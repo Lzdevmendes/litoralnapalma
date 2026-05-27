@@ -72,7 +72,7 @@ export function AppMapView() {
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.animateToRegion(
-        { latitude: city.lat, longitude: city.lng, ...DELTA },
+        { latitude: city.center.lat, longitude: city.center.lng, ...DELTA },
         500
       );
     }
@@ -87,7 +87,7 @@ export function AppMapView() {
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}
-        initialRegion={{ latitude: city.lat, longitude: city.lng, ...DELTA }}
+        initialRegion={{ latitude: city.center.lat, longitude: city.center.lng, ...DELTA }}
         showsUserLocation
         showsMyLocationButton={false}
       >

@@ -1,3 +1,5 @@
+export type { City } from "@/data/cities";
+
 export type TrafficLevel = "livre" | "moderado" | "lento" | "parado";
 export type BeachOccupancy = "vazia" | "moderada" | "lotada";
 export type ReportType =
