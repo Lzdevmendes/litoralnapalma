@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Litoral na Palma 🌊
 
-## Getting Started
+App de informações em tempo real para o **Litoral Norte de São Paulo** — Caraguatatuba, Ubatuba, São Sebastião e Ilhabela.
 
-First, run the development server:
+## Funcionalidades
+
+- 🌤️ **Clima** — temperatura, UV, umidade, vento
+- 🚗 **Trânsito** — status das principais vias em tempo real
+- 🏖️ **Praias** — ocupação, qualidade da água, ondas
+- 🏥 **UPAs** — tempo de espera e status das unidades de saúde
+- 🗺️ **Mapa ao Vivo** — marcadores de praias, UPAs e reportes da comunidade
+- 📢 **Reportes** — envie ocorrências (acidentes, blitz, lotação)
+- 🧭 **Roteiro Lado B** — alternativas inteligentes quando há congestionamento
+- 🔔 **Alertas Geofencing** — notificações de lotação e trânsito em tempo real
+- 👤 **Modos** — Morador e Turista com conteúdo adaptado
+
+## Tech Stack
+
+- [Expo SDK 54](https://expo.dev) + Expo Router
+- React Native 0.81.5
+- TanStack Query v5
+- react-native-maps
+- expo-blur, expo-haptics, expo-location, expo-notifications
+
+## Rodar localmente
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm start   # Abre Metro + QR Code para Expo Go
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> ⚠️ O mapa (`react-native-maps`) requer um **dev build**. Use `npx expo run:android` ou `npx expo run:ios` para mapas funcionando.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Cidades cobertas
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Cidade | Status |
+|--------|--------|
+| Caraguatatuba | ✅ Implementado |
+| Ubatuba | 🔜 Em breve |
+| São Sebastião | 🔜 Em breve |
+| Ilhabela | 🔜 Em breve |
