@@ -2,7 +2,7 @@ import { View, Text } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { useUPA } from '@/hooks/useUPA';
-import { CITIES } from '@/data/cities';
+import { useCity } from '@/context/city-context';
 import { formatWaitTime } from '@/lib/utils';
 
 const statusConfig = {
@@ -11,11 +11,9 @@ const statusConfig = {
   critico: { color: '#ef4444', label: 'Crítico', emoji: '🔴' },
 };
 
-const cityName = (cityId: string) =>
-  CITIES.find((c) => c.id === cityId)?.name ?? cityId;
-
 export function UPACard() {
-  const { data: upas, isLoading } = useUPA();
+  const { city } = useCity();
+  const { data: upas, isLoading } = useUPA(city);
 
   if (isLoading || !upas) return <CardSkeleton />;
 
@@ -68,9 +66,6 @@ export function UPACard() {
                   <Text style={{ fontSize: 14, fontWeight: '600', color: '#1e293b' }}>{upa.name}</Text>
                   <Badge color={cfg.color}>{cfg.label}</Badge>
                 </View>
-                <Text style={{ fontSize: 11, color: '#94a3b8', marginBottom: 1 }}>
-                  📍 {cityName(upa.city)}
-                </Text>
                 <Text style={{ fontSize: 12, color: '#64748b' }} selectable>
                   {upa.address}
                 </Text>

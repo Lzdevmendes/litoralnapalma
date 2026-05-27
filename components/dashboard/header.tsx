@@ -1,6 +1,8 @@
 import { useRef } from 'react';
-import { View, Text, Pressable, Animated } from 'react-native';
+import { View, Text, Pressable, ScrollView, Animated } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
+import { useCity } from '@/context/city-context';
+import { CITIES } from '@/data/cities';
 import type { UserMode } from '@/lib/types';
 
 interface HeaderProps {
@@ -12,6 +14,7 @@ const BLUE = '#0077b6';
 
 export function Header({ mode, onModeChange }: HeaderProps) {
   const queryClient = useQueryClient();
+  const { city, setCity } = useCity();
   const rotation = useRef(new Animated.Value(0)).current;
   const spinRef = useRef<Animated.CompositeAnimation | null>(null);
 
@@ -35,87 +38,129 @@ export function Header({ mode, onModeChange }: HeaderProps) {
   return (
     <View
       style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
         backgroundColor: 'rgba(255,255,255,0.85)',
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(0,119,182,0.1)',
-        gap: 12,
       }}
     >
-      {/* Logo */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+      {/* Linha principal */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          paddingTop: 12,
+          paddingBottom: 8,
+          gap: 12,
+        }}
+      >
+        {/* Logo */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+          <View
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              backgroundColor: BLUE,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{ fontSize: 18 }}>🧭</Text>
+          </View>
+          <View>
+            <Text style={{ fontSize: 13, fontWeight: '700', color: BLUE }}>Litoral na Palma</Text>
+            <Text style={{ fontSize: 10, color: '#94a3b8' }}>📍 {city.name}, SP</Text>
+          </View>
+        </View>
+
+        {/* Mode toggle */}
         <View
+          style={{
+            flexDirection: 'row',
+            backgroundColor: 'rgba(0,0,0,0.06)',
+            borderRadius: 12,
+            padding: 3,
+            gap: 2,
+          }}
+        >
+          {(['morador', 'turista'] as UserMode[]).map((m) => (
+            <Pressable
+              key={m}
+              onPress={() => onModeChange(m)}
+              style={{
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: 9,
+                backgroundColor: mode === m ? BLUE : 'transparent',
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: '600',
+                  color: mode === m ? '#fff' : '#64748b',
+                }}
+              >
+                {m === 'morador' ? '🏠 Morador' : '🧳 Turista'}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Refresh */}
+        <Pressable
+          onPress={handleRefresh}
           style={{
             width: 36,
             height: 36,
             borderRadius: 10,
-            backgroundColor: BLUE,
+            backgroundColor: `${BLUE}12`,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Text style={{ fontSize: 18 }}>🧭</Text>
-        </View>
-        <View>
-          <Text style={{ fontSize: 13, fontWeight: '700', color: BLUE }}>Litoral na Palma</Text>
-          <Text style={{ fontSize: 10, color: '#94a3b8' }}>📍 Caraguatatuba, SP</Text>
-        </View>
+          <Animated.Text style={[{ fontSize: 16 }, { transform: [{ rotate: spin }] }]}>
+            🔄
+          </Animated.Text>
+        </Pressable>
       </View>
 
-      {/* Mode toggle */}
-      <View
-        style={{
-          flexDirection: 'row',
-          backgroundColor: 'rgba(0,0,0,0.06)',
-          borderRadius: 12,
-          padding: 3,
-          gap: 2,
-        }}
+      {/* Seletor de município */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 6, paddingHorizontal: 16, paddingBottom: 10 }}
       >
-        {(['morador', 'turista'] as UserMode[]).map((m) => (
-          <Pressable
-            key={m}
-            onPress={() => onModeChange(m)}
-            style={{
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-              borderRadius: 9,
-              backgroundColor: mode === m ? BLUE : 'transparent',
-            }}
-          >
-            <Text
+        {CITIES.map((c) => {
+          const active = c.id === city.id;
+          return (
+            <Pressable
+              key={c.id}
+              onPress={() => setCity(c)}
               style={{
-                fontSize: 12,
-                fontWeight: '600',
-                color: mode === m ? '#fff' : '#64748b',
+                paddingHorizontal: 12,
+                paddingVertical: 5,
+                borderRadius: 20,
+                backgroundColor: active ? BLUE : `${BLUE}12`,
+                borderWidth: 1,
+                borderColor: active ? BLUE : `${BLUE}30`,
               }}
             >
-              {m === 'morador' ? '🏠 Morador' : '🧳 Turista'}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* Refresh */}
-      <Pressable
-        onPress={handleRefresh}
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: 10,
-          backgroundColor: `${BLUE}12`,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Animated.Text style={[{ fontSize: 16 }, { transform: [{ rotate: spin }] }]}>
-          🔄
-        </Animated.Text>
-      </Pressable>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: '600',
+                  color: active ? '#fff' : BLUE,
+                }}
+              >
+                {c.name}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 }

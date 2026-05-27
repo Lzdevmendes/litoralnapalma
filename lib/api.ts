@@ -64,9 +64,10 @@ export async function fetchBeaches() {
   return getMockBeaches();
 }
 
-export async function fetchUPAs() {
+export async function fetchUPAs(cityId?: string) {
   await delay(350 + Math.random() * 350);
-  return getMockUPAs();
+  const upas = getMockUPAs();
+  return cityId ? upas.filter((u) => u.city === cityId) : upas;
 }
 
 export async function fetchReports() {

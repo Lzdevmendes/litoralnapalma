@@ -1,8 +1,10 @@
+import { useRef, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import Constants from 'expo-constants';
 import { useBeaches } from '@/hooks/useBeaches';
 import { useUPA } from '@/hooks/useUPA';
 import { useReports } from '@/hooks/useReports';
+import { useCity } from '@/context/city-context';
 import { occupancyColor } from '@/lib/utils';
 
 // react-native-maps requer dev build — não está disponível no Expo Go.
@@ -28,7 +30,7 @@ if (!isExpoGo) {
   }
 }
 
-const CENTER = { latitude: -23.62, longitude: -45.41, latitudeDelta: 0.1, longitudeDelta: 0.1 };
+const DELTA = { latitudeDelta: 0.1, longitudeDelta: 0.1 };
 
 const statusColor = { normal: '#22c55e', alerta: '#f59e0b', critico: '#ef4444' } as const;
 const reportEmoji: Record<string, string> = {
@@ -60,9 +62,21 @@ function MapPlaceholder() {
 }
 
 export function AppMapView() {
-  const { data: beaches } = useBeaches();
-  const { data: upas } = useUPA();
+  const { city } = useCity();
+  const { data: beaches } = useBeaches(city);
+  const { data: upas } = useUPA(city);
   const { data: reports } = useReports();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(
+        { latitude: city.lat, longitude: city.lng, ...DELTA },
+        500
+      );
+    }
+  }, [city]);
 
   if (isExpoGo || !MapView) {
     return <MapPlaceholder />;
@@ -70,7 +84,13 @@ export function AppMapView() {
 
   return (
     <View style={{ borderRadius: 20, overflow: 'hidden', height: 320, boxShadow: '0 2px 16px rgba(0,119,182,0.12)' }}>
-      <MapView style={{ flex: 1 }} initialRegion={CENTER} showsUserLocation showsMyLocationButton={false}>
+      <MapView
+        ref={mapRef}
+        style={{ flex: 1 }}
+        initialRegion={{ latitude: city.lat, longitude: city.lng, ...DELTA }}
+        showsUserLocation
+        showsMyLocationButton={false}
+      >
         {beaches?.map((beach) => (
           <Marker
             key={beach.id}

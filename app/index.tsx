@@ -3,6 +3,7 @@ import { ScrollView, View, Text, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
 import type { UserMode } from '@/lib/types';
+import { useCity } from '@/context/city-context';
 import { Header } from '@/components/dashboard/header';
 import { QuickStats } from '@/components/dashboard/quick-stats';
 import { WeatherCard } from '@/components/dashboard/weather-card';
@@ -19,6 +20,7 @@ const BG = '#f0f6fc';
 
 export default function DashboardScreen() {
   const [mode, setMode] = useState<UserMode>('morador');
+  const { city } = useCity();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={['top']}>
@@ -86,7 +88,7 @@ export default function DashboardScreen() {
               paddingBottom: 8,
             }}
           >
-            Litoral na Palma · Dados atualizados em tempo real · Litoral Norte SP
+            Litoral na Palma · {city.name} · Dados atualizados em tempo real
           </Text>
         </View>
       </ScrollView>
