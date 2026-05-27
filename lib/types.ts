@@ -31,6 +31,7 @@ export interface Beach {
   lat: number;
   lng: number;
   updatedAt: string;
+  collectedAt?: string; // data da última amostragem CETESB (ISO string)
 }
 
 export interface UPA {
