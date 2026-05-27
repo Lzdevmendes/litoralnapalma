@@ -7,7 +7,6 @@
     "icon": "./assets/icon.png",
     "scheme": "litoralnapalma",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "backgroundColor": "#0077b6"
     },
