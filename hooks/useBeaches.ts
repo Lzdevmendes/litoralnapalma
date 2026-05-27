@@ -6,7 +6,7 @@ import type { City } from "@/data/cities";
 export function useBeaches(city: City = DEFAULT_CITY) {
   return useQuery({
     queryKey: ["beaches", city.id],
-    queryFn: fetchBeaches,
+    queryFn: () => fetchBeaches(city.id),
     refetchInterval: 3 * 60 * 1000,
     staleTime: 2 * 60 * 1000,
   });

@@ -54,14 +54,14 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
   };
 }
 
-export async function fetchTraffic() {
+export async function fetchTraffic(cityId?: string) {
   await delay(300 + Math.random() * 400);
-  return getMockTraffic();
+  return getMockTraffic(cityId);
 }
 
-export async function fetchBeaches() {
+export async function fetchBeaches(cityId?: string) {
   await delay(500 + Math.random() * 300);
-  return getMockBeaches();
+  return getMockBeaches(cityId);
 }
 
 export async function fetchUPAs(cityId?: string) {

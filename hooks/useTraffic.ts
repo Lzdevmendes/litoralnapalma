@@ -6,7 +6,7 @@ import type { City } from "@/data/cities";
 export function useTraffic(city: City = DEFAULT_CITY) {
   return useQuery({
     queryKey: ["traffic", city.id],
-    queryFn: fetchTraffic,
+    queryFn: () => fetchTraffic(city.id),
     refetchInterval: 2 * 60 * 1000,
     staleTime: 60 * 1000,
   });
