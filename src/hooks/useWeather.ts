@@ -1,0 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
+import { fetchWeather } from "@/lib/api";
+
+export function useWeather() {
+  return useQuery({
+    queryKey: ["weather"],
+    queryFn: fetchWeather,
+    refetchInterval: 5 * 60 * 1000, // 5 min
+    staleTime: 3 * 60 * 1000,
+  });
+}
