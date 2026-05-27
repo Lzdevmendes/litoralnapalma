@@ -1,10 +1,4 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
 import type { TrafficLevel, BeachOccupancy } from "./types";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 export function trafficLevelColor(level: TrafficLevel): string {
   const map: Record<TrafficLevel, string> = {
