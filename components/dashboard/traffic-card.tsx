@@ -43,7 +43,7 @@ export function TrafficCard() {
           <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>Trânsito</Text>
         </View>
         <Badge color={trafficLevelColor(worst.level)} dot>
-          {trafficLevelLabel(worst.level)} no geral
+          {`${trafficLevelLabel(worst.level)} no geral`}
         </Badge>
       </View>
 

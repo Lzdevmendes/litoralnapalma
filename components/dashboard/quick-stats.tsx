@@ -4,7 +4,7 @@ import { useBeaches } from '@/hooks/useBeaches';
 import { useTraffic } from '@/hooks/useTraffic';
 import { useUPA } from '@/hooks/useUPA';
 import { useCity } from '@/context/city-context';
-import { trafficLevelColor, occupancyColor } from '@/lib/utils';
+import { trafficLevelColor } from '@/lib/utils';
 
 export function QuickStats() {
   const { city } = useCity();

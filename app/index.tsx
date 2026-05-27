@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, View, Text, Platform } from 'react-native';
+import { ScrollView, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
 import type { UserMode } from '@/lib/types';
