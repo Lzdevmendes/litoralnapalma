@@ -2,10 +2,12 @@ import { View, Text } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { useTraffic } from '@/hooks/useTraffic';
+import { useCity } from '@/context/city-context';
 import { trafficLevelColor, trafficLevelLabel, timeAgo } from '@/lib/utils';
 
 export function TrafficCard() {
-  const { data: routes, isLoading } = useTraffic();
+  const { city } = useCity();
+  const { data: routes, isLoading } = useTraffic(city);
 
   if (isLoading || !routes) return <CardSkeleton />;
 

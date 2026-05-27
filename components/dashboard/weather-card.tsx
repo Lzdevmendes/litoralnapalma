@@ -1,9 +1,7 @@
-import { useState } from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Text } from 'react-native';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { useWeather } from '@/hooks/useWeather';
-import { CITIES, DEFAULT_CITY } from '@/data/cities';
-import type { City } from '@/data/cities';
+import { useCity } from '@/context/city-context';
 import type { WeatherData } from '@/lib/types';
 
 const CONDITION: Record<WeatherData['condition'], { emoji: string; label: string; bg: string }> = {
@@ -23,57 +21,11 @@ function uvLabel(uv: number) {
 }
 
 export function WeatherCard() {
-  const [selectedCity, setSelectedCity] = useState<City>(DEFAULT_CITY);
-  const { data, isLoading } = useWeather(selectedCity);
+  const { city } = useCity();
+  const { data, isLoading } = useWeather(city);
 
-  return (
-    <View style={{ gap: 10 }}>
-      {/* City selector */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 6 }}
-      >
-        {CITIES.map((city) => {
-          const active = city.id === selectedCity.id;
-          return (
-            <Pressable
-              key={city.id}
-              onPress={() => setSelectedCity(city)}
-              style={{
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                borderRadius: 20,
-                backgroundColor: active ? '#0077b6' : 'rgba(0,119,182,0.08)',
-                borderWidth: 1,
-                borderColor: active ? '#0077b6' : 'rgba(0,119,182,0.15)',
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: '600',
-                  color: active ? '#fff' : '#0077b6',
-                }}
-              >
-                {city.name}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+  if (isLoading || !data) return <CardSkeleton />;
 
-      {/* Weather data */}
-      {isLoading || !data ? (
-        <CardSkeleton />
-      ) : (
-        <WeatherContent data={data} cityName={selectedCity.name} />
-      )}
-    </View>
-  );
-}
-
-function WeatherContent({ data, cityName }: { data: WeatherData; cityName: string }) {
   const cond = CONDITION[data.condition];
   const uv = uvLabel(data.uvIndex);
 
@@ -91,7 +43,7 @@ function WeatherContent({ data, cityName }: { data: WeatherData; cityName: strin
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
         <View>
           <Text style={{ fontSize: 11, fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Clima Agora · {cityName}
+            Clima Agora · {city.name}
           </Text>
           <Text style={{ fontSize: 48, fontWeight: '800', color: '#0f172a', lineHeight: 56 }}>
             {data.temperature}°

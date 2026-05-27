@@ -3,13 +3,15 @@ import { useWeather } from '@/hooks/useWeather';
 import { useBeaches } from '@/hooks/useBeaches';
 import { useTraffic } from '@/hooks/useTraffic';
 import { useUPA } from '@/hooks/useUPA';
+import { useCity } from '@/context/city-context';
 import { trafficLevelColor, occupancyColor } from '@/lib/utils';
 
 export function QuickStats() {
-  const { data: weather } = useWeather();
-  const { data: beaches } = useBeaches();
-  const { data: traffic } = useTraffic();
-  const { data: upas } = useUPA();
+  const { city } = useCity();
+  const { data: weather } = useWeather(city);
+  const { data: beaches } = useBeaches(city);
+  const { data: traffic } = useTraffic(city);
+  const { data: upas } = useUPA(city);
 
   const order = { livre: 0, moderado: 1, lento: 2, parado: 3 } as const;
   const worstRoute = traffic?.reduce((a, b) => (order[b.level] > order[a.level] ? b : a));
