@@ -1,9 +1,25 @@
 import { View, Text } from 'react-native';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import Constants from 'expo-constants';
 import { useBeaches } from '@/hooks/useBeaches';
 import { useUPA } from '@/hooks/useUPA';
 import { useReports } from '@/hooks/useReports';
 import { occupancyColor } from '@/lib/utils';
+
+// react-native-maps requer dev build — não está disponível no Expo Go.
+// Usar require() condicional evita o crash do TurboModule na inicialização.
+const isExpoGo = Constants.executionEnvironment === 'storeClient';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let MapView: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Marker: any = null;
+
+if (!isExpoGo) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const Maps = require('react-native-maps');
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+}
 
 const CENTER = { latitude: -23.62, longitude: -45.41, latitudeDelta: 0.1, longitudeDelta: 0.1 };
 
@@ -13,10 +29,37 @@ const reportEmoji: Record<string, string> = {
   falta_agua: '💧', falta_luz: '⚡', outro: '📍',
 };
 
+function MapPlaceholder() {
+  return (
+    <View
+      style={{
+        height: 320,
+        borderRadius: 20,
+        backgroundColor: '#e8f4f8',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(0,119,182,0.18)',
+      }}
+    >
+      <Text style={{ fontSize: 44 }}>🗺️</Text>
+      <Text style={{ fontSize: 15, fontWeight: '700', color: '#0077b6' }}>Mapa ao Vivo</Text>
+      <Text style={{ fontSize: 12, color: '#64748b', textAlign: 'center', paddingHorizontal: 32, lineHeight: 18 }}>
+        Disponível no app completo (dev build).{'\n'}No Expo Go apenas o preview é exibido.
+      </Text>
+    </View>
+  );
+}
+
 export function AppMapView() {
   const { data: beaches } = useBeaches();
   const { data: upas } = useUPA();
   const { data: reports } = useReports();
+
+  if (isExpoGo || !MapView) {
+    return <MapPlaceholder />;
+  }
 
   return (
     <View style={{ borderRadius: 20, overflow: 'hidden', height: 320, boxShadow: '0 2px 16px rgba(0,119,182,0.12)' }}>
