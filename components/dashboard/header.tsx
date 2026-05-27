@@ -1,11 +1,5 @@
-import { View, Text, Pressable } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  cancelAnimation,
-} from 'react-native-reanimated';
+import { useRef } from 'react';
+import { View, Text, Pressable, Animated } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import type { UserMode } from '@/lib/types';
 
@@ -18,17 +12,24 @@ const BLUE = '#0077b6';
 
 export function Header({ mode, onModeChange }: HeaderProps) {
   const queryClient = useQueryClient();
-  const rotation = useSharedValue(0);
+  const rotation = useRef(new Animated.Value(0)).current;
+  const spinRef = useRef<Animated.CompositeAnimation | null>(null);
 
-  const iconStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
+  const spin = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
 
   async function handleRefresh() {
-    rotation.value = withRepeat(withTiming(360, { duration: 800 }), -1, false);
+    rotation.setValue(0);
+    spinRef.current = Animated.loop(
+      Animated.timing(rotation, { toValue: 1, duration: 800, useNativeDriver: true })
+    );
+    spinRef.current.start();
     await queryClient.invalidateQueries();
-    cancelAnimation(rotation);
-    rotation.value = 0;
+    spinRef.current?.stop();
+    spinRef.current = null;
+    rotation.setValue(0);
   }
 
   return (
@@ -111,7 +112,9 @@ export function Header({ mode, onModeChange }: HeaderProps) {
           justifyContent: 'center',
         }}
       >
-        <Animated.Text style={[{ fontSize: 16 }, iconStyle]}>🔄</Animated.Text>
+        <Animated.Text style={[{ fontSize: 16 }, { transform: [{ rotate: spin }] }]}>
+          🔄
+        </Animated.Text>
       </Pressable>
     </View>
   );
