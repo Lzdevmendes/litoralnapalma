@@ -146,13 +146,17 @@ export const CITIES: City[] = [
     id: 'ilhabela',
     name: 'Ilhabela',
     state: 'SP',
-    center: { lat: -23.7786, lng: -45.3582 },
+    center: { lat: -23.790, lng: -45.365 },
     zoom: 12,
     beaches: [
-      { id: 'perequê',    name: 'Perequê',    waterQuality: 'boa', lat: -23.7779, lng: -45.3526 },
-      { id: 'curral',     name: 'Praia do Curral', waterQuality: 'boa', lat: -23.8421, lng: -45.3712 },
-      { id: 'viana',      name: 'Praia de Viana',  waterQuality: 'boa', lat: -23.8089, lng: -45.3851 },
-      { id: 'jabaquara',  name: 'Jabaquara',        waterQuality: 'boa', lat: -23.7521, lng: -45.3291 },
+      { id: 'portinho',      name: 'Portinho',        waterQuality: 'boa', lat: -23.7334, lng: -45.3412 },
+      { id: 'jabaquara',     name: 'Jabaquara',        waterQuality: 'boa', lat: -23.7512, lng: -45.3445 },
+      { id: 'juliao',        name: 'Praia do Julião',  waterQuality: 'boa', lat: -23.7643, lng: -45.3498 },
+      { id: 'perequê',       name: 'Perequê',          waterQuality: 'boa', lat: -23.7779, lng: -45.3526 },
+      { id: 'feiticeira',    name: 'Feiticeira',       waterQuality: 'boa', lat: -23.7891, lng: -45.3623 },
+      { id: 'pedras-miudas', name: 'Pedras Miúdas',    waterQuality: 'boa', lat: -23.8013, lng: -45.3572 },
+      { id: 'curral',        name: 'Praia do Curral',  waterQuality: 'boa', lat: -23.8237, lng: -45.3681 },
+      { id: 'viana',         name: 'Praia de Viana',   waterQuality: 'boa', lat: -23.8453, lng: -45.3801 },
     ],
     upas: [
       // Ilhabela não possui UPA própria — referência: UPA São Sebastião (balsa + 30 min)
