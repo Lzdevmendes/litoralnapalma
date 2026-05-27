@@ -6,8 +6,11 @@ import { useReports } from '@/hooks/useReports';
 import { occupancyColor } from '@/lib/utils';
 
 // react-native-maps requer dev build — não está disponível no Expo Go.
-// Usar require() condicional evita o crash do TurboModule na inicialização.
-const isExpoGo = Constants.executionEnvironment === 'storeClient';
+// Usar require() condicional + try-catch evita o crash do TurboModule na inicialização.
+const isExpoGo =
+  Constants.executionEnvironment === 'storeClient' ||
+  // fallback para versões antigas de expo-constants
+  (Constants as unknown as { appOwnership?: string }).appOwnership === 'expo';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let MapView: any = null;
@@ -15,10 +18,14 @@ let MapView: any = null;
 let Marker: any = null;
 
 if (!isExpoGo) {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const Maps = require('react-native-maps');
-  MapView = Maps.default;
-  Marker = Maps.Marker;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Maps = require('react-native-maps');
+    MapView = Maps.default;
+    Marker = Maps.Marker;
+  } catch {
+    // módulo nativo não disponível nesse ambiente
+  }
 }
 
 const CENTER = { latitude: -23.62, longitude: -45.41, latitudeDelta: 0.1, longitudeDelta: 0.1 };
