@@ -134,8 +134,9 @@ export function getMockBeaches(): Beach[] {
 export function getMockUPAs(): UPA[] {
   return [
     {
-      id: "upa-centro",
-      name: "UPA Centro",
+      id: "upa-caraguatatuba",
+      name: "UPA 24h Caraguatatuba",
+      city: "caraguatatuba",
       region: "centro",
       waitTime: 30 + Math.floor(Math.random() * 120),
       patientsWaiting: 5 + Math.floor(Math.random() * 30),
@@ -143,38 +144,41 @@ export function getMockUPAs(): UPA[] {
         ["normal", "alerta", "critico"] as const,
         [50, 35, 15]
       ),
-      address: "Av. Adhemar de Barros, 1000 - Centro",
+      address: "Av. Adhemar de Barros, 1289 - Centro, Caraguatatuba",
       lat: -23.6201,
       lng: -45.4129,
     },
     {
-      id: "upa-sul",
-      name: "UPA Sul",
-      region: "sul",
+      id: "upa-sao-sebastiao",
+      name: "UPA São Sebastião",
+      city: "sao-sebastiao",
+      region: "centro",
       waitTime: 20 + Math.floor(Math.random() * 90),
       patientsWaiting: 3 + Math.floor(Math.random() * 20),
       status: pickRandom(
         ["normal", "alerta", "critico"] as const,
-        [60, 30, 10]
+        [55, 30, 15]
       ),
-      address: "R. das Palmeiras, 500 - Pontal Santa Marina",
-      lat: -23.6698,
-      lng: -45.4312,
+      address: "R. João Lino da Silva, 250 - Topolândia, São Sebastião",
+      lat: -23.7957,
+      lng: -45.4082,
     },
     {
-      id: "upa-norte",
-      name: "UPA Norte",
-      region: "norte",
+      id: "upa-ubatuba",
+      name: "UPA Ubatuba",
+      city: "ubatuba",
+      region: "centro",
       waitTime: 15 + Math.floor(Math.random() * 60),
       patientsWaiting: 2 + Math.floor(Math.random() * 15),
       status: pickRandom(
         ["normal", "alerta", "critico"] as const,
-        [65, 25, 10]
+        [60, 25, 15]
       ),
-      address: "Estr. do Cocuhy, 200 - Capricórnio",
-      lat: -23.5789,
-      lng: -45.3901,
+      address: "R. Dr. Paulo Virgílio Bastos, 93 - Centro, Ubatuba",
+      lat: -23.4336,
+      lng: -45.0838,
     },
+    // Ilhabela não possui UPA própria — referência: UPA São Sebastião
   ];
 }
 

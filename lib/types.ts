@@ -34,6 +34,7 @@ export interface Beach {
 export interface UPA {
   id: string;
   name: string;
+  city: string; // ID do município (vide data/cities.ts)
   region: "centro" | "sul" | "norte";
   waitTime: number; // minutes
   patientsWaiting: number;
