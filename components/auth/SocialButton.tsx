@@ -20,14 +20,14 @@ export function SocialButton({ onPress, label, emoji, loading }: SocialButtonPro
         gap: 10,
         backgroundColor: '#fff',
         borderWidth: 1.5,
-        borderColor: '#e2e8f0',
-        borderRadius: 14,
-        paddingVertical: 14,
+        borderColor: '#dbeafe',
+        borderRadius: 16,
+        paddingVertical: 16,
         opacity: loading ? 0.6 : 1,
-        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
       }}
     >
-      <Text style={{ fontSize: 20 }}>{emoji}</Text>
+      <Text style={{ fontSize: 22 }}>{emoji}</Text>
       <Text style={{ fontSize: 15, fontWeight: '600', color: '#1e293b' }}>
         {loading ? 'Aguarde...' : label}
       </Text>
@@ -51,12 +51,13 @@ export function PrimaryButton({ onPress, label, disabled, loading }: PrimaryButt
       activeOpacity={0.85}
       style={{
         backgroundColor: inactive ? '#94a3b8' : '#0077b6',
-        borderRadius: 14,
-        paddingVertical: 16,
+        borderRadius: 16,
+        paddingVertical: 18,
         alignItems: 'center',
+        boxShadow: inactive ? undefined : '0 6px 20px rgba(0,119,182,0.38)',
       }}
     >
-      <Text style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>
+      <Text style={{ fontSize: 16, fontWeight: '800', color: '#fff', letterSpacing: 0.2 }}>
         {loading ? 'Aguarde...' : label}
       </Text>
     </TouchableOpacity>

@@ -3,20 +3,17 @@ import { View, Text, Pressable, ScrollView, Animated } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
+import { useUserMode } from '@/context/user-mode-context';
 import { CITIES } from '@/data/cities';
 import type { UserMode } from '@/lib/types';
 
-interface HeaderProps {
-  mode: UserMode;
-  onModeChange: (mode: UserMode) => void;
-}
-
 const BLUE = '#0077b6';
 
-export function Header({ mode, onModeChange }: HeaderProps) {
+export function Header() {
   const queryClient = useQueryClient();
   const { city, setCity } = useCity();
   const { locale, setLocale, t } = useLanguage();
+  const { mode, setMode } = useUserMode();
   const rotation = useRef(new Animated.Value(0)).current;
   const spinRef = useRef<Animated.CompositeAnimation | null>(null);
 
@@ -40,9 +37,10 @@ export function Header({ mode, onModeChange }: HeaderProps) {
   return (
     <View
       style={{
-        backgroundColor: 'rgba(255,255,255,0.85)',
+        backgroundColor: 'rgba(255,255,255,0.92)',
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(0,119,182,0.1)',
+        borderBottomColor: 'rgba(0,119,182,0.08)',
+        boxShadow: '0 1px 8px rgba(0,119,182,0.06)',
       }}
     >
       {/* Linha principal */}
@@ -61,18 +59,21 @@ export function Header({ mode, onModeChange }: HeaderProps) {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
           <View
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
+              width: 38,
+              height: 38,
+              borderRadius: 11,
               backgroundColor: BLUE,
               alignItems: 'center',
               justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(0,119,182,0.35)',
             }}
           >
-            <Text style={{ fontSize: 18 }}>🧭</Text>
+            <Text style={{ fontSize: 20 }}>🧭</Text>
           </View>
           <View>
-            <Text style={{ fontSize: 13, fontWeight: '700', color: BLUE }}>Litoral na Palma</Text>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: BLUE, letterSpacing: -0.2 }}>
+              Litoral na Palma
+            </Text>
             <Text style={{ fontSize: 10, color: '#94a3b8' }}>📍 {city.name}, SP</Text>
           </View>
         </View>
@@ -81,7 +82,7 @@ export function Header({ mode, onModeChange }: HeaderProps) {
         <View
           style={{
             flexDirection: 'row',
-            backgroundColor: 'rgba(0,0,0,0.06)',
+            backgroundColor: '#f1f5f9',
             borderRadius: 12,
             padding: 3,
             gap: 2,
@@ -90,18 +91,19 @@ export function Header({ mode, onModeChange }: HeaderProps) {
           {(['morador', 'turista'] as UserMode[]).map((m) => (
             <Pressable
               key={m}
-              onPress={() => onModeChange(m)}
+              onPress={() => setMode(m)}
               style={{
                 paddingHorizontal: 10,
                 paddingVertical: 6,
                 borderRadius: 9,
                 backgroundColor: mode === m ? BLUE : 'transparent',
+                boxShadow: mode === m ? '0 1px 4px rgba(0,119,182,0.3)' : undefined,
               }}
             >
               <Text
                 style={{
                   fontSize: 11,
-                  fontWeight: '600',
+                  fontWeight: '700',
                   color: mode === m ? '#fff' : '#64748b',
                 }}
               >
@@ -115,8 +117,8 @@ export function Header({ mode, onModeChange }: HeaderProps) {
         <Pressable
           onPress={() => setLocale(locale === 'pt' ? 'en' : 'pt')}
           style={({ pressed }) => ({
-            width: 34,
-            height: 34,
+            width: 36,
+            height: 36,
             borderRadius: 10,
             backgroundColor: pressed ? `${BLUE}20` : `${BLUE}10`,
             alignItems: 'center',
@@ -130,10 +132,10 @@ export function Header({ mode, onModeChange }: HeaderProps) {
         <Pressable
           onPress={handleRefresh}
           style={{
-            width: 34,
-            height: 34,
+            width: 36,
+            height: 36,
             borderRadius: 10,
-            backgroundColor: `${BLUE}12`,
+            backgroundColor: `${BLUE}10`,
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -157,18 +159,19 @@ export function Header({ mode, onModeChange }: HeaderProps) {
               key={c.id}
               onPress={() => setCity(c)}
               style={{
-                paddingHorizontal: 12,
-                paddingVertical: 5,
+                paddingHorizontal: 14,
+                paddingVertical: 6,
                 borderRadius: 20,
-                backgroundColor: active ? BLUE : `${BLUE}12`,
+                backgroundColor: active ? BLUE : `${BLUE}10`,
                 borderWidth: 1,
-                borderColor: active ? BLUE : `${BLUE}30`,
+                borderColor: active ? BLUE : `${BLUE}28`,
+                boxShadow: active ? '0 2px 8px rgba(0,119,182,0.25)' : undefined,
               }}
             >
               <Text
                 style={{
                   fontSize: 12,
-                  fontWeight: '600',
+                  fontWeight: '700',
                   color: active ? '#fff' : BLUE,
                 }}
               >

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
 import { sendEmailOTP, sendPhoneOTP, signInWithGoogle } from '@/lib/auth';
@@ -21,6 +21,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function LoginScreen() {
   const router = useRouter();
   const { setUser } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const [method, setMethod] = useState<Method>('email');
   const [email, setEmail] = useState('');
@@ -67,24 +68,49 @@ export default function LoginScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }} edges={['top', 'bottom']}>
+    <View style={{ flex: 1, backgroundColor: '#e0f2fe' }}>
+      {/* ── Header oceânico ────────────────────────────────────────────── */}
+      <View
+        style={{
+          backgroundColor: '#0077b6',
+          paddingTop: insets.top + 32,
+          paddingBottom: 56,
+          paddingHorizontal: 24,
+          alignItems: 'center',
+          borderBottomLeftRadius: 48,
+          borderBottomRightRadius: 48,
+          boxShadow: '0 8px 32px rgba(0,119,182,0.3)',
+        }}
+      >
+        <Text style={{ fontSize: 64, marginBottom: 12 }}>🌊</Text>
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: '800',
+            color: '#fff',
+            letterSpacing: -0.5,
+            marginBottom: 6,
+          }}
+        >
+          Litoral na Palma
+        </Text>
+        <Text style={{ fontSize: 15, color: 'rgba(255,255,255,0.78)', fontWeight: '500' }}>
+          Entre na sua conta para continuar
+        </Text>
+      </View>
+
+      {/* ── Formulário ─────────────────────────────────────────────────── */}
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24, gap: 0 }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            padding: 24,
+            paddingTop: 28,
+            gap: 0,
+          }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Logo */}
-          <View style={{ alignItems: 'center', marginBottom: 40 }}>
-            <Text style={{ fontSize: 48 }}>🌊</Text>
-            <Text style={{ fontSize: 26, fontWeight: '800', color: '#0077b6', marginTop: 8 }}>
-              Litoral na Palma
-            </Text>
-            <Text style={{ fontSize: 14, color: '#64748b', marginTop: 4 }}>
-              Entre na sua conta
-            </Text>
-          </View>
-
           {/* Google */}
           <SocialButton
             emoji="🔵"
@@ -94,20 +120,20 @@ export default function LoginScreen() {
           />
 
           {/* Divisor */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 24 }}>
-            <View style={{ flex: 1, height: 1, backgroundColor: '#e2e8f0' }} />
-            <Text style={{ fontSize: 12, color: '#94a3b8' }}>ou</Text>
-            <View style={{ flex: 1, height: 1, backgroundColor: '#e2e8f0' }} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 22 }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: '#bfdbfe' }} />
+            <Text style={{ fontSize: 13, color: '#94a3b8', fontWeight: '500' }}>ou</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: '#bfdbfe' }} />
           </View>
 
           {/* Toggle método */}
           <View
             style={{
               flexDirection: 'row',
-              backgroundColor: '#e2e8f0',
-              borderRadius: 12,
+              backgroundColor: '#dbeafe',
+              borderRadius: 14,
               padding: 4,
-              marginBottom: 16,
+              marginBottom: 20,
             }}
           >
             {(['email', 'phone'] as Method[]).map((m) => (
@@ -116,17 +142,17 @@ export default function LoginScreen() {
                 onPress={() => { setMethod(m); setTouched(false); }}
                 style={{
                   flex: 1,
-                  paddingVertical: 10,
-                  borderRadius: 10,
+                  paddingVertical: 11,
+                  borderRadius: 11,
                   alignItems: 'center',
                   backgroundColor: method === m ? '#fff' : 'transparent',
-                  boxShadow: method === m ? '0 1px 3px rgba(0,0,0,0.1)' : undefined,
+                  boxShadow: method === m ? '0 2px 8px rgba(0,119,182,0.12)' : undefined,
                 }}
               >
                 <Text
                   style={{
                     fontSize: 14,
-                    fontWeight: method === m ? '700' : '400',
+                    fontWeight: method === m ? '700' : '500',
                     color: method === m ? '#0077b6' : '#64748b',
                   }}
                 >
@@ -137,8 +163,8 @@ export default function LoginScreen() {
           </View>
 
           {/* Campo de entrada */}
-          <View style={{ gap: 4, marginBottom: 20 }}>
-            <Text style={{ fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 4 }}>
+          <View style={{ gap: 6, marginBottom: 24 }}>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#1e293b', marginBottom: 2 }}>
               {method === 'email' ? 'E-mail' : 'Número de telefone'}
             </Text>
             <TextInput
@@ -156,16 +182,17 @@ export default function LoginScreen() {
               style={{
                 backgroundColor: '#fff',
                 borderWidth: 1.5,
-                borderColor: fieldError ? '#ef4444' : '#e2e8f0',
-                borderRadius: 14,
-                paddingHorizontal: 16,
-                paddingVertical: 14,
+                borderColor: fieldError ? '#ef4444' : '#bfdbfe',
+                borderRadius: 16,
+                paddingHorizontal: 18,
+                paddingVertical: 16,
                 fontSize: 16,
                 color: '#1e293b',
+                boxShadow: '0 1px 4px rgba(0,119,182,0.06)',
               }}
             />
             {fieldError ? (
-              <Text style={{ fontSize: 12, color: '#ef4444', marginTop: 2 }}>{fieldError}</Text>
+              <Text style={{ fontSize: 13, color: '#ef4444', marginTop: 2 }}>{fieldError}</Text>
             ) : null}
           </View>
 
@@ -178,14 +205,16 @@ export default function LoginScreen() {
           />
 
           {/* Link cadastro */}
-          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 24, gap: 4 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 28, gap: 4 }}>
             <Text style={{ fontSize: 14, color: '#64748b' }}>Não tem conta?</Text>
             <TouchableOpacity onPress={() => router.push('/auth/register')}>
               <Text style={{ fontSize: 14, fontWeight: '700', color: '#0077b6' }}>Cadastre-se</Text>
             </TouchableOpacity>
           </View>
+
+          <View style={{ height: insets.bottom + 8 }} />
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
