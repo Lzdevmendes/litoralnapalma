@@ -1,6 +1,19 @@
 // Tipos estáticos para configuração de cidade.
 // Os tipos completos com campos dinâmicos (Beach, UPA, TrafficRoute) ficam em lib/types.ts.
 
+export interface BusLine {
+  id: string;
+  number: string;         // ex: "201"
+  name: string;           // ex: "Centro x Martim de Sá"
+  company: string;        // ex: "EMTU", "Litorânea"
+  type: 'municipal' | 'intermunicipal';
+  route: string[];        // lista ordenada de paradas
+  firstDeparture: string; // "05:30"
+  lastDeparture: string;  // "22:45"
+  frequency: number;      // minutos entre partidas
+  garageAddress: string;
+}
+
 export type FuelType = 'gasolina' | 'etanol' | 'diesel' | 'gnv';
 
 export interface FuelPrice {
@@ -82,6 +95,7 @@ export interface City {
   highways: HighwayStatic[];
   services: CityServices;
   gasStations: GasStation[];
+  busLines: BusLine[];
 }
 
 export const CITIES: City[] = [
@@ -164,6 +178,56 @@ export const CITIES: City[] = [
           { type: 'diesel',   price: 6.19, updatedAt: '2026-05-28' },
           { type: 'gnv',      price: 3.85, updatedAt: '2026-05-28' },
         ],
+      },
+    ],
+    busLines: [
+      {
+        id: 'cara-201',
+        number: '201',
+        name: 'Centro x Martim de Sá',
+        company: 'EMTU',
+        type: 'municipal',
+        route: ['Terminal Caraguatatuba', 'Praça da Matriz', 'Av. Adhemar de Barros', 'Indaiá', 'Cocanha', 'Martim de Sá'],
+        firstDeparture: '05:30',
+        lastDeparture: '22:00',
+        frequency: 30,
+        garageAddress: 'Terminal Urbano de Caraguatatuba — Av. Presidente Kennedy, s/n',
+      },
+      {
+        id: 'cara-202',
+        number: '202',
+        name: 'Centro x Porto Novo x Massaguaçu',
+        company: 'EMTU',
+        type: 'municipal',
+        route: ['Terminal Caraguatatuba', 'Centro', 'Porto Novo', 'Pegorelli', 'Massaguaçu'],
+        firstDeparture: '05:00',
+        lastDeparture: '23:00',
+        frequency: 20,
+        garageAddress: 'Terminal Urbano de Caraguatatuba — Av. Presidente Kennedy, s/n',
+      },
+      {
+        id: 'cara-301',
+        number: '301',
+        name: 'Caraguatatuba x São Sebastião',
+        company: 'Litorânea',
+        type: 'intermunicipal',
+        route: ['Terminal Caraguatatuba', 'Entrada de Caraguatatuba', 'Boracéia', 'São Sebastião Centro'],
+        firstDeparture: '06:00',
+        lastDeparture: '20:00',
+        frequency: 60,
+        garageAddress: 'Garagem Litorânea — Caraguatatuba',
+      },
+      {
+        id: 'cara-401',
+        number: '401',
+        name: 'Caraguatatuba x São Paulo (Tietê)',
+        company: 'Litorânea',
+        type: 'intermunicipal',
+        route: ['Terminal Caraguatatuba', 'Rodovia dos Tamoios', 'São José dos Campos', 'Guarulhos', 'Terminal Tietê (SP)'],
+        firstDeparture: '07:00',
+        lastDeparture: '19:00',
+        frequency: 120,
+        garageAddress: 'Garagem Litorânea — Caraguatatuba',
       },
     ],
   },
@@ -251,6 +315,56 @@ export const CITIES: City[] = [
           { type: 'diesel',   price: 6.24, updatedAt: '2026-05-28' },
           { type: 'gnv',      price: 3.79, updatedAt: '2026-05-28' },
         ],
+      },
+    ],
+    busLines: [
+      {
+        id: 'ss-101',
+        number: '101',
+        name: 'Centro x Maresias x Boiçucanga',
+        company: 'EMTU',
+        type: 'municipal',
+        route: ['Terminal São Sebastião', 'Centro', 'Juqueí', 'Barra do Sahy', 'Toque-Toque', 'Maresias', 'Boiçucanga'],
+        firstDeparture: '06:00',
+        lastDeparture: '22:00',
+        frequency: 40,
+        garageAddress: 'Terminal Urbano de São Sebastião — R. João Lino da Silva, 180',
+      },
+      {
+        id: 'ss-102',
+        number: '102',
+        name: 'Centro x Porto x Boracéia',
+        company: 'EMTU',
+        type: 'municipal',
+        route: ['Terminal São Sebastião', 'Centro', 'Porto de São Sebastião', 'Topolândia', 'Boracéia'],
+        firstDeparture: '05:30',
+        lastDeparture: '22:30',
+        frequency: 30,
+        garageAddress: 'Terminal Urbano de São Sebastião — R. João Lino da Silva, 180',
+      },
+      {
+        id: 'ss-301',
+        number: '301',
+        name: 'São Sebastião x Caraguatatuba',
+        company: 'Litorânea',
+        type: 'intermunicipal',
+        route: ['Terminal São Sebastião', 'Boracéia', 'Entrada de Caraguatatuba', 'Terminal Caraguatatuba'],
+        firstDeparture: '06:00',
+        lastDeparture: '20:00',
+        frequency: 60,
+        garageAddress: 'Garagem Litorânea — São Sebastião',
+      },
+      {
+        id: 'ss-402',
+        number: '402',
+        name: 'São Sebastião x São Paulo (Tietê)',
+        company: 'Litorânea',
+        type: 'intermunicipal',
+        route: ['Terminal São Sebastião', 'Caraguatatuba', 'Rodovia dos Tamoios', 'São José dos Campos', 'Terminal Tietê (SP)'],
+        firstDeparture: '07:00',
+        lastDeparture: '18:00',
+        frequency: 120,
+        garageAddress: 'Garagem Litorânea — São Sebastião',
       },
     ],
   },
@@ -343,6 +457,56 @@ export const CITIES: City[] = [
         ],
       },
     ],
+    busLines: [
+      {
+        id: 'uba-501',
+        number: '501',
+        name: 'Centro x Enseada',
+        company: 'Mantiqueira',
+        type: 'municipal',
+        route: ['Terminal Ubatuba', 'Centro', 'Perequê-Açú', 'Saco da Ribeira', 'Enseada'],
+        firstDeparture: '05:30',
+        lastDeparture: '22:00',
+        frequency: 30,
+        garageAddress: 'Garagem Mantiqueira — Av. Iperoig, 400, Ubatuba',
+      },
+      {
+        id: 'uba-502',
+        number: '502',
+        name: 'Centro x Itamambuca x Picinguaba',
+        company: 'Mantiqueira',
+        type: 'municipal',
+        route: ['Terminal Ubatuba', 'Centro', 'Prumirim', 'Lagoinha', 'Itamambuca', 'Picinguaba'],
+        firstDeparture: '06:00',
+        lastDeparture: '20:00',
+        frequency: 60,
+        garageAddress: 'Garagem Mantiqueira — Av. Iperoig, 400, Ubatuba',
+      },
+      {
+        id: 'uba-503',
+        number: '503',
+        name: 'Centro x Domingas Dias x Lázaro',
+        company: 'Mantiqueira',
+        type: 'municipal',
+        route: ['Terminal Ubatuba', 'Centro', 'Toninhas', 'Félix', 'Domingas Dias', 'Lázaro'],
+        firstDeparture: '06:30',
+        lastDeparture: '21:00',
+        frequency: 45,
+        garageAddress: 'Garagem Mantiqueira — Av. Iperoig, 400, Ubatuba',
+      },
+      {
+        id: 'uba-401',
+        number: '401',
+        name: 'Ubatuba x São José dos Campos',
+        company: 'Litorânea',
+        type: 'intermunicipal',
+        route: ['Terminal Ubatuba', 'Rodovia Oswaldo Cruz (SP-125)', 'Taubaté', 'São José dos Campos'],
+        firstDeparture: '07:00',
+        lastDeparture: '19:00',
+        frequency: 120,
+        garageAddress: 'Garagem Litorânea — Ubatuba',
+      },
+    ],
   },
 
   {
@@ -417,6 +581,44 @@ export const CITIES: City[] = [
           { type: 'diesel',   price: 6.39, updatedAt: '2026-05-28' },
           { type: 'gnv',      price: 3.95, updatedAt: '2026-05-28' },
         ],
+      },
+    ],
+    busLines: [
+      {
+        id: 'ilh-601',
+        number: '601',
+        name: 'Perequê x Feiticeira x Curral',
+        company: 'Transporte Ilhabela',
+        type: 'municipal',
+        route: ['Terminal Perequê', 'Portinho', 'Jabaquara', 'Julião', 'Perequê', 'Feiticeira', 'Pedras Miúdas', 'Curral'],
+        firstDeparture: '06:00',
+        lastDeparture: '22:00',
+        frequency: 40,
+        garageAddress: 'Garagem Municipal — Av. Pedro Paulo de Moraes, 1500, Ilhabela',
+      },
+      {
+        id: 'ilh-602',
+        number: '602',
+        name: 'Vila x Jabaquara x Viana',
+        company: 'Transporte Ilhabela',
+        type: 'municipal',
+        route: ['Terminal Perequê', 'Vila', 'Portinho', 'Jabaquara', 'Viana'],
+        firstDeparture: '07:00',
+        lastDeparture: '21:00',
+        frequency: 60,
+        garageAddress: 'Garagem Municipal — Av. Pedro Paulo de Moraes, 1500, Ilhabela',
+      },
+      {
+        id: 'ilh-701',
+        number: '701',
+        name: 'Ilhabela x São Sebastião (via Balsa)',
+        company: 'Litorânea',
+        type: 'intermunicipal',
+        route: ['Terminal Perequê', 'Terminal Balsa Ilhabela', 'Terminal Balsa São Sebastião', 'Terminal São Sebastião'],
+        firstDeparture: '06:30',
+        lastDeparture: '20:30',
+        frequency: 90,
+        garageAddress: 'Garagem Litorânea — São Sebastião',
       },
     ],
   },
