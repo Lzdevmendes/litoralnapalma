@@ -1,4 +1,5 @@
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
+import { router } from 'expo-router';
 import { Badge } from '@/components/ui/badge';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { CardSkeleton } from '@/components/ui/skeleton';
@@ -95,14 +96,15 @@ export function BeachCard() {
           const color = occupancyColor(beach.occupancy);
           const wColor = waterColor[beach.waterQuality];
           return (
-            <View
+            <Pressable
               key={beach.id}
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.8)',
+              onPress={() => router.push(`/praia/${beach.id}`)}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? 'rgba(0,119,182,0.06)' : 'rgba(255,255,255,0.8)',
                 borderRadius: 14,
                 padding: 12,
                 gap: 8,
-              }}
+              })}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text style={{ fontSize: 14, fontWeight: '600', color: '#1e293b' }}>{beach.name}</Text>
@@ -116,7 +118,7 @@ export function BeachCard() {
                   💧 {waterLabel[beach.waterQuality]}
                 </Text>
               </View>
-            </View>
+            </Pressable>
           );
         })}
       </View>

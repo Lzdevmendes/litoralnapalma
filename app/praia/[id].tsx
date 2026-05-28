@@ -1,0 +1,323 @@
+import { View, Text, ScrollView, Pressable, Linking } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLocalSearchParams, router, Stack } from 'expo-router';
+import Constants from 'expo-constants';
+import { CITIES } from '@/data/cities';
+import { useBeaches } from '@/hooks/useBeaches';
+import { CardSkeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { ProgressBar } from '@/components/ui/progress-bar';
+import { occupancyColor, occupancyLabel } from '@/lib/utils';
+import type { Beach } from '@/lib/types';
+
+// ── react-native-maps (só disponível em dev build) ───────────────────────────
+const isExpoGo =
+  Constants.executionEnvironment === 'storeClient' ||
+  (Constants as unknown as { appOwnership?: string }).appOwnership === 'expo';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let MapView: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Marker: any = null;
+
+if (!isExpoGo) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Maps = require('react-native-maps');
+    MapView = Maps.default;
+    Marker = Maps.Marker;
+  } catch {
+    // módulo nativo não disponível
+  }
+}
+
+// ── utils ────────────────────────────────────────────────────────────────────
+
+const waterLabel: Record<Beach['waterQuality'], string> = {
+  boa: 'Própria',
+  regular: 'Regular',
+  impropia: 'Imprópria',
+};
+const waterColor: Record<Beach['waterQuality'], string> = {
+  boa: '#22c55e',
+  regular: '#f59e0b',
+  impropia: '#ef4444',
+};
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+// ── componente ────────────────────────────────────────────────────────────────
+
+export default function BeachDetailScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+
+  // Localiza cidade e praia estática pelo id
+  const found = CITIES.reduce<{ city: (typeof CITIES)[0]; beachStatic: (typeof CITIES)[0]['beaches'][0] } | null>(
+    (acc, city) => {
+      if (acc) return acc;
+      const b = city.beaches.find((b) => b.id === id);
+      return b ? { city, beachStatic: b } : null;
+    },
+    null
+  );
+
+  const { data: beaches, isLoading } = useBeaches(found?.city);
+
+  if (!found) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#f0f6fc', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+        <Text style={{ fontSize: 40 }}>🔍</Text>
+        <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>Praia não encontrada</Text>
+        <Pressable onPress={() => router.back()} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#0077b6', borderRadius: 12 }}>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>← Voltar</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
+
+  const { city, beachStatic } = found;
+  const beach = beaches?.find((b) => b.id === id);
+  const mapsUrl = `https://maps.google.com/?q=${beachStatic.lat},${beachStatic.lng}`;
+
+  const amenities = beachStatic.amenities;
+  const amenityItems = [
+    { label: 'Banheiros', icon: '🚿', ok: amenities.banheiros },
+    { label: 'Quiosques', icon: '🏖️', ok: amenities.quiosques },
+    { label: 'Estacionamento', icon: '🅿️', ok: amenities.estacionamento },
+  ];
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f0f6fc' }} edges={['top']}>
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* Header */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          backgroundColor: '#f0f6fc',
+          borderBottomWidth: 1,
+          borderBottomColor: 'rgba(0,0,0,0.06)',
+          gap: 12,
+        }}
+      >
+        <Pressable
+          onPress={() => router.back()}
+          style={({ pressed }) => ({
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            backgroundColor: pressed ? 'rgba(0,119,182,0.12)' : 'rgba(0,119,182,0.08)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          })}
+        >
+          <Text style={{ fontSize: 18, color: '#0077b6' }}>←</Text>
+        </Pressable>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#1e293b' }} numberOfLines={1}>
+            {beachStatic.name}
+          </Text>
+          <Text style={{ fontSize: 11, color: '#94a3b8' }}>{city.name} · {city.state}</Text>
+        </View>
+      </View>
+
+      <ScrollView
+        contentContainerStyle={{ padding: 16, gap: 14 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Ocupação & qualidade */}
+        {isLoading ? (
+          <CardSkeleton />
+        ) : beach ? (
+          <View
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              borderRadius: 20,
+              padding: 16,
+              borderWidth: 1,
+              borderColor: 'rgba(0,119,182,0.1)',
+              boxShadow: '0 2px 12px rgba(0,119,182,0.08)',
+              gap: 12,
+            }}
+          >
+            {/* Hero */}
+            <View style={{ alignItems: 'center', gap: 8 }}>
+              <Text style={{ fontSize: 52 }}>🏖️</Text>
+              <Badge color={occupancyColor(beach.occupancy)} dot>
+                {occupancyLabel(beach.occupancy)}
+              </Badge>
+            </View>
+
+            {/* Barra de ocupação */}
+            <View style={{ gap: 6 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: 12, color: '#64748b' }}>Ocupação atual</Text>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: occupancyColor(beach.occupancy) }}>
+                  {beach.occupancyPercent}%
+                </Text>
+              </View>
+              <ProgressBar value={beach.occupancyPercent} color={occupancyColor(beach.occupancy)} height={8} />
+            </View>
+
+            {/* Stats */}
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {[
+                {
+                  emoji: '💧',
+                  label: 'Água',
+                  value: waterLabel[beach.waterQuality],
+                  color: waterColor[beach.waterQuality],
+                },
+                {
+                  emoji: '🌊',
+                  label: 'Ondas',
+                  value: `${beach.wavesHeight.toFixed(1)} m`,
+                  color: '#0077b6',
+                },
+                ...(beach.collectedAt
+                  ? [{ emoji: '📅', label: 'CETESB', value: formatDate(beach.collectedAt), color: '#64748b' }]
+                  : []),
+              ].map(({ emoji, label, value, color }) => (
+                <View
+                  key={label}
+                  style={{
+                    flex: 1,
+                    backgroundColor: 'rgba(0,0,0,0.03)',
+                    borderRadius: 14,
+                    padding: 10,
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <Text style={{ fontSize: 18 }}>{emoji}</Text>
+                  <Text style={{ fontSize: 9, color: '#94a3b8', textTransform: 'uppercase' }}>{label}</Text>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color }}>{value}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : null}
+
+        {/* Estrutura */}
+        <View
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            borderRadius: 20,
+            padding: 16,
+            borderWidth: 1,
+            borderColor: 'rgba(0,0,0,0.06)',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+            gap: 12,
+          }}
+        >
+          <Text style={{ fontSize: 13, fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            Estrutura
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {amenityItems.map(({ label, icon, ok }) => (
+              <View
+                key={label}
+                style={{
+                  flex: 1,
+                  backgroundColor: ok ? 'rgba(34,197,94,0.08)' : 'rgba(0,0,0,0.04)',
+                  borderRadius: 14,
+                  padding: 10,
+                  alignItems: 'center',
+                  gap: 6,
+                  borderWidth: 1,
+                  borderColor: ok ? 'rgba(34,197,94,0.2)' : 'transparent',
+                }}
+              >
+                <Text style={{ fontSize: 22 }}>{icon}</Text>
+                <Text style={{ fontSize: 10, fontWeight: '600', color: ok ? '#16a34a' : '#94a3b8', textAlign: 'center' }}>
+                  {label}
+                </Text>
+                <Text style={{ fontSize: 9, color: ok ? '#16a34a' : '#94a3b8' }}>
+                  {ok ? '✓ Disponível' : '✗ Sem estrutura'}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Como chegar */}
+        <Pressable
+          onPress={() => Linking.openURL(mapsUrl)}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? '#005f92' : '#0077b6',
+            borderRadius: 16,
+            paddingVertical: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'row',
+            gap: 8,
+            opacity: pressed ? 0.9 : 1,
+          })}
+        >
+          <Text style={{ fontSize: 18 }}>📍</Text>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>Como chegar</Text>
+        </Pressable>
+
+        {/* Mini mapa */}
+        {!isExpoGo && MapView && Marker ? (
+          <View style={{ borderRadius: 20, overflow: 'hidden', height: 200, boxShadow: '0 2px 16px rgba(0,119,182,0.12)' }}>
+            <MapView
+              style={{ flex: 1 }}
+              initialRegion={{
+                latitude: beachStatic.lat,
+                longitude: beachStatic.lng,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              scrollEnabled={false}
+              zoomEnabled={false}
+            >
+              <Marker
+                coordinate={{ latitude: beachStatic.lat, longitude: beachStatic.lng }}
+                title={beachStatic.name}
+              >
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: `${occupancyColor(beach?.occupancy ?? 'vazia')}30`,
+                    borderWidth: 2.5,
+                    borderColor: occupancyColor(beach?.occupancy ?? 'vazia'),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Text style={{ fontSize: 18 }}>🏖️</Text>
+                </View>
+              </Marker>
+            </MapView>
+          </View>
+        ) : (
+          <View
+            style={{
+              height: 140,
+              borderRadius: 20,
+              backgroundColor: '#e8f4f8',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              borderWidth: 1,
+              borderColor: 'rgba(0,119,182,0.15)',
+            }}
+          >
+            <Text style={{ fontSize: 32 }}>🗺️</Text>
+            <Text style={{ fontSize: 12, color: '#0077b6', fontWeight: '600' }}>Mapa disponível no dev build</Text>
+          </View>
+        )}
+
+        <View style={{ height: 16 }} />
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
