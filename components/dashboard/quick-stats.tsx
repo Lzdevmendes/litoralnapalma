@@ -5,13 +5,30 @@ import { useTraffic } from '@/hooks/useTraffic';
 import { useUPA } from '@/hooks/useUPA';
 import { useCity } from '@/context/city-context';
 import { trafficLevelColor } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function QuickStats() {
   const { city } = useCity();
-  const { data: weather } = useWeather(city);
-  const { data: beaches } = useBeaches(city);
-  const { data: traffic } = useTraffic(city);
-  const { data: upas } = useUPA(city);
+  const { data: weather, isLoading: loadingWeather } = useWeather(city);
+  const { data: beaches, isLoading: loadingBeaches } = useBeaches(city);
+  const { data: traffic, isLoading: loadingTraffic } = useTraffic(city);
+  const { data: upas, isLoading: loadingUPA } = useUPA(city);
+
+  const isLoading = loadingWeather || loadingBeaches || loadingTraffic || loadingUPA;
+
+  if (isLoading) {
+    return (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
+      >
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} style={{ width: 88, height: 68, borderRadius: 14 }} />
+        ))}
+      </ScrollView>
+    );
+  }
 
   const order = { livre: 0, moderado: 1, lento: 2, parado: 3 } as const;
   const worstRoute = traffic?.reduce((a, b) => (order[b.level] > order[a.level] ? b : a));
