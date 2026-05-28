@@ -28,31 +28,42 @@ function mapOWMCondition(id: number): WeatherData["condition"] {
 
 export async function fetchWeather(lat: number, lng: number): Promise<WeatherData> {
   if (!OWM_KEY) {
-    // Fallback para desenvolvimento sem chave configurada
     await delay(400);
     return getMockWeather();
   }
 
-  const [weatherRes, uviRes] = await Promise.all([
+  // Usa a API /weather para condição + temperatura.
+  // O índice UV vem do campo `uvi` dentro de /onecall (One Call API 3.0).
+  // O endpoint legado /uvi foi removido — requer plano pago a partir de jun/2024.
+  const [weatherRes, oneCallRes] = await Promise.all([
     fetch(
       `${OWM_BASE}/weather?lat=${lat}&lon=${lng}&appid=${OWM_KEY}&units=metric&lang=pt_br`
     ),
-    fetch(`${OWM_BASE}/uvi?lat=${lat}&lon=${lng}&appid=${OWM_KEY}`),
+    fetch(
+      `${OWM_BASE}/onecall?lat=${lat}&lon=${lng}&appid=${OWM_KEY}&exclude=minutely,hourly,daily,alerts`
+    ),
   ]);
 
   if (!weatherRes.ok) {
     throw new Error(`OpenWeatherMap error: ${weatherRes.status}`);
   }
 
-  const weather = await weatherRes.json();
-  const uvIndex = uviRes.ok ? (await uviRes.json() as { value: number }).value : 0;
+  const weather = await weatherRes.json() as {
+    main: { temp: number; feels_like: number; humidity: number };
+    wind: { speed: number };
+    weather: [{ id: number }];
+  };
+
+  const uvIndex = oneCallRes.ok
+    ? ((await oneCallRes.json() as { current?: { uvi?: number } }).current?.uvi ?? 0)
+    : 0;
 
   return {
-    temperature: Math.round(weather.main.temp as number),
-    feelsLike: Math.round(weather.main.feels_like as number),
-    humidity: weather.main.humidity as number,
-    condition: mapOWMCondition(weather.weather[0].id as number),
-    windSpeed: Math.round((weather.wind.speed as number) * 3.6), // m/s → km/h
+    temperature: Math.round(weather.main.temp),
+    feelsLike: Math.round(weather.main.feels_like),
+    humidity: weather.main.humidity,
+    condition: mapOWMCondition(weather.weather[0].id),
+    windSpeed: Math.round(weather.wind.speed * 3.6), // m/s → km/h
     uvIndex: Math.round(uvIndex),
     updatedAt: new Date().toISOString(),
   };
@@ -61,7 +72,6 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
 export async function fetchTraffic(cityId?: string) {
   const city = CITIES.find((c) => c.id === cityId) ?? CITIES[0];
 
-  // Tenta dados reais via Google Routes API; cai no mock se sem chave ou erro
   const realData = await fetchGoogleTraffic(city.highways).catch(
     () => ({}) as Partial<Record<string, never>>
   );
@@ -72,7 +82,6 @@ export async function fetchTraffic(cityId?: string) {
     return getMockTraffic(cityId);
   }
 
-  // Mescla: dados reais sobrescrevem level/travelTime; mock preenche o resto
   return getMockTraffic(cityId).map((route) => {
     const real = realData[route.id];
     return real ? { ...route, level: real.level, travelTime: real.travelTime } : route;
@@ -99,21 +108,19 @@ export async function fetchReports(cityId?: string): Promise<Report[]> {
   return cityId ? mock.filter((r) => !r.city || r.city === cityId) : mock;
 }
 
+/**
+ * Submete um report.
+ * `city` é obrigatório — necessário para filtros no dashboard e RLS no Supabase.
+ */
 export async function submitReport(data: {
   type: ReportType;
   description?: string;
   lat: number;
   lng: number;
-  city?: string;
+  city: string; // obrigatório (era opcional — corrigido)
 }): Promise<Report> {
-  if (isSupabaseConfigured && data.city) {
-    return submitReportToSupabase({
-      type: data.type,
-      description: data.description,
-      lat: data.lat,
-      lng: data.lng,
-      city: data.city,
-    });
+  if (isSupabaseConfigured) {
+    return submitReportToSupabase(data);
   }
   await delay(600 + Math.random() * 400);
   return {

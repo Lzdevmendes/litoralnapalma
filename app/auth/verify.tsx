@@ -16,6 +16,7 @@ export default function VerifyScreen() {
   const [seconds, setSeconds] = useState(60);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const isEmail = type === 'email';
   const maskedContact = isEmail
@@ -48,11 +49,19 @@ export default function VerifyScreen() {
   }
 
   async function handleResend() {
+    if (resending) return;
+    setResending(true);
     setCode('');
     setError('');
-    setSeconds(60);
-    if (isEmail) await sendEmailOTP(contact ?? '');
-    else await sendPhoneOTP(contact ?? '');
+    try {
+      if (isEmail) await sendEmailOTP(contact ?? '');
+      else await sendPhoneOTP(contact ?? '');
+      setSeconds(60);
+    } catch {
+      setError('Não foi possível reenviar o código. Tente novamente.');
+    } finally {
+      setResending(false);
+    }
   }
 
   return (
@@ -122,9 +131,9 @@ export default function VerifyScreen() {
                 <Text style={{ fontWeight: '700', color: '#64748b' }}>{seconds}s</Text>
               </Text>
             ) : (
-              <TouchableOpacity onPress={handleResend}>
-                <Text style={{ fontSize: 14, fontWeight: '700', color: '#0077b6' }}>
-                  Reenviar código
+              <TouchableOpacity onPress={handleResend} disabled={resending}>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: resending ? '#94a3b8' : '#0077b6' }}>
+                  {resending ? 'Enviando…' : 'Reenviar código'}
                 </Text>
               </TouchableOpacity>
             )}
