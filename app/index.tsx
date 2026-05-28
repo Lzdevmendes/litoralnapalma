@@ -10,6 +10,7 @@ import { WeatherCard } from '@/components/dashboard/weather-card';
 import { TrafficCard } from '@/components/dashboard/traffic-card';
 import { BeachCard } from '@/components/dashboard/beach-card';
 import { UPACard } from '@/components/dashboard/upa-card';
+import { FerryCard } from '@/components/dashboard/ferry-card';
 import { ModeContent } from '@/components/dashboard/mode-content';
 import { AppMapView } from '@/components/map/map-view';
 import { SmartRouter } from '@/components/router/smart-router';
@@ -65,6 +66,14 @@ export default function DashboardScreen() {
             <SectionTitle>🚗 Trânsito</SectionTitle>
             <TrafficCard />
           </View>
+
+          {/* Ferry — apenas para Ilhabela e São Sebastião */}
+          {(city.id === 'ilhabela' || city.id === 'sao-sebastiao') && (
+            <View style={{ gap: 6 }}>
+              <SectionTitle>⛴️ Balsa</SectionTitle>
+              <FerryCard />
+            </View>
+          )}
 
           {/* Beaches */}
           <View style={{ gap: 6 }}>

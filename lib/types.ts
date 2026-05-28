@@ -70,6 +70,14 @@ export interface SideRoute {
   lng: number;
 }
 
+export interface FerryStatus {
+  waitTimeCars: number;        // minutos
+  waitTimeMotorcycles: number; // minutos
+  nextDeparture: string;       // HH:mm
+  isOperating: boolean;
+  lastUpdated: string;         // ISO string
+}
+
 export interface Report {
   id: string;
   type: ReportType;
