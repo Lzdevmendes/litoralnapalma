@@ -13,6 +13,7 @@ import { BeachCard } from '@/components/dashboard/beach-card';
 import { UPACard } from '@/components/dashboard/upa-card';
 import { FerryCard } from '@/components/dashboard/ferry-card';
 import { GasCard } from '@/components/dashboard/gas-card';
+import { BusCard } from '@/components/dashboard/bus-card';
 import { ModeContent } from '@/components/dashboard/mode-content';
 import { AppMapView } from '@/components/map/map-view';
 import { SmartRouter } from '@/components/router/smart-router';
@@ -78,6 +79,12 @@ export default function DashboardScreen() {
           <View style={{ gap: 6 }}>
             <SectionTitle>⛽ Postos de Combustível</SectionTitle>
             <GasCard />
+          </View>
+
+          {/* Bus lines */}
+          <View style={{ gap: 6 }}>
+            <SectionTitle>🚌 Ônibus</SectionTitle>
+            <BusCard />
           </View>
 
           {/* Ferry — apenas para Ilhabela e São Sebastião */}
