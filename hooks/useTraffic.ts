@@ -7,7 +7,7 @@ export function useTraffic(city: City = DEFAULT_CITY) {
   return useQuery({
     queryKey: ["traffic", city.id],
     queryFn: () => fetchTraffic(city.id),
-    refetchInterval: 2 * 60 * 1000,
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000,  // 5 min — alinhado com o cache da API de trânsito
+    refetchInterval: 5 * 60 * 1000,
   });
 }

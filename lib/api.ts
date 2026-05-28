@@ -5,6 +5,8 @@ import {
   getMockUPAs,
   getMockReports,
 } from "@/data/mock";
+import { CITIES } from "@/data/cities";
+import { fetchGoogleTraffic } from "@/lib/traffic";
 import type { Report, ReportType, WeatherData } from "./types";
 
 const delay = (ms: number) =>
@@ -55,8 +57,24 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
 }
 
 export async function fetchTraffic(cityId?: string) {
-  await delay(300 + Math.random() * 400);
-  return getMockTraffic(cityId);
+  const city = CITIES.find((c) => c.id === cityId) ?? CITIES[0];
+
+  // Tenta dados reais via Google Routes API; cai no mock se sem chave ou erro
+  const realData = await fetchGoogleTraffic(city.highways).catch(
+    () => ({}) as Partial<Record<string, never>>
+  );
+  const hasRealData = Object.keys(realData).length > 0;
+
+  if (!hasRealData) {
+    await delay(300 + Math.random() * 400);
+    return getMockTraffic(cityId);
+  }
+
+  // Mescla: dados reais sobrescrevem level/travelTime; mock preenche o resto
+  return getMockTraffic(cityId).map((route) => {
+    const real = realData[route.id];
+    return real ? { ...route, level: real.level, travelTime: real.travelTime } : route;
+  });
 }
 
 export async function fetchBeaches(cityId?: string) {
