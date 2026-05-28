@@ -4,6 +4,7 @@ import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
 import { useRestaurants } from '@/hooks/useRestaurants';
 import { useCity } from '@/context/city-context';
+import { useLanguage } from '@/context/language-context';
 import type { Restaurant, RestaurantCategory } from '@/data/cities';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -12,15 +13,6 @@ type SortKey = 'preco' | 'avaliacao' | 'custo_beneficio';
 
 const PRICE_LABELS = ['', '$', '$$', '$$$', '$$$$'] as const;
 const PRICE_COLORS = ['', '#22c55e', '#84cc16', '#f59e0b', '#ef4444'] as const;
-
-const CATEGORY_LABEL: Record<RestaurantCategory, string> = {
-  frutos_do_mar: '🦐 Frutos do Mar',
-  pizza:         '🍕 Pizza',
-  churrasco:     '🥩 Churrasco',
-  variado:       '🍽️ Variado',
-  cafe:          '☕ Café',
-  bar:           '🍺 Bar',
-};
 
 function costBenefit(r: Restaurant) {
   return r.rating / r.priceRange;
@@ -59,7 +51,7 @@ function StarRating({ rating }: { rating: number }) {
 
 // ── gráfico de barras simples ─────────────────────────────────────────────────
 
-function TicketBarChart({ restaurants }: { restaurants: Restaurant[] }) {
+function TicketBarChart({ restaurants, perPerson }: { restaurants: Restaurant[]; perPerson: string }) {
   const max = Math.max(...restaurants.map((r) => r.averageTicket));
   return (
     <View style={{ gap: 6 }}>
@@ -68,7 +60,7 @@ function TicketBarChart({ restaurants }: { restaurants: Restaurant[] }) {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ fontSize: 10, color: '#374151', flex: 1 }} numberOfLines={1}>{r.name}</Text>
             <Text style={{ fontSize: 10, fontWeight: '700', color: PRICE_COLORS[r.priceRange] }}>
-              {formatTicket(r.averageTicket)}/pessoa
+              {formatTicket(r.averageTicket)}{perPerson}
             </Text>
           </View>
           <View style={{ height: 8, backgroundColor: 'rgba(0,0,0,0.06)', borderRadius: 4, overflow: 'hidden' }}>
@@ -91,6 +83,7 @@ function TicketBarChart({ restaurants }: { restaurants: Restaurant[] }) {
 
 export function RestaurantCard() {
   const { city } = useCity();
+  const { t } = useLanguage();
   const { data: restaurants, isLoading, isError, error, refetch } = useRestaurants(city);
   const [showCompare, setShowCompare] = useState(false);
   const [filterCat, setFilterCat] = useState<RestaurantCategory | 'todas'>('todas');
@@ -118,10 +111,14 @@ export function RestaurantCard() {
   const categories = Array.from(new Set(restaurants.map((r) => r.category)));
 
   const sortOptions: { key: SortKey; label: string }[] = [
-    { key: 'custo_beneficio', label: 'Custo-benefício' },
-    { key: 'avaliacao', label: 'Avaliação' },
-    { key: 'preco', label: 'Preço ↑' },
+    { key: 'custo_beneficio', label: t.restaurant.sortValue },
+    { key: 'avaliacao', label: t.restaurant.sortRating },
+    { key: 'preco', label: t.restaurant.sortPrice },
   ];
+
+  function categoryLabel(cat: RestaurantCategory): string {
+    return t.restaurant.categories[cat];
+  }
 
   return (
     <View
@@ -148,11 +145,11 @@ export function RestaurantCard() {
             <Text style={{ fontSize: 18 }}>🍽️</Text>
           </View>
           <View>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>Restaurantes</Text>
-            <Text style={{ fontSize: 10, color: '#94a3b8' }}>{restaurants.length} opções · {city.name}</Text>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.sections.restaurants}</Text>
+            <Text style={{ fontSize: 10, color: '#94a3b8' }}>{restaurants.length} {t.restaurant.options} · {city.name}</Text>
           </View>
         </View>
-        <Text style={{ fontSize: 11, color: '#ea580c', fontWeight: '600' }}>Top custo-benefício</Text>
+        <Text style={{ fontSize: 11, color: '#ea580c', fontWeight: '600' }}>{t.restaurant.topLabel}</Text>
       </View>
 
       {/* Top 3 */}
@@ -170,13 +167,13 @@ export function RestaurantCard() {
               gap: 10,
             })}
           >
-            <Text style={{ fontSize: 20 }}>{CATEGORY_LABEL[r.category].split(' ')[0]}</Text>
+            <Text style={{ fontSize: 20 }}>{categoryLabel(r.category).split(' ')[0]}</Text>
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={{ fontSize: 13, fontWeight: '700', color: '#1e293b' }} numberOfLines={1}>
                 {r.name}
               </Text>
               <Text style={{ fontSize: 10, color: '#94a3b8' }} numberOfLines={1}>
-                {CATEGORY_LABEL[r.category].split(' ').slice(1).join(' ')} · {r.address.split(' - ')[1] ?? ''}
+                {categoryLabel(r.category).split(' ').slice(1).join(' ')} · {r.address.split(' - ')[1] ?? ''}
               </Text>
             </View>
             <View style={{ alignItems: 'flex-end', gap: 4 }}>
@@ -184,7 +181,7 @@ export function RestaurantCard() {
                 <PriceBadge range={r.priceRange} />
                 <StarRating rating={r.rating} />
               </View>
-              <Text style={{ fontSize: 11, color: '#64748b' }}>{formatTicket(r.averageTicket)}/pessoa</Text>
+              <Text style={{ fontSize: 11, color: '#64748b' }}>{formatTicket(r.averageTicket)}{t.restaurant.perPerson}</Text>
             </View>
           </Pressable>
         ))}
@@ -201,7 +198,7 @@ export function RestaurantCard() {
           }}
         >
           <Text style={{ fontSize: 10, color: '#ea580c', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.4 }}>
-            ✨ Destaque — {top3[0].name}
+            ✨ {t.restaurant.highlight} — {top3[0].name}
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
             {top3[0].highlights.map((h) => (
@@ -225,7 +222,7 @@ export function RestaurantCard() {
         })}
       >
         <Text style={{ fontSize: 12, fontWeight: '700', color: showCompare ? '#fff' : '#ea580c' }}>
-          {showCompare ? '✕ Fechar comparação' : '⚖️ Comparar restaurantes'}
+          {showCompare ? t.restaurant.closeCompare : t.restaurant.compare}
         </Text>
       </Pressable>
 
@@ -235,7 +232,7 @@ export function RestaurantCard() {
           {/* Filtro por categoria */}
           <View style={{ gap: 6 }}>
             <Text style={{ fontSize: 11, fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.4 }}>
-              Categoria
+              {t.restaurant.category}
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
               <Pressable
@@ -246,7 +243,7 @@ export function RestaurantCard() {
                 }}
               >
                 <Text style={{ fontSize: 11, fontWeight: '600', color: filterCat === 'todas' ? '#fff' : '#ea580c' }}>
-                  Todas
+                  {t.restaurant.allCategories}
                 </Text>
               </Pressable>
               {categories.map((cat) => (
@@ -259,7 +256,7 @@ export function RestaurantCard() {
                   }}
                 >
                   <Text style={{ fontSize: 11, fontWeight: '600', color: filterCat === cat ? '#fff' : '#ea580c' }}>
-                    {CATEGORY_LABEL[cat].split(' ')[0]}
+                    {categoryLabel(cat).split(' ')[0]}
                   </Text>
                 </Pressable>
               ))}
@@ -269,7 +266,7 @@ export function RestaurantCard() {
           {/* Ordenação */}
           <View style={{ gap: 6 }}>
             <Text style={{ fontSize: 11, fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.4 }}>
-              Ordenar por
+              {t.restaurant.sortBy}
             </Text>
             <View style={{ flexDirection: 'row', gap: 5 }}>
               {sortOptions.map(({ key, label }) => (
@@ -299,9 +296,9 @@ export function RestaurantCard() {
             }}
           >
             <Text style={{ fontSize: 11, fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.4 }}>
-              Ticket médio por pessoa
+              {t.restaurant.avgTicket}
             </Text>
-            <TicketBarChart restaurants={sorted} />
+            <TicketBarChart restaurants={sorted} perPerson={t.restaurant.perPerson} />
           </View>
 
           {/* Lista ordenada */}
@@ -320,7 +317,7 @@ export function RestaurantCard() {
                 })}
               >
                 <Text style={{ fontSize: 11, fontWeight: '800', color: '#94a3b8', width: 16 }}>{idx + 1}</Text>
-                <Text style={{ fontSize: 16 }}>{CATEGORY_LABEL[r.category].split(' ')[0]}</Text>
+                <Text style={{ fontSize: 16 }}>{categoryLabel(r.category).split(' ')[0]}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 12, fontWeight: '600', color: '#1e293b' }}>{r.name}</Text>
                   <StarRating rating={r.rating} />

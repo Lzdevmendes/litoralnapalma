@@ -45,10 +45,15 @@ export function formatWaitTime(minutes: number): string {
   return m > 0 ? `${h}h ${m}min` : `${h}h`;
 }
 
-export function timeAgo(dateStr: string): string {
+export function timeAgo(dateStr: string, locale: 'pt' | 'en' = 'pt'): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "agora";
+  if (locale === 'en') {
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins} min ago`;
+    return `${Math.floor(mins / 60)}h ago`;
+  }
+  if (mins < 1) return 'agora';
   if (mins < 60) return `há ${mins} min`;
   return `há ${Math.floor(mins / 60)}h`;
 }

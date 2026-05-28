@@ -2,6 +2,7 @@ import { View, Text } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { useFerry } from '@/hooks/useFerry';
+import { useLanguage } from '@/context/language-context';
 import { timeAgo } from '@/lib/utils';
 
 function waitColor(minutes: number): string {
@@ -11,21 +12,22 @@ function waitColor(minutes: number): string {
   return '#ef4444';
 }
 
-function waitLabel(minutes: number): string {
-  if (minutes === 0) return 'Sem fila';
-  if (minutes < 60) return `${minutes} min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m > 0 ? `${h}h ${m}min` : `${h}h`;
-}
-
 export function FerryCard() {
+  const { locale, t } = useLanguage();
   const { data: ferry, isLoading } = useFerry();
 
   if (isLoading || !ferry) return <CardSkeleton />;
 
   const carColor = waitColor(ferry.waitTimeCars);
   const motoColor = waitColor(ferry.waitTimeMotorcycles);
+
+  function waitLabel(minutes: number): string {
+    if (minutes === 0) return t.ferry.noQueue;
+    if (minutes < 60) return `${minutes} min`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h}h ${m}min` : `${h}h`;
+  }
 
   return (
     <View
@@ -55,12 +57,12 @@ export function FerryCard() {
             <Text style={{ fontSize: 18 }}>⛴️</Text>
           </View>
           <View>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>Balsa</Text>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.ferry.label}</Text>
             <Text style={{ fontSize: 10, color: '#94a3b8' }}>São Sebastião ↔ Ilhabela</Text>
           </View>
         </View>
         <Badge color={ferry.isOperating ? '#22c55e' : '#ef4444'} dot>
-          {ferry.isOperating ? 'Operando' : 'Suspenso'}
+          {ferry.isOperating ? t.ferry.operating : t.ferry.closed}
         </Badge>
       </View>
 
@@ -84,7 +86,7 @@ export function FerryCard() {
             {waitLabel(ferry.waitTimeCars)}
           </Text>
           <Text style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.3 }}>
-            Carros
+            {t.ferry.cars}
           </Text>
         </View>
 
@@ -106,7 +108,7 @@ export function FerryCard() {
             {waitLabel(ferry.waitTimeMotorcycles)}
           </Text>
           <Text style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.3 }}>
-            Motos
+            {t.ferry.motos}
           </Text>
         </View>
 
@@ -128,14 +130,14 @@ export function FerryCard() {
             {ferry.nextDeparture}
           </Text>
           <Text style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.3 }}>
-            Próxima
+            {t.ferry.nextDeparture}
           </Text>
         </View>
       </View>
 
       {/* Rodapé */}
       <Text style={{ fontSize: 10, color: '#94a3b8', textAlign: 'right' }}>
-        atualizado {timeAgo(ferry.lastUpdated)}
+        {t.ferry.updated} {timeAgo(ferry.lastUpdated, locale)}
       </Text>
     </View>
   );

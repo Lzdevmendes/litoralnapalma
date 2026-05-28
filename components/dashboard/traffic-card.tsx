@@ -4,10 +4,12 @@ import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
 import { useTraffic } from '@/hooks/useTraffic';
 import { useCity } from '@/context/city-context';
-import { trafficLevelColor, trafficLevelLabel, timeAgo } from '@/lib/utils';
+import { useLanguage } from '@/context/language-context';
+import { trafficLevelColor, timeAgo } from '@/lib/utils';
 
 export function TrafficCard() {
   const { city } = useCity();
+  const { locale, t } = useLanguage();
   const { data: routes, isLoading, isError, error, refetch } = useTraffic(city);
 
   if (isLoading) return <CardSkeleton />;
@@ -42,10 +44,10 @@ export function TrafficCard() {
           >
             <Text style={{ fontSize: 18 }}>🚗</Text>
           </View>
-          <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>Trânsito</Text>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.traffic.label}</Text>
         </View>
         <Badge color={trafficLevelColor(worst.level)} dot>
-          {`${trafficLevelLabel(worst.level)} no geral`}
+          {`${t.traffic.levels[worst.level]} ${t.traffic.overall}`}
         </Badge>
       </View>
 
@@ -65,12 +67,12 @@ export function TrafficCard() {
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text style={{ fontSize: 14, fontWeight: '600', color: '#1e293b' }}>{route.shortName}</Text>
-                <Badge color={color}>{trafficLevelLabel(route.level)}</Badge>
+                <Badge color={color}>{t.traffic.levels[route.level]}</Badge>
               </View>
               <View style={{ flexDirection: 'row', gap: 16 }}>
                 <Text style={{ fontSize: 12, color: '#64748b' }}>⏱ {route.travelTime} min</Text>
                 <Text style={{ fontSize: 12, color: '#64748b' }}>📍 {route.distance} km</Text>
-                <Text style={{ fontSize: 12, color: '#94a3b8', marginLeft: 'auto' }}>{timeAgo(route.updatedAt)}</Text>
+                <Text style={{ fontSize: 12, color: '#94a3b8', marginLeft: 'auto' }}>{timeAgo(route.updatedAt, locale)}</Text>
               </View>
               {/* Level bar */}
               <View style={{ height: 4, backgroundColor: 'rgba(0,0,0,0.06)', borderRadius: 2, overflow: 'hidden' }}>
