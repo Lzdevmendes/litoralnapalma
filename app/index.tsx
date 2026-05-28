@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { ScrollView, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack } from 'expo-router';
+import { Stack, Redirect } from 'expo-router';
 import type { UserMode } from '@/lib/types';
 import { useCity } from '@/context/city-context';
+import { useAuth } from '@/context/auth-context';
 import { Header } from '@/components/dashboard/header';
 import { QuickStats } from '@/components/dashboard/quick-stats';
 import { WeatherCard } from '@/components/dashboard/weather-card';
@@ -20,8 +21,13 @@ import { GeofenceAlert } from '@/components/geofencing/geofence-alert';
 const BG = '#f0f6fc';
 
 export default function DashboardScreen() {
+  const { user, isLoading } = useAuth();
   const [mode, setMode] = useState<UserMode>('morador');
   const { city } = useCity();
+
+  // Guard: redireciona para login se não autenticado
+  if (!isLoading && !user) return <Redirect href="/auth/login" />;
+  if (isLoading) return null;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={['top']}>
