@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/skeleton';
+import { ErrorCard } from '@/components/ui/error-card';
 import { useUPA } from '@/hooks/useUPA';
 import { useCity } from '@/context/city-context';
 import { formatWaitTime } from '@/lib/utils';
@@ -13,9 +14,10 @@ const statusConfig = {
 
 export function UPACard() {
   const { city } = useCity();
-  const { data: upas, isLoading } = useUPA(city);
+  const { data: upas, isLoading, isError, error, refetch } = useUPA(city);
 
-  if (isLoading || !upas) return <CardSkeleton />;
+  if (isLoading) return <CardSkeleton />;
+  if (isError || !upas) return <ErrorCard error={error} onRetry={refetch} />;
 
   return (
     <View

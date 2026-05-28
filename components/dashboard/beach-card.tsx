@@ -2,6 +2,7 @@ import { View, Text } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { CardSkeleton } from '@/components/ui/skeleton';
+import { ErrorCard } from '@/components/ui/error-card';
 import { useBeaches } from '@/hooks/useBeaches';
 import { useWaterQuality } from '@/hooks/useWaterQuality';
 import { useCity } from '@/context/city-context';
@@ -30,10 +31,11 @@ function formatDate(iso: string): string {
 
 export function BeachCard() {
   const { city } = useCity();
-  const { data: beaches, isLoading } = useBeaches(city);
+  const { data: beaches, isLoading, isError, error, refetch } = useBeaches(city);
   const { data: waterQuality } = useWaterQuality();
 
-  if (isLoading || !beaches) return <CardSkeleton />;
+  if (isLoading) return <CardSkeleton />;
+  if (isError || !beaches) return <ErrorCard error={error} onRetry={refetch} />;
 
   // Mescla dados CETESB com os dados de praia
   const merged = beaches.map((b) => {

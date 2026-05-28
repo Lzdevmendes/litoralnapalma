@@ -1,15 +1,17 @@
 import { View, Text } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/skeleton';
+import { ErrorCard } from '@/components/ui/error-card';
 import { useTraffic } from '@/hooks/useTraffic';
 import { useCity } from '@/context/city-context';
 import { trafficLevelColor, trafficLevelLabel, timeAgo } from '@/lib/utils';
 
 export function TrafficCard() {
   const { city } = useCity();
-  const { data: routes, isLoading } = useTraffic(city);
+  const { data: routes, isLoading, isError, error, refetch } = useTraffic(city);
 
-  if (isLoading || !routes) return <CardSkeleton />;
+  if (isLoading) return <CardSkeleton />;
+  if (isError || !routes) return <ErrorCard error={error} onRetry={refetch} />;
 
   const order = { livre: 0, moderado: 1, lento: 2, parado: 3 } as const;
   const worst = routes.reduce((a, b) => (order[b.level] > order[a.level] ? b : a));
