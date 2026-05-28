@@ -1,6 +1,37 @@
 // Tipos estáticos para configuração de cidade.
 // Os tipos completos com campos dinâmicos (Beach, UPA, TrafficRoute) ficam em lib/types.ts.
 
+export type RestaurantCategory = 'frutos_do_mar' | 'pizza' | 'churrasco' | 'variado' | 'cafe' | 'bar';
+
+export interface Restaurant {
+  id: string;
+  name: string;
+  category: RestaurantCategory;
+  priceRange: 1 | 2 | 3 | 4; // $ $$ $$$ $$$$
+  averageTicket: number;      // R$ por pessoa
+  rating: number;             // 1–5
+  address: string;
+  lat: number;
+  lng: number;
+  highlights: string[];
+  mapsUrl: string;
+}
+
+export type AttractionType = 'praia' | 'trilha' | 'cachoeira' | 'historico' | 'mirante' | 'parque';
+
+export interface Attraction {
+  id: string;
+  name: string;
+  type: AttractionType;
+  description: string;
+  entryFee: number | null; // null = gratuito
+  rating: number;
+  lat: number;
+  lng: number;
+  tips: string[];
+  mapsUrl: string;
+}
+
 export interface BusLine {
   id: string;
   number: string;         // ex: "201"
@@ -96,6 +127,8 @@ export interface City {
   services: CityServices;
   gasStations: GasStation[];
   busLines: BusLine[];
+  restaurants: Restaurant[];
+  attractions: Attraction[];
 }
 
 export const CITIES: City[] = [
@@ -229,6 +262,20 @@ export const CITIES: City[] = [
         frequency: 120,
         garageAddress: 'Garagem Litorânea — Caraguatatuba',
       },
+    ],
+    restaurants: [
+      { id: 'cara-r1', name: 'Amanhecer do Mar', category: 'frutos_do_mar', priceRange: 3, averageTicket: 80, rating: 4.5, address: 'Av. da Praia, 520 - Porto Novo, Caraguatatuba', lat: -23.6310, lng: -45.4088, highlights: ['Moqueca premiada', 'Vista pro mar', 'Frutos do mar frescos'], mapsUrl: 'https://maps.google.com/?q=-23.6310,-45.4088' },
+      { id: 'cara-r2', name: 'Pizzaria Central', category: 'pizza', priceRange: 2, averageTicket: 45, rating: 4.2, address: 'R. Santos Dumont, 210 - Centro, Caraguatatuba', lat: -23.6195, lng: -45.4130, highlights: ['Pizza de camarão', 'Rodízio às sextas', 'Delivery rápido'], mapsUrl: 'https://maps.google.com/?q=-23.6195,-45.4130' },
+      { id: 'cara-r3', name: 'Churrascaria Gaúcha', category: 'churrasco', priceRange: 2, averageTicket: 58, rating: 4.0, address: 'Av. Presidente Kennedy, 1100 - Martim, Caraguatatuba', lat: -23.5940, lng: -45.3700, highlights: ['Rodízio completo', 'Buffet de frios', 'Caipirinha artesanal'], mapsUrl: 'https://maps.google.com/?q=-23.5940,-45.3700' },
+      { id: 'cara-r4', name: 'Café da Orla', category: 'cafe', priceRange: 1, averageTicket: 25, rating: 4.3, address: 'Av. da Praia, 180 - Martim de Sá, Caraguatatuba', lat: -23.5938, lng: -45.3695, highlights: ['Açaí artesanal', 'Vista pro mar', 'Brunch aos fins de semana'], mapsUrl: 'https://maps.google.com/?q=-23.5938,-45.3695' },
+      { id: 'cara-r5', name: 'Bar do Pescador', category: 'bar', priceRange: 1, averageTicket: 30, rating: 4.1, address: 'R. dos Pescadores, 45 - Porto Novo, Caraguatatuba', lat: -23.6318, lng: -45.4095, highlights: ['Peixe do dia', 'Cerveja gelada', 'Ambiente praiano'], mapsUrl: 'https://maps.google.com/?q=-23.6318,-45.4095' },
+      { id: 'cara-r6', name: 'Cantina da Família', category: 'variado', priceRange: 2, averageTicket: 42, rating: 4.4, address: 'Av. Adhemar de Barros, 654 - Centro, Caraguatatuba', lat: -23.6200, lng: -45.4120, highlights: ['Prato feito generoso', 'Comida caseira', 'Cardápio rotativo'], mapsUrl: 'https://maps.google.com/?q=-23.6200,-45.4120' },
+    ],
+    attractions: [
+      { id: 'cara-a1', name: 'Cachoeira do Paraibuna', type: 'cachoeira', description: 'Cachoeira de água cristalina no sopé da Serra do Mar, com piscinas naturais e mata preservada.', entryFee: null, rating: 4.6, lat: -23.5200, lng: -45.4500, tips: ['Leve repelente', 'Melhor de manhã cedo', 'Água fria — leve agasalho'], mapsUrl: 'https://maps.google.com/?q=-23.5200,-45.4500' },
+      { id: 'cara-a2', name: 'Mirante do Morro São João', type: 'mirante', description: 'Vista panorâmica de 360° do litoral norte, do centro de Caraguatatuba às ilhas ao horizonte.', entryFee: null, rating: 4.4, lat: -23.6050, lng: -45.4300, tips: ['Melhor ao entardecer', 'Trilha de 40 min', 'Leve lanterna se for à noite'], mapsUrl: 'https://maps.google.com/?q=-23.6050,-45.4300' },
+      { id: 'cara-a3', name: 'Parque Estadual da Serra do Mar', type: 'parque', description: 'Maior remanescente de Mata Atlântica do estado, com trilhas, cachoeiras e fauna exuberante.', entryFee: 10, rating: 4.7, lat: -23.5500, lng: -45.5000, tips: ['Reserva obrigatória no site', 'Proibido entrar com comida', 'Guia é obrigatório para trilhas longas'], mapsUrl: 'https://maps.google.com/?q=-23.5500,-45.5000' },
+      { id: 'cara-a4', name: 'Igreja Matriz N. Sra. da Ajuda', type: 'historico', description: 'Igreja do século XVIII, um dos símbolos históricos de Caraguatatuba, reconstruída após o deslizamento de 1967.', entryFee: null, rating: 4.0, lat: -23.6201, lng: -45.4129, tips: ['Visitas guiadas às quintas', 'Museu no interior', 'Evento junino imperdível'], mapsUrl: 'https://maps.google.com/?q=-23.6201,-45.4129' },
     ],
   },
 
@@ -366,6 +413,20 @@ export const CITIES: City[] = [
         frequency: 120,
         garageAddress: 'Garagem Litorânea — São Sebastião',
       },
+    ],
+    restaurants: [
+      { id: 'ss-r1', name: 'Porto das Ostras', category: 'frutos_do_mar', priceRange: 3, averageTicket: 85, rating: 4.6, address: 'Av. Guarda Mor Lobo Viana, 880 - Centro, São Sebastião', lat: -23.8095, lng: -45.4085, highlights: ['Ostras frescas da região', 'Vista pro porto', 'Camarão na moranga premiado'], mapsUrl: 'https://maps.google.com/?q=-23.8095,-45.4085' },
+      { id: 'ss-r2', name: 'Maresias Burger', category: 'variado', priceRange: 2, averageTicket: 40, rating: 4.4, address: 'R. Francisco Loup, 90 - Maresias, São Sebastião', lat: -23.8005, lng: -45.5315, highlights: ['Burger artesanal', 'Batata frita rústica', 'Ótimo pós-surf'], mapsUrl: 'https://maps.google.com/?q=-23.8005,-45.5315' },
+      { id: 'ss-r3', name: 'Cantinho do Samba', category: 'bar', priceRange: 1, averageTicket: 28, rating: 4.2, address: 'R. da Praia, 55 - Boiçucanga, São Sebastião', lat: -23.8135, lng: -45.5710, highlights: ['Samba ao vivo aos sábados', 'Tira-gosto farto', 'Caipirinha da casa'], mapsUrl: 'https://maps.google.com/?q=-23.8135,-45.5710' },
+      { id: 'ss-r4', name: 'Pizzaria Mangueiral', category: 'pizza', priceRange: 2, averageTicket: 48, rating: 4.1, address: 'Av. Mangueiral, 320 - Juqueí, São Sebastião', lat: -23.7715, lng: -45.4895, highlights: ['Pizza de frutos do mar', 'Opções veganas', 'Vista pro mangue'], mapsUrl: 'https://maps.google.com/?q=-23.7715,-45.4895' },
+      { id: 'ss-r5', name: 'Camburi Grill', category: 'churrasco', priceRange: 3, averageTicket: 75, rating: 4.3, address: 'Estr. do Camburi, 410 - Camburi, São Sebastião', lat: -23.7675, lng: -45.5882, highlights: ['Picanha na brasa', 'Cardápio de peixes', 'Varanda com vista'], mapsUrl: 'https://maps.google.com/?q=-23.7675,-45.5882' },
+      { id: 'ss-r6', name: 'Café Topolândia', category: 'cafe', priceRange: 1, averageTicket: 22, rating: 4.0, address: 'R. João Lino da Silva, 120 - Topolândia, São Sebastião', lat: -23.7958, lng: -45.4083, highlights: ['Café especial da Serra', 'Tapioca recheada', 'Ambiente acolhedor'], mapsUrl: 'https://maps.google.com/?q=-23.7958,-45.4083' },
+    ],
+    attractions: [
+      { id: 'ss-a1', name: 'Praia de Camburi', type: 'praia', description: 'Uma das praias mais preservadas do litoral paulista, rodeada de Mata Atlântica e com águas calmas.', entryFee: null, rating: 4.8, lat: -23.7672, lng: -45.5879, tips: ['Proibido barracas de som', 'Estacionamento pago na entrada', 'Chegar cedo para pegar vaga'], mapsUrl: 'https://maps.google.com/?q=-23.7672,-45.5879' },
+      { id: 'ss-a2', name: 'Museu de Arte Sacra', type: 'historico', description: 'Acervo com peças do século XVII ao XIX, na casa histórica do Porto — uma das mais antigas do litoral.', entryFee: 5, rating: 4.2, lat: -23.8092, lng: -45.4082, tips: ['Fechado às segundas', 'Visita guiada inclusa', 'Loja de artesanato na saída'], mapsUrl: 'https://maps.google.com/?q=-23.8092,-45.4082' },
+      { id: 'ss-a3', name: 'Trilha do Costão', type: 'trilha', description: 'Trilha de nível moderado entre costões rochosos com vista espetacular para as ilhas de São Sebastião.', entryFee: null, rating: 4.5, lat: -23.8100, lng: -45.4100, tips: ['Leve água e protetor solar', 'Boa forma física recomendada', 'Saída às 7h para evitar sol forte'], mapsUrl: 'https://maps.google.com/?q=-23.8100,-45.4100' },
+      { id: 'ss-a4', name: 'Lagoa dos Bambus', type: 'parque', description: 'Lagoa de água doce cercada de bambuzal exótico, ótima para stand-up paddle e contemplação.', entryFee: null, rating: 4.3, lat: -23.7900, lng: -45.5050, tips: ['Aluguel de SUP no local', 'Mosquitos ao entardecer — leve repelente', 'Ótima para fotos'], mapsUrl: 'https://maps.google.com/?q=-23.7900,-45.5050' },
     ],
   },
 
@@ -507,6 +568,20 @@ export const CITIES: City[] = [
         garageAddress: 'Garagem Litorânea — Ubatuba',
       },
     ],
+    restaurants: [
+      { id: 'uba-r1', name: 'Siri Mole', category: 'frutos_do_mar', priceRange: 3, averageTicket: 90, rating: 4.7, address: 'Av. Leovegildo Dias Vieira, 540 - Centro, Ubatuba', lat: -23.4338, lng: -45.0840, highlights: ['Siri mole frito exclusivo', 'Lagosta ao alho e óleo', 'Vista para o mar'], mapsUrl: 'https://maps.google.com/?q=-23.4338,-45.0840' },
+      { id: 'uba-r2', name: 'Cantina do Ubatuba', category: 'variado', priceRange: 2, averageTicket: 45, rating: 4.3, address: 'R. Gula, 78 - Centro, Ubatuba', lat: -23.4330, lng: -45.0835, highlights: ['Comida regional', 'Porções fartas', 'Ambiente familiar'], mapsUrl: 'https://maps.google.com/?q=-23.4330,-45.0835' },
+      { id: 'uba-r3', name: 'Bar da Enseada', category: 'bar', priceRange: 1, averageTicket: 25, rating: 4.0, address: 'Av. Leovegildo Dias Vieira, 1000 - Enseada, Ubatuba', lat: -23.4958, lng: -45.1100, highlights: ['Pastel de siri', 'Chope gelado', 'Vôlei de praia ao lado'], mapsUrl: 'https://maps.google.com/?q=-23.4958,-45.1100' },
+      { id: 'uba-r4', name: 'Churrascaria Serrana', category: 'churrasco', priceRange: 2, averageTicket: 58, rating: 4.2, address: 'Av. Iperoig, 1200 - Centro, Ubatuba', lat: -23.4342, lng: -45.0845, highlights: ['Costela de boi na brasa', 'Buffet de saladas frescas', 'Rodízio completo'], mapsUrl: 'https://maps.google.com/?q=-23.4342,-45.0845' },
+      { id: 'uba-r5', name: 'Café Trincheira', category: 'cafe', priceRange: 1, averageTicket: 22, rating: 4.4, address: 'R. Felix Guisard, 160 - Centro, Ubatuba', lat: -23.4335, lng: -45.0838, highlights: ['Café especial caiçara', 'Pão de queijo artesanal', 'Wi-Fi gratuito'], mapsUrl: 'https://maps.google.com/?q=-23.4335,-45.0838' },
+      { id: 'uba-r6', name: 'Pizzaria Picinguaba', category: 'pizza', priceRange: 2, averageTicket: 52, rating: 4.5, address: 'Estr. da Picinguaba, 300 - Picinguaba, Ubatuba', lat: -23.3705, lng: -44.9405, highlights: ['Pizza de pupunha', 'Ingredientes orgânicos', 'Vista incrível da baía'], mapsUrl: 'https://maps.google.com/?q=-23.3705,-44.9405' },
+    ],
+    attractions: [
+      { id: 'uba-a1', name: 'Ilha Anchieta', type: 'praia', description: 'Ilha paradisíaca com praias de águas cristalinas, ruínas de presídio histórico e trilhas na mata.', entryFee: null, rating: 4.9, lat: -23.5350, lng: -45.0760, tips: ['Barco sai do Saco da Ribeira', 'Leve lanche — sem comércio na ilha', 'Snorkel obrigatório!'], mapsUrl: 'https://maps.google.com/?q=-23.5350,-45.0760' },
+      { id: 'uba-a2', name: 'Parque Estadual Serra do Mar — Picinguaba', type: 'parque', description: 'Núcleo de preservação com praias selvagens, comunidade caiçara e trilhas com vista para o Atlântico.', entryFee: 12, rating: 4.8, lat: -23.3701, lng: -44.9401, tips: ['Reserva prévia obrigatória', 'Guia credenciado recomendado', 'Proibido acampar sem autorização'], mapsUrl: 'https://maps.google.com/?q=-23.3701,-44.9401' },
+      { id: 'uba-a3', name: 'Cachoeira da Toca', type: 'cachoeira', description: 'Cachoeira de 12 m de queda com poço natural para banho, dentro da Mata Atlântica preservada.', entryFee: null, rating: 4.6, lat: -23.4150, lng: -45.0620, tips: ['Trilha de 20 min pelo mato', 'Água gelada mesmo no verão', 'Levar calçado fechado'], mapsUrl: 'https://maps.google.com/?q=-23.4150,-45.0620' },
+      { id: 'uba-a4', name: 'Mirante do Félix', type: 'mirante', description: 'Ponto mais alto da região urbana de Ubatuba, com vista de 180° do litoral e das ilhas vizinhas.', entryFee: null, rating: 4.5, lat: -23.4485, lng: -45.0860, tips: ['Subida íngreme de moto táxi disponível', 'Melhor vista ao pôr do sol', 'Leve agasalho — ventoso'], mapsUrl: 'https://maps.google.com/?q=-23.4485,-45.0860' },
+    ],
   },
 
   {
@@ -620,6 +695,20 @@ export const CITIES: City[] = [
         frequency: 90,
         garageAddress: 'Garagem Litorânea — São Sebastião',
       },
+    ],
+    restaurants: [
+      { id: 'ilh-r1', name: 'Viana Beach Restaurant', category: 'frutos_do_mar', priceRange: 3, averageTicket: 95, rating: 4.6, address: 'Estr. da Viana, s/n - Praia de Viana, Ilhabela', lat: -23.8455, lng: -45.3803, highlights: ['Polvo grelhado na brasa', 'Frutos do mar locais', 'Mesa com vista pro mar'], mapsUrl: 'https://maps.google.com/?q=-23.8455,-45.3803' },
+      { id: 'ilh-r2', name: 'Pizzaria do Porto', category: 'pizza', priceRange: 2, averageTicket: 50, rating: 4.3, address: 'Av. Pedro Paulo de Moraes, 1250 - Vila, Ilhabela', lat: -23.7762, lng: -45.3516, highlights: ['Pizza com ingredientes da ilha', 'Cardápio especial de mariscos', 'Vista pro cais da balsa'], mapsUrl: 'https://maps.google.com/?q=-23.7762,-45.3516' },
+      { id: 'ilh-r3', name: 'Deck Bar Perequê', category: 'bar', priceRange: 2, averageTicket: 38, rating: 4.4, address: 'Av. Pedro Paulo de Moraes, 890 - Perequê, Ilhabela', lat: -23.7780, lng: -45.3528, highlights: ['Deck sobre o mar', 'Drink de frutas tropicais', 'Musica ao vivo nas sextas'], mapsUrl: 'https://maps.google.com/?q=-23.7780,-45.3528' },
+      { id: 'ilh-r4', name: 'Cantina da Vila', category: 'variado', priceRange: 1, averageTicket: 35, rating: 4.1, address: 'R. Dr. Carvalho, 88 - Centro, Ilhabela', lat: -23.7758, lng: -45.3510, highlights: ['Marmita caiçara', 'Comida do dia no almoço', 'Preço justo'], mapsUrl: 'https://maps.google.com/?q=-23.7758,-45.3510' },
+      { id: 'ilh-r5', name: 'Churrascaria Ilha Verde', category: 'churrasco', priceRange: 3, averageTicket: 80, rating: 4.5, address: 'Estr. da Feiticeira, 520 - Feiticeira, Ilhabela', lat: -23.7893, lng: -45.3625, highlights: ['Corte especial da ilha', 'Cardápio de peixes misturado', 'Ambiente entre a mata'], mapsUrl: 'https://maps.google.com/?q=-23.7893,-45.3625' },
+      { id: 'ilh-r6', name: 'Café da Balsa', category: 'cafe', priceRange: 1, averageTicket: 20, rating: 3.9, address: 'Terminal da Balsa - Perequê, Ilhabela', lat: -23.7779, lng: -45.3526, highlights: ['Café e tapioca esperando a balsa', 'Rápido e prático', 'Pão artesanal'], mapsUrl: 'https://maps.google.com/?q=-23.7779,-45.3526' },
+    ],
+    attractions: [
+      { id: 'ilh-a1', name: 'Praia dos Castelhanos', type: 'praia', description: 'A mais famosa de Ilhabela, de difícil acesso (4x4) e das mais belas do Brasil, com ondas para surf.', entryFee: null, rating: 4.9, lat: -23.8580, lng: -45.2850, tips: ['Acesso só de 4x4 — contratar excursão', 'Leve comida própria', 'Temporada de surf (abr–ago)'], mapsUrl: 'https://maps.google.com/?q=-23.8580,-45.2850' },
+      { id: 'ilh-a2', name: 'Pico do Baepi', type: 'trilha', description: 'Trilha até o ponto mais alto acessível da ilha (640m), com vista de 360° do arquipélago.', entryFee: null, rating: 4.8, lat: -23.7800, lng: -45.3200, tips: ['Saída às 6h para evitar chuva da tarde', 'Guia obrigatório em temporada', 'Nível difícil — prepare-se bem'], mapsUrl: 'https://maps.google.com/?q=-23.7800,-45.3200' },
+      { id: 'ilh-a3', name: 'Cachoeira da Laje', type: 'cachoeira', description: 'Queda d\'água de 30m com piscina natural esmeralda, acessível por trilha de 1h pela mata.', entryFee: null, rating: 4.7, lat: -23.8100, lng: -45.3400, tips: ['Leve roupas para molhar', 'Trilha moderada — tênis fechado', 'Evitar no verão chuvoso'], mapsUrl: 'https://maps.google.com/?q=-23.8100,-45.3400' },
+      { id: 'ilh-a4', name: 'Museu Histórico de Ilhabela', type: 'historico', description: 'Sede colonial do século XVIII com acervo sobre piratas, naufrácios e a cultura caiçara da ilha.', entryFee: 8, rating: 4.2, lat: -23.7760, lng: -45.3514, tips: ['Fechado às terças', 'Visita guiada inclusa no ingresso', 'Loja de artesanato caiçara'], mapsUrl: 'https://maps.google.com/?q=-23.7760,-45.3514' },
     ],
   },
 ];
