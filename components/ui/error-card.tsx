@@ -1,11 +1,16 @@
 import { View, Text, Pressable } from 'react-native';
+import { useLanguage } from '@/context/language-context';
+import type { Translations } from '@/lib/i18n';
 
 interface ErrorCardProps {
   error?: unknown;
   onRetry?: () => void;
 }
 
-function getErrorInfo(error: unknown): { emoji: string; title: string; message: string } {
+function getErrorInfo(
+  error: unknown,
+  t: Translations['error']
+): { emoji: string; title: string; message: string } {
   if (error instanceof Error) {
     const msg = error.message.toLowerCase();
     if (
@@ -14,22 +19,15 @@ function getErrorInfo(error: unknown): { emoji: string; title: string; message: 
       msg.includes('network') ||
       msg.includes('timeout')
     ) {
-      return {
-        emoji: '📡',
-        title: 'Sem conexão',
-        message: 'Verifique sua internet e tente novamente.',
-      };
+      return { emoji: '📡', title: t.noConnection, message: t.noConnectionMsg };
     }
   }
-  return {
-    emoji: '⚠️',
-    title: 'Erro ao carregar',
-    message: 'Não foi possível obter os dados.',
-  };
+  return { emoji: '⚠️', title: t.loadError, message: t.loadErrorMsg };
 }
 
 export function ErrorCard({ error, onRetry }: ErrorCardProps) {
-  const { emoji, title, message } = getErrorInfo(error);
+  const { t } = useLanguage();
+  const { emoji, title, message } = getErrorInfo(error, t.error);
 
   return (
     <View
@@ -73,7 +71,7 @@ export function ErrorCard({ error, onRetry }: ErrorCardProps) {
             opacity: pressed ? 0.9 : 1,
           })}
         >
-          <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>↺ Tentar novamente</Text>
+          <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>{t.error.retry}</Text>
         </Pressable>
       )}
     </View>

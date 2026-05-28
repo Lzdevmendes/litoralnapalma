@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { View, Text, Pressable, ScrollView, Animated } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCity } from '@/context/city-context';
+import { useLanguage } from '@/context/language-context';
 import { CITIES } from '@/data/cities';
 import type { UserMode } from '@/lib/types';
 
@@ -15,6 +16,7 @@ const BLUE = '#0077b6';
 export function Header({ mode, onModeChange }: HeaderProps) {
   const queryClient = useQueryClient();
   const { city, setCity } = useCity();
+  const { locale, setLocale, t } = useLanguage();
   const rotation = useRef(new Animated.Value(0)).current;
   const spinRef = useRef<Animated.CompositeAnimation | null>(null);
 
@@ -52,7 +54,7 @@ export function Header({ mode, onModeChange }: HeaderProps) {
           paddingHorizontal: 16,
           paddingTop: 12,
           paddingBottom: 8,
-          gap: 12,
+          gap: 8,
         }}
       >
         {/* Logo */}
@@ -90,7 +92,7 @@ export function Header({ mode, onModeChange }: HeaderProps) {
               key={m}
               onPress={() => onModeChange(m)}
               style={{
-                paddingHorizontal: 12,
+                paddingHorizontal: 10,
                 paddingVertical: 6,
                 borderRadius: 9,
                 backgroundColor: mode === m ? BLUE : 'transparent',
@@ -98,23 +100,38 @@ export function Header({ mode, onModeChange }: HeaderProps) {
             >
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: '600',
                   color: mode === m ? '#fff' : '#64748b',
                 }}
               >
-                {m === 'morador' ? '🏠 Morador' : '🧳 Turista'}
+                {m === 'morador' ? t.header.resident : t.header.tourist}
               </Text>
             </Pressable>
           ))}
         </View>
 
+        {/* Language toggle */}
+        <Pressable
+          onPress={() => setLocale(locale === 'pt' ? 'en' : 'pt')}
+          style={({ pressed }) => ({
+            width: 34,
+            height: 34,
+            borderRadius: 10,
+            backgroundColor: pressed ? `${BLUE}20` : `${BLUE}10`,
+            alignItems: 'center',
+            justifyContent: 'center',
+          })}
+        >
+          <Text style={{ fontSize: 18 }}>{locale === 'pt' ? '🇧🇷' : '🇺🇸'}</Text>
+        </Pressable>
+
         {/* Refresh */}
         <Pressable
           onPress={handleRefresh}
           style={{
-            width: 36,
-            height: 36,
+            width: 34,
+            height: 34,
             borderRadius: 10,
             backgroundColor: `${BLUE}12`,
             alignItems: 'center',

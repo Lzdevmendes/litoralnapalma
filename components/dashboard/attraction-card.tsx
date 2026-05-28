@@ -4,6 +4,7 @@ import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
 import { useAttractions } from '@/hooks/useAttractions';
 import { useCity } from '@/context/city-context';
+import { useLanguage } from '@/context/language-context';
 import type { AttractionType } from '@/data/cities';
 
 const TYPE_ICON: Record<AttractionType, string> = {
@@ -13,15 +14,6 @@ const TYPE_ICON: Record<AttractionType, string> = {
   historico: '🏛️',
   mirante:   '🔭',
   parque:    '🌿',
-};
-
-const TYPE_LABEL: Record<AttractionType, string> = {
-  praia:     'Praia',
-  trilha:    'Trilha',
-  cachoeira: 'Cachoeira',
-  historico: 'Histórico',
-  mirante:   'Mirante',
-  parque:    'Parque',
 };
 
 const TYPE_COLOR: Record<AttractionType, string> = {
@@ -35,6 +27,7 @@ const TYPE_COLOR: Record<AttractionType, string> = {
 
 export function AttractionCard() {
   const { city } = useCity();
+  const { t } = useLanguage();
   const { data: attractions, isLoading, isError, error, refetch } = useAttractions(city);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -69,8 +62,10 @@ export function AttractionCard() {
             <Text style={{ fontSize: 18 }}>🗺️</Text>
           </View>
           <View>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>Atrações Turísticas</Text>
-            <Text style={{ fontSize: 10, color: '#94a3b8' }}>{attractions.length} atrações · {freeCount} gratuitas</Text>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.sections.attractions}</Text>
+            <Text style={{ fontSize: 10, color: '#94a3b8' }}>
+              {attractions.length} {t.attraction.count} · {freeCount} {t.attraction.freeCount}
+            </Text>
           </View>
         </View>
         <Text style={{ fontSize: 11, color: '#16a34a', fontWeight: '600' }}>{city.name}</Text>
@@ -111,7 +106,9 @@ export function AttractionCard() {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     {/* Tipo */}
                     <View style={{ paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6, backgroundColor: `${color}15` }}>
-                      <Text style={{ fontSize: 9, fontWeight: '700', color }}>{TYPE_LABEL[attraction.type]}</Text>
+                      <Text style={{ fontSize: 9, fontWeight: '700', color }}>
+                        {t.attraction.types[attraction.type]}
+                      </Text>
                     </View>
                     {/* Avaliação */}
                     <Text style={{ fontSize: 10, color: '#f59e0b', fontWeight: '700' }}>★ {attraction.rating.toFixed(1)}</Text>
@@ -122,7 +119,7 @@ export function AttractionCard() {
                 <View style={{ alignItems: 'flex-end', gap: 3 }}>
                   {isFree ? (
                     <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: 'rgba(22,163,74,0.12)' }}>
-                      <Text style={{ fontSize: 10, fontWeight: '800', color: '#16a34a' }}>Gratuito</Text>
+                      <Text style={{ fontSize: 10, fontWeight: '800', color: '#16a34a' }}>{t.attraction.free}</Text>
                     </View>
                   ) : (
                     <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: 'rgba(245,158,11,0.12)' }}>
@@ -150,11 +147,11 @@ export function AttractionCard() {
                   {/* Dicas */}
                   <View style={{ gap: 5 }}>
                     <Text style={{ fontSize: 10, fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.4 }}>
-                      💡 Dicas
+                      💡 {t.attraction.tips}
                     </Text>
                     {attraction.tips.map((tip, i) => (
                       <View key={i} style={{ flexDirection: 'row', gap: 6, alignItems: 'flex-start' }}>
-                        <Text style={{ fontSize: 10, color: color, fontWeight: '700' }}>•</Text>
+                        <Text style={{ fontSize: 10, color, fontWeight: '700' }}>•</Text>
                         <Text style={{ fontSize: 11, color: '#64748b', flex: 1, lineHeight: 16 }}>{tip}</Text>
                       </View>
                     ))}
@@ -175,7 +172,7 @@ export function AttractionCard() {
                     })}
                   >
                     <Text style={{ fontSize: 14 }}>📍</Text>
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>Como chegar</Text>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>{t.attraction.directions}</Text>
                   </Pressable>
                 </View>
               )}

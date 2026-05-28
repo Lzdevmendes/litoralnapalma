@@ -3,32 +3,36 @@ import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
 import { useWeather } from '@/hooks/useWeather';
 import { useCity } from '@/context/city-context';
+import { useLanguage } from '@/context/language-context';
 import type { WeatherData } from '@/lib/types';
 
-const CONDITION: Record<WeatherData['condition'], { emoji: string; label: string; bg: string }> = {
-  ensolarado: { emoji: '☀️', label: 'Ensolarado', bg: '#fef3c7' },
-  parcial: { emoji: '⛅', label: 'Parcialmente Nublado', bg: '#f1f5f9' },
-  nublado: { emoji: '☁️', label: 'Nublado', bg: '#e2e8f0' },
-  chuva: { emoji: '🌧️', label: 'Chuva', bg: '#dbeafe' },
-  trovoada: { emoji: '⛈️', label: 'Trovoada', bg: '#ede9fe' },
+const CONDITION_EMOJI: Record<WeatherData['condition'], { emoji: string; bg: string }> = {
+  ensolarado: { emoji: '☀️', bg: '#fef3c7' },
+  parcial:    { emoji: '⛅', bg: '#f1f5f9' },
+  nublado:    { emoji: '☁️', bg: '#e2e8f0' },
+  chuva:      { emoji: '🌧️', bg: '#dbeafe' },
+  trovoada:   { emoji: '⛈️', bg: '#ede9fe' },
 };
-
-function uvLabel(uv: number) {
-  if (uv <= 2) return { label: 'Baixo', color: '#22c55e' };
-  if (uv <= 5) return { label: 'Moderado', color: '#f59e0b' };
-  if (uv <= 7) return { label: 'Alto', color: '#f97316' };
-  if (uv <= 10) return { label: 'Muito Alto', color: '#ef4444' };
-  return { label: 'Extremo', color: '#7c3aed' };
-}
 
 export function WeatherCard() {
   const { city } = useCity();
+  const { t } = useLanguage();
   const { data, isLoading, isError, error, refetch } = useWeather(city);
 
   if (isLoading) return <CardSkeleton />;
   if (isError || !data) return <ErrorCard error={error} onRetry={refetch} />;
 
-  const cond = CONDITION[data.condition];
+  const cond = CONDITION_EMOJI[data.condition];
+  const condLabel = t.weather.conditions[data.condition];
+
+  function uvLabel(uv: number) {
+    if (uv <= 2) return { label: t.weather.uvLabels.low,      color: '#22c55e' };
+    if (uv <= 5) return { label: t.weather.uvLabels.moderate, color: '#f59e0b' };
+    if (uv <= 7) return { label: t.weather.uvLabels.high,     color: '#f97316' };
+    if (uv <= 10) return { label: t.weather.uvLabels.veryHigh, color: '#ef4444' };
+    return { label: t.weather.uvLabels.extreme, color: '#7c3aed' };
+  }
+
   const uv = uvLabel(data.uvIndex);
 
   return (
@@ -45,25 +49,25 @@ export function WeatherCard() {
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
         <View>
           <Text style={{ fontSize: 11, fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Clima Agora · {city.name}
+            {t.weather.label} · {city.name}
           </Text>
           <Text style={{ fontSize: 48, fontWeight: '800', color: '#0f172a', lineHeight: 56 }}>
             {data.temperature}°
           </Text>
-          <Text style={{ fontSize: 13, color: '#64748b' }}>Sensação {data.feelsLike}°</Text>
+          <Text style={{ fontSize: 13, color: '#64748b' }}>{t.weather.feelsLike} {data.feelsLike}°</Text>
         </View>
         <Text style={{ fontSize: 52 }}>{cond.emoji}</Text>
       </View>
 
       <Text style={{ fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
-        {cond.label}
+        {condLabel}
       </Text>
 
       <View style={{ flexDirection: 'row', gap: 8 }}>
         {[
-          { label: 'Umidade', value: `${data.humidity}%`, emoji: '💧' },
-          { label: 'Vento', value: `${data.windSpeed} km/h`, emoji: '💨' },
-          { label: 'UV', value: uv.label, emoji: '🔆', color: uv.color },
+          { label: t.weather.humidity, value: `${data.humidity}%`,        emoji: '💧' },
+          { label: t.weather.wind,     value: `${data.windSpeed} km/h`,   emoji: '💨' },
+          { label: t.weather.uv,       value: uv.label,                   emoji: '🔆', color: uv.color },
         ].map(({ label, value, emoji, color }) => (
           <View
             key={label}
