@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, Animated } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useBeaches } from '@/hooks/useBeaches';
 import { useTraffic } from '@/hooks/useTraffic';
-import { occupancyColor, trafficLevelColor } from '@/lib/utils';
+import { useReports } from '@/hooks/useReports';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { useCity } from '@/context/city-context';
+import { haversineDistance, formatDistance, occupancyColor, trafficLevelColor } from '@/lib/utils';
 
 interface GeoAlert {
   id: string;
@@ -15,45 +18,96 @@ interface GeoAlert {
 
 export function GeofenceAlert() {
   const [alerts, setAlerts] = useState<GeoAlert[]>([]);
-  const { data: beaches } = useBeaches();
-  const { data: traffic } = useTraffic();
-  const prevBeachesRef = useRef<typeof beaches>(undefined);
+  const { city } = useCity();
+  const { data: beaches } = useBeaches(city);
+  const { data: traffic } = useTraffic(city);
+  const { data: reports } = useReports(city);
+  const { coords } = useGeolocation();
+
+  // Controla quais alertas de proximidade já foram disparados (reset ao sair da área)
+  const shownRef = useRef<Set<string>>(new Set());
   const prevTrafficRef = useRef<typeof traffic>(undefined);
 
-  // Welcome alert on mount
+  // Alerta de boas-vindas no mount
   useEffect(() => {
-    const demo: GeoAlert = {
+    const welcome: GeoAlert = {
       id: 'welcome',
       title: 'Bem-vindo ao Litoral na Palma! 🌊',
       message: 'Alertas em tempo real ativados.',
       color: '#0077b6',
       emoji: '🔔',
     };
-    setAlerts([demo]);
+    setAlerts([welcome]);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setTimeout(() => setAlerts((prev) => prev.filter((a) => a.id !== 'welcome')), 5000);
   }, []);
 
+  // Alertas baseados em distância real do usuário
   useEffect(() => {
+    if (!coords) return;
+
     const newAlerts: GeoAlert[] = [];
 
-    if (beaches && prevBeachesRef.current) {
-      beaches.forEach((beach) => {
-        const prev = prevBeachesRef.current?.find((b) => b.id === beach.id);
-        if (prev && prev.occupancy !== 'lotada' && beach.occupancy === 'lotada') {
+    // Praia lotada a menos de 2km
+    beaches?.forEach((beach) => {
+      const dist = haversineDistance(coords.lat, coords.lng, beach.lat, beach.lng);
+      const alertId = `beach-near-${beach.id}`;
+
+      if (dist < 2 && beach.occupancy === 'lotada') {
+        if (!shownRef.current.has(alertId)) {
+          shownRef.current.add(alertId);
           newAlerts.push({
-            id: `beach-${beach.id}-${Date.now()}`,
-            title: 'Praia Lotada!',
-            message: `${beach.name} atingiu capacidade máxima.`,
+            id: alertId,
+            title: 'Praia Lotada Próxima',
+            message: `${beach.name} está lotada (${formatDistance(dist)}).`,
             color: occupancyColor('lotada'),
             emoji: '🏖️',
           });
         }
-      });
-    }
-    prevBeachesRef.current = beaches;
+      } else {
+        // Usuário saiu da área — permite disparar novamente se voltar
+        shownRef.current.delete(alertId);
+      }
+    });
 
-    if (traffic && prevTrafficRef.current) {
+    // Acidente reportado a menos de 5km
+    reports
+      ?.filter((r) => r.type === 'acidente')
+      .forEach((report) => {
+        const dist = haversineDistance(coords.lat, coords.lng, report.lat, report.lng);
+        const alertId = `report-near-${report.id}`;
+
+        if (dist < 5) {
+          if (!shownRef.current.has(alertId)) {
+            shownRef.current.add(alertId);
+            newAlerts.push({
+              id: alertId,
+              title: 'Acidente Próximo',
+              message: `Acidente a ${formatDistance(dist)} de você.`,
+              color: '#ef4444',
+              emoji: '🚨',
+            });
+          }
+        } else {
+          shownRef.current.delete(alertId);
+        }
+      });
+
+    if (newAlerts.length > 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setAlerts((prev) => [...newAlerts, ...prev].slice(0, 3));
+      setTimeout(() => {
+        setAlerts((prev) => prev.filter((a) => !newAlerts.some((na) => na.id === a.id)));
+      }, 8000);
+    }
+  }, [coords, beaches, reports]);
+
+  // Fallback: alertas por degradação de tráfego (funciona com ou sem GPS)
+  useEffect(() => {
+    if (!traffic) return;
+    const newAlerts: GeoAlert[] = [];
+
+    if (prevTrafficRef.current) {
       const order = { livre: 0, moderado: 1, lento: 2, parado: 3 } as const;
       traffic.forEach((route) => {
         const prev = prevTrafficRef.current?.find((r) => r.id === route.id);
@@ -77,7 +131,7 @@ export function GeofenceAlert() {
         setAlerts((prev) => prev.filter((a) => !newAlerts.some((na) => na.id === a.id)));
       }, 6000);
     }
-  }, [beaches, traffic]);
+  }, [traffic]);
 
   if (alerts.length === 0) return null;
 
