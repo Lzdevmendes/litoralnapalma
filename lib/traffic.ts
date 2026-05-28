@@ -33,7 +33,10 @@ const HIGHWAY_ENDPOINTS: Record<string, RouteEndpoints> = {
   'rio-santos-sul':     { origin: { lat: -23.8500, lng: -45.4500 }, dest: { lat: -23.7957, lng: -45.4082 } },
   // Ubatuba
   'rio-santos-uba':     { origin: { lat: -23.4336, lng: -45.0838 }, dest: { lat: -23.7957, lng: -45.4082 } },
+  'tamoios-norte':      { origin: { lat: -23.1794, lng: -45.8869 }, dest: { lat: -23.4336, lng: -45.0838 } },
   'oswaldo-cruz':       { origin: { lat: -23.4336, lng: -45.0838 }, dest: { lat: -23.1909, lng: -45.9012 } },
+  // São Sebastião — Acesso ao Porto
+  'acesso-porto-ss':    { origin: { lat: -23.8090, lng: -45.4080 }, dest: { lat: -23.8115, lng: -45.4139 } },
   // Ilhabela
   'balsa':              { origin: { lat: -23.7957, lng: -45.4082 }, dest: { lat: -23.7779, lng: -45.3526 } },
   'perimetral':         { origin: { lat: -23.7779, lng: -45.3526 }, dest: { lat: -23.8453, lng: -45.3801 } },

@@ -99,9 +99,10 @@ export const CITIES: City[] = [
       },
     ],
     highways: [
-      { id: 'rio-santos-norte', name: 'Rio-Santos Norte (SP-055)', shortName: 'Rio-Santos N', distance: 22, typicalTravelTime: 30 },
-      { id: 'rio-santos-sul',   name: 'Rio-Santos Sul (SP-055)',   shortName: 'Rio-Santos S', distance: 15, typicalTravelTime: 20 },
-      { id: 'centro-ss',        name: 'Centro de São Sebastião',  shortName: 'Centro',       distance: 8,  typicalTravelTime: 12 },
+      { id: 'rio-santos-norte',  name: 'Rio-Santos Norte (SP-055)',          shortName: 'Rio-Santos N', distance: 22, typicalTravelTime: 30 },
+      { id: 'rio-santos-sul',    name: 'Rio-Santos Sul (SP-055)',            shortName: 'Rio-Santos S', distance: 15, typicalTravelTime: 20 },
+      { id: 'acesso-porto-ss',   name: 'Acesso ao Porto de São Sebastião',   shortName: 'Porto',        distance: 4,  typicalTravelTime: 8  },
+      { id: 'centro-ss',         name: 'Centro de São Sebastião',            shortName: 'Centro',       distance: 8,  typicalTravelTime: 12 },
     ],
   },
 
@@ -136,9 +137,10 @@ export const CITIES: City[] = [
       },
     ],
     highways: [
-      { id: 'rio-santos-uba', name: 'Rio-Santos (SP-055)',     shortName: 'Rio-Santos', distance: 30, typicalTravelTime: 40 },
-      { id: 'oswaldo-cruz',   name: 'Oswaldo Cruz (SP-125)',   shortName: 'Oswaldo Cruz', distance: 65, typicalTravelTime: 70 },
-      { id: 'centro-uba',     name: 'Centro de Ubatuba',       shortName: 'Centro',     distance: 6,  typicalTravelTime: 10 },
+      { id: 'rio-santos-uba',  name: 'Rio-Santos (SP-055)',              shortName: 'Rio-Santos',   distance: 30, typicalTravelTime: 40 },
+      { id: 'tamoios-norte',   name: 'Rodovia dos Tamoios Norte (SP-099)', shortName: 'Tamoios N',  distance: 45, typicalTravelTime: 50 },
+      { id: 'oswaldo-cruz',    name: 'Oswaldo Cruz (SP-125)',             shortName: 'Oswaldo Cruz', distance: 65, typicalTravelTime: 70 },
+      { id: 'centro-uba',      name: 'Centro de Ubatuba',                shortName: 'Centro',       distance: 6,  typicalTravelTime: 10 },
     ],
   },
 
