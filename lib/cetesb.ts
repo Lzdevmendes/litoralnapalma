@@ -13,7 +13,7 @@ const CETESB_URL =
 
 // Mapeia nome da praia no CETESB (sem acento, uppercase) → ID interno do app
 const CETESB_NAME_MAP: Record<string, string> = {
-  // Caraguatatuba
+  // caraguatatuba
   'MARTIM DE SA':  'martim-de-sa',
   'INDAIA':        'indaia',
   'COCANHA':       'cocanha',

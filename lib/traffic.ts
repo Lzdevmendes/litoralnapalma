@@ -25,7 +25,7 @@ interface RouteEndpoints {
  * Cobre todas as highways definidas em data/cities.ts.
  */
 const HIGHWAY_ENDPOINTS: Record<string, RouteEndpoints> = {
-  // Caraguatatuba
+  // caraguatatuba
   'rio-santos':         { origin: { lat: -23.7957, lng: -45.4082 }, dest: { lat: -23.6201, lng: -45.4129 } },
   'tamoios':            { origin: { lat: -23.6201, lng: -45.4129 }, dest: { lat: -23.1794, lng: -45.8869 } },
   // São Sebastião
