@@ -3,6 +3,7 @@
 declare const process: {
   env: {
     EXPO_PUBLIC_OPENWEATHER_KEY?: string;
+    EXPO_PUBLIC_GOOGLE_ROUTES_KEY?: string;
     EXPO_OS?: string;
     NODE_ENV?: string;
     [key: string]: string | undefined;
