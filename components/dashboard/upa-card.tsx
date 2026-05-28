@@ -4,16 +4,24 @@ import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
 import { useUPA } from '@/hooks/useUPA';
 import { useCity } from '@/context/city-context';
+import { useLanguage } from '@/context/language-context';
 import { formatWaitTime } from '@/lib/utils';
 
-const statusConfig = {
-  normal: { color: '#22c55e', label: 'Normal', emoji: '🟢' },
-  alerta: { color: '#f59e0b', label: 'Alerta', emoji: '🟡' },
-  critico: { color: '#ef4444', label: 'Crítico', emoji: '🔴' },
+const statusEmoji: Record<'normal' | 'alerta' | 'critico', string> = {
+  normal: '🟢',
+  alerta: '🟡',
+  critico: '🔴',
+};
+
+const statusColor: Record<'normal' | 'alerta' | 'critico', string> = {
+  normal: '#22c55e',
+  alerta: '#f59e0b',
+  critico: '#ef4444',
 };
 
 export function UPACard() {
   const { city } = useCity();
+  const { t } = useLanguage();
   const { data: upas, isLoading, isError, error, refetch } = useUPA(city);
 
   if (isLoading) return <CardSkeleton />;
@@ -44,12 +52,14 @@ export function UPACard() {
         >
           <Text style={{ fontSize: 18 }}>🏥</Text>
         </View>
-        <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>Saúde · UPAs</Text>
+        <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.upa.label}</Text>
       </View>
 
       <View style={{ gap: 8 }}>
         {upas.map((upa) => {
-          const cfg = statusConfig[upa.status];
+          const emoji = statusEmoji[upa.status];
+          const color = statusColor[upa.status];
+          const label = t.upa.status[upa.status];
           return (
             <View
               key={upa.id}
@@ -62,20 +72,21 @@ export function UPACard() {
                 gap: 12,
               }}
             >
-              <Text style={{ fontSize: 20 }}>{cfg.emoji}</Text>
+              <Text style={{ fontSize: 20 }}>{emoji}</Text>
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
                   <Text style={{ fontSize: 14, fontWeight: '600', color: '#1e293b' }}>{upa.name}</Text>
-                  <Badge color={cfg.color}>{cfg.label}</Badge>
+                  <Badge color={color}>{label}</Badge>
                 </View>
                 <Text style={{ fontSize: 12, color: '#64748b' }} selectable>
                   {upa.address}
                 </Text>
                 <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
                   <Text style={{ fontSize: 12, color: '#64748b' }}>
-                    ⏳ Espera: <Text style={{ color: cfg.color, fontWeight: '700' }}>{formatWaitTime(upa.waitTime)}</Text>
+                    ⏳ {t.upa.wait}:{' '}
+                    <Text style={{ color, fontWeight: '700' }}>{formatWaitTime(upa.waitTime)}</Text>
                   </Text>
-                  <Text style={{ fontSize: 12, color: '#64748b' }}>👤 {upa.patientsWaiting} aguardando</Text>
+                  <Text style={{ fontSize: 12, color: '#64748b' }}>👤 {upa.patientsWaiting} {t.upa.waiting}</Text>
                 </View>
               </View>
             </View>

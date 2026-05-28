@@ -4,20 +4,14 @@ import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
 import { useGasStations } from '@/hooks/useGasStations';
 import { useCity } from '@/context/city-context';
-import type { GasStation, FuelType } from '@/data/cities';
+import { useLanguage } from '@/context/language-context';
+import type { GasStation } from '@/data/cities';
 
 const brandColor: Record<string, string> = {
   Ipiranga: '#f97316',
   Shell:    '#f59e0b',
   BR:       '#22c55e',
   Petrobras:'#3b82f6',
-};
-
-const fuelLabel: Record<FuelType, string> = {
-  gasolina: 'Gasolina',
-  etanol:   'Etanol',
-  diesel:   'Diesel',
-  gnv:      'GNV',
 };
 
 function cheapestGasolina(station: GasStation): number {
@@ -30,6 +24,7 @@ function formatPrice(price: number): string {
 
 export function GasCard() {
   const { city } = useCity();
+  const { t } = useLanguage();
   const { data: stations, isLoading, isError, error, refetch } = useGasStations(city);
 
   if (isLoading) return <CardSkeleton />;
@@ -70,16 +65,16 @@ export function GasCard() {
             <Text style={{ fontSize: 18 }}>⛽</Text>
           </View>
           <View>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>Postos</Text>
-            <Text style={{ fontSize: 10, color: '#94a3b8' }}>{stations.length} postos · {city.name}</Text>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.sections.gas}</Text>
+            <Text style={{ fontSize: 10, color: '#94a3b8' }}>{stations.length} {t.gas.stations} · {city.name}</Text>
           </View>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
-          <Text style={{ fontSize: 10, color: '#94a3b8' }}>mais barato</Text>
+          <Text style={{ fontSize: 10, color: '#94a3b8' }}>{t.gas.cheapest}</Text>
           <Text style={{ fontSize: 14, fontWeight: '800', color: '#f97316' }}>
             {formatPrice(cheapestPrice)}
           </Text>
-          <Text style={{ fontSize: 9, color: '#94a3b8' }}>gasolina/L</Text>
+          <Text style={{ fontSize: 9, color: '#94a3b8' }}>{t.gas.gasUnit}</Text>
         </View>
       </View>
 
@@ -157,7 +152,7 @@ export function GasCard() {
                 )}
                 {eth && (
                   <Text style={{ fontSize: 10, color: '#64748b' }}>
-                    Etanol {formatPrice(eth.price)}
+                    {t.gas.fuelLabels.etanol} {formatPrice(eth.price)}
                   </Text>
                 )}
               </View>
@@ -177,7 +172,7 @@ export function GasCard() {
           })}
         >
           <Text style={{ fontSize: 12, color: '#f97316', fontWeight: '600' }}>
-            Ver todos os {stations.length} postos →
+            {t.gas.viewAll} {stations.length} {t.gas.stations} →
           </Text>
         </Pressable>
       )}

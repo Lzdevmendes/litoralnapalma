@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { CityProvider } from '@/context/city-context';
 import { AuthProvider } from '@/context/auth-context';
+import { LanguageProvider } from '@/context/language-context';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 export default function RootLayout() {
@@ -25,10 +26,12 @@ export default function RootLayout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <CityProvider>
-              <StatusBar style="dark" />
-              <Stack screenOptions={{ headerShown: false }} />
-            </CityProvider>
+            <LanguageProvider>
+              <CityProvider>
+                <StatusBar style="dark" />
+                <Stack screenOptions={{ headerShown: false }} />
+              </CityProvider>
+            </LanguageProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>

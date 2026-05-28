@@ -21,6 +21,7 @@ import { AppMapView } from '@/components/map/map-view';
 import { SmartRouter } from '@/components/router/smart-router';
 import { ReportButton } from '@/components/report/report-button';
 import { GeofenceAlert } from '@/components/geofencing/geofence-alert';
+import { useLanguage } from '@/context/language-context';
 
 const BG = '#f0f6fc';
 
@@ -28,6 +29,7 @@ export default function DashboardScreen() {
   const { user, isLoading } = useAuth();
   const [mode, setMode] = useState<UserMode>('morador');
   const { city } = useCity();
+  const { t } = useLanguage();
 
   // Guard: redireciona para login se não autenticado
   if (!isLoading && !user) return <Redirect href="/auth/login" />;
@@ -61,51 +63,51 @@ export default function DashboardScreen() {
 
           {/* Map */}
           <View style={{ gap: 6 }}>
-            <SectionTitle>🗺️ Mapa ao Vivo</SectionTitle>
+            <SectionTitle>{t.sections.map}</SectionTitle>
             <AppMapView />
           </View>
 
           {/* Weather */}
           <View style={{ gap: 6 }}>
-            <SectionTitle>🌤️ Clima</SectionTitle>
+            <SectionTitle>{t.sections.weather}</SectionTitle>
             <WeatherCard />
           </View>
 
           {/* Traffic */}
           <View style={{ gap: 6 }}>
-            <SectionTitle>🚗 Trânsito</SectionTitle>
+            <SectionTitle>{t.sections.traffic}</SectionTitle>
             <TrafficCard />
           </View>
 
           {/* Gas stations */}
           <View style={{ gap: 6 }}>
-            <SectionTitle>⛽ Postos de Combustível</SectionTitle>
+            <SectionTitle>{t.sections.gas}</SectionTitle>
             <GasCard />
           </View>
 
           {/* Bus lines */}
           <View style={{ gap: 6 }}>
-            <SectionTitle>🚌 Ônibus</SectionTitle>
+            <SectionTitle>{t.sections.bus}</SectionTitle>
             <BusCard />
           </View>
 
           {/* Ferry — apenas para Ilhabela e São Sebastião */}
           {(city.id === 'ilhabela' || city.id === 'sao-sebastiao') && (
             <View style={{ gap: 6 }}>
-              <SectionTitle>⛴️ Balsa</SectionTitle>
+              <SectionTitle>{t.sections.ferry}</SectionTitle>
               <FerryCard />
             </View>
           )}
 
           {/* Beaches */}
           <View style={{ gap: 6 }}>
-            <SectionTitle>🏖️ Praias</SectionTitle>
+            <SectionTitle>{t.sections.beaches}</SectionTitle>
             <BeachCard />
           </View>
 
           {/* UPAs */}
           <View style={{ gap: 6 }}>
-            <SectionTitle>🏥 Saúde · UPAs</SectionTitle>
+            <SectionTitle>{t.sections.health}</SectionTitle>
             <UPACard />
           </View>
 
@@ -113,11 +115,11 @@ export default function DashboardScreen() {
           {mode === 'turista' && (
             <>
               <View style={{ gap: 6 }}>
-                <SectionTitle>🍽️ Restaurantes</SectionTitle>
+                <SectionTitle>{t.sections.restaurants}</SectionTitle>
                 <RestaurantCard />
               </View>
               <View style={{ gap: 6 }}>
-                <SectionTitle>🗺️ Atrações Turísticas</SectionTitle>
+                <SectionTitle>{t.sections.attractions}</SectionTitle>
                 <AttractionCard />
               </View>
             </>
@@ -133,7 +135,7 @@ export default function DashboardScreen() {
               paddingBottom: 8,
             }}
           >
-            Litoral na Palma · {city.name} · Dados atualizados em tempo real
+            Litoral na Palma · {city.name} · {t.footer}
           </Text>
         </View>
       </ScrollView>
