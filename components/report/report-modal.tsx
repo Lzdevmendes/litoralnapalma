@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { View, Text, Modal, Pressable, TextInput, ScrollView, ActivityIndicator } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSubmitReport } from '@/hooks/useReports';
+import type { City } from '@/data/cities';
 import type { ReportType } from '@/lib/types';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
+  city: City;
 }
 
 const REPORT_TYPES: { type: ReportType; emoji: string; label: string }[] = [
@@ -18,7 +20,7 @@ const REPORT_TYPES: { type: ReportType; emoji: string; label: string }[] = [
   { type: 'outro', emoji: '📍', label: 'Outro' },
 ];
 
-export function ReportModal({ visible, onClose }: Props) {
+export function ReportModal({ visible, onClose, city }: Props) {
   const [selected, setSelected] = useState<ReportType | null>(null);
   const [description, setDescription] = useState('');
   const { mutate: submit, isPending, isSuccess } = useSubmitReport();
@@ -27,7 +29,13 @@ export function ReportModal({ visible, onClose }: Props) {
     if (!selected) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     submit(
-      { type: selected, description, lat: -23.62, lng: -45.41 },
+      {
+        type: selected,
+        description,
+        lat: city.center.lat,
+        lng: city.center.lng,
+        city: city.id,
+      },
       {
         onSuccess: () => {
           setTimeout(() => {
