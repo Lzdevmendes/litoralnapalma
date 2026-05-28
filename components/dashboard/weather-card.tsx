@@ -1,5 +1,6 @@
 import { View, Text } from 'react-native';
 import { CardSkeleton } from '@/components/ui/skeleton';
+import { ErrorCard } from '@/components/ui/error-card';
 import { useWeather } from '@/hooks/useWeather';
 import { useCity } from '@/context/city-context';
 import type { WeatherData } from '@/lib/types';
@@ -22,9 +23,10 @@ function uvLabel(uv: number) {
 
 export function WeatherCard() {
   const { city } = useCity();
-  const { data, isLoading } = useWeather(city);
+  const { data, isLoading, isError, error, refetch } = useWeather(city);
 
-  if (isLoading || !data) return <CardSkeleton />;
+  if (isLoading) return <CardSkeleton />;
+  if (isError || !data) return <ErrorCard error={error} onRetry={refetch} />;
 
   const cond = CONDITION[data.condition];
   const uv = uvLabel(data.uvIndex);

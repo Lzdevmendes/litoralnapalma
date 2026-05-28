@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { CityProvider } from '@/context/city-context';
 import { AuthProvider } from '@/context/auth-context';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 export default function RootLayout() {
   const [queryClient] = useState(
@@ -21,14 +22,16 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <CityProvider>
-            <StatusBar style="dark" />
-            <Stack screenOptions={{ headerShown: false }} />
-          </CityProvider>
-        </AuthProvider>
-      </QueryClientProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <CityProvider>
+              <StatusBar style="dark" />
+              <Stack screenOptions={{ headerShown: false }} />
+            </CityProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
     </GestureHandlerRootView>
   );
 }
