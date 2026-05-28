@@ -27,6 +27,25 @@ export interface HighwayStatic {
   typicalTravelTime: number; // minutos em condições normais
 }
 
+export interface FeiraLivre {
+  day: string;      // "Sáb", "Qua"
+  location: string; // local da feira
+  hours: string;    // "6h–13h"
+}
+
+export interface PasseioBarco {
+  name: string;
+  departures: string; // "8h e 14h"
+}
+
+export interface CityServices {
+  feiraLivre: FeiraLivre[];
+  trilhasCount: number;
+  trilhasHighlight: string; // destaque curto para a sub-label
+  passeiosBarco: PasseioBarco[];
+  temBalsa: boolean; // true apenas para Ilhabela e São Sebastião
+}
+
 export interface City {
   id: string;
   name: string;
@@ -36,6 +55,7 @@ export interface City {
   beaches: BeachStatic[];
   upas: UPAStatic[];
   highways: HighwayStatic[];
+  services: CityServices;
 }
 
 export const CITIES: City[] = [
@@ -68,6 +88,16 @@ export const CITIES: City[] = [
       { id: 'tamoios',            name: 'Rodovia dos Tamoios (SP-099)',    shortName: 'Tamoios',    distance: 82,   typicalTravelTime: 55 },
       { id: 'centro-caraguatuba', name: 'Centro de Caraguatatuba',        shortName: 'Centro',     distance: 5.2,  typicalTravelTime: 10 },
     ],
+    services: {
+      feiraLivre: [
+        { day: 'Sáb', location: 'Orla do Porto', hours: '6h–13h' },
+        { day: 'Qua', location: 'Bairro do Indaiá', hours: '6h–12h' },
+      ],
+      trilhasCount: 6,
+      trilhasHighlight: 'Serra do Mar',
+      passeiosBarco: [{ name: 'Enseadas e ilhotas', departures: '9h e 15h' }],
+      temBalsa: false,
+    },
   },
 
   {
@@ -104,6 +134,15 @@ export const CITIES: City[] = [
       { id: 'acesso-porto-ss',   name: 'Acesso ao Porto de São Sebastião',   shortName: 'Porto',        distance: 4,  typicalTravelTime: 8  },
       { id: 'centro-ss',         name: 'Centro de São Sebastião',            shortName: 'Centro',       distance: 8,  typicalTravelTime: 12 },
     ],
+    services: {
+      feiraLivre: [
+        { day: 'Sáb', location: 'Mercadão (Centro)', hours: '6h–13h' },
+      ],
+      trilhasCount: 8,
+      trilhasHighlight: 'Costão · Lagoa dos Bambus',
+      passeiosBarco: [{ name: 'Montão de Trigo', departures: '8h e 14h' }],
+      temBalsa: true,
+    },
   },
 
   {
@@ -142,6 +181,16 @@ export const CITIES: City[] = [
       { id: 'oswaldo-cruz',    name: 'Oswaldo Cruz (SP-125)',             shortName: 'Oswaldo Cruz', distance: 65, typicalTravelTime: 70 },
       { id: 'centro-uba',      name: 'Centro de Ubatuba',                shortName: 'Centro',       distance: 6,  typicalTravelTime: 10 },
     ],
+    services: {
+      feiraLivre: [
+        { day: 'Qua', location: 'Feira Central', hours: '7h–12h' },
+        { day: 'Sáb', location: 'Orla do Perequê-Açú', hours: '7h–13h' },
+      ],
+      trilhasCount: 15,
+      trilhasHighlight: 'Picinguaba · Bocaina',
+      passeiosBarco: [{ name: 'Ilha Anchieta', departures: '8h e 14h' }],
+      temBalsa: false,
+    },
   },
 
   {
@@ -167,6 +216,15 @@ export const CITIES: City[] = [
       { id: 'balsa',        name: 'Balsa São Sebastião–Ilhabela', shortName: 'Balsa',      distance: 5,  typicalTravelTime: 20 },
       { id: 'perimetral',   name: 'Perimetral Sul (SP-131)',       shortName: 'Perimetral', distance: 12, typicalTravelTime: 18 },
     ],
+    services: {
+      feiraLivre: [
+        { day: 'Sáb', location: 'Mercado Municipal', hours: '7h–13h' },
+      ],
+      trilhasCount: 12,
+      trilhasHighlight: 'Baepi · Cachoeira da Toca',
+      passeiosBarco: [{ name: 'Volta à ilha', departures: '9h' }],
+      temBalsa: true,
+    },
   },
 ];
 
