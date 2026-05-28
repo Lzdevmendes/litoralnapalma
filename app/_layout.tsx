@@ -8,6 +8,13 @@ import { AuthProvider } from '@/context/auth-context';
 import { LanguageProvider } from '@/context/language-context';
 import { UserModeProvider } from '@/context/user-mode-context';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { useNotifications } from '@/hooks/useNotifications';
+
+/** Inicializa permissões e listeners de notificação. */
+function NotificationSetup() {
+  useNotifications();
+  return null;
+}
 
 export default function RootLayout() {
   const [queryClient] = useState(
@@ -30,6 +37,7 @@ export default function RootLayout() {
             <LanguageProvider>
               <CityProvider>
                 <UserModeProvider>
+                  <NotificationSetup />
                   <StatusBar style="light" />
                   <Stack screenOptions={{ headerShown: false }} />
                 </UserModeProvider>

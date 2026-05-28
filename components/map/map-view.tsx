@@ -7,6 +7,7 @@ import { useUPA } from '@/hooks/useUPA';
 import { useReports } from '@/hooks/useReports';
 import { useCity } from '@/context/city-context';
 import { occupancyColor } from '@/lib/utils';
+import { WebViewMap } from '@/components/map/webview-map';
 
 // react-native-maps requer dev build — não está disponível no Expo Go.
 // Usar require() condicional + try-catch evita o crash do TurboModule na inicialização.
@@ -91,7 +92,14 @@ export function AppMapView() {
   }, [city]);
 
   if (isExpoGo || !MapView) {
-    return <MapPlaceholder />;
+    return (
+      <WebViewMap
+        city={city}
+        beaches={beaches ?? []}
+        upas={upas ?? []}
+        reports={reports ?? []}
+      />
+    );
   }
 
   const delta = zoomToDelta(city.zoom);
