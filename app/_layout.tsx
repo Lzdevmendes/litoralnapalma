@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { CityProvider } from '@/context/city-context';
 import { AuthProvider } from '@/context/auth-context';
 import { LanguageProvider } from '@/context/language-context';
+import { UserModeProvider } from '@/context/user-mode-context';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 export default function RootLayout() {
@@ -28,8 +29,10 @@ export default function RootLayout() {
           <AuthProvider>
             <LanguageProvider>
               <CityProvider>
-                <StatusBar style="dark" />
-                <Stack screenOptions={{ headerShown: false }} />
+                <UserModeProvider>
+                  <StatusBar style="light" />
+                  <Stack screenOptions={{ headerShown: false }} />
+                </UserModeProvider>
               </CityProvider>
             </LanguageProvider>
           </AuthProvider>

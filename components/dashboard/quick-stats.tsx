@@ -21,10 +21,10 @@ export function QuickStats() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
+        contentContainerStyle={{ gap: 10, paddingHorizontal: 16 }}
       >
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} style={{ width: 88, height: 68, borderRadius: 14 }} />
+          <Skeleton key={i} style={{ width: 96, height: 80, borderRadius: 16 }} />
         ))}
       </ScrollView>
     );
@@ -69,27 +69,30 @@ export function QuickStats() {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
+      contentContainerStyle={{ gap: 10, paddingHorizontal: 16 }}
     >
       {stats.map(({ emoji, label, value, color }) => (
         <View
           key={label}
           style={{
-            backgroundColor: 'rgba(255,255,255,0.85)',
-            borderRadius: 14,
-            paddingHorizontal: 14,
-            paddingVertical: 10,
+            backgroundColor: '#fff',
+            borderRadius: 16,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
             alignItems: 'center',
-            gap: 3,
-            minWidth: 80,
+            gap: 4,
+            minWidth: 92,
             borderWidth: 1,
-            borderColor: `${color}22`,
-            boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
+            borderColor: `${color}20`,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
           }}
         >
-          <Text style={{ fontSize: 20 }}>{emoji}</Text>
-          <Text style={{ fontSize: 11, fontWeight: '700', color }}>{value}</Text>
-          <Text style={{ fontSize: 9, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.3 }}>{label}</Text>
+          <Text style={{ fontSize: 22 }}>{emoji}</Text>
+          {/* Valor grande e em destaque — regra: valor > label */}
+          <Text style={{ fontSize: 16, fontWeight: '800', color, lineHeight: 20 }}>{value}</Text>
+          <Text style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.4 }}>
+            {label}
+          </Text>
         </View>
       ))}
     </ScrollView>
