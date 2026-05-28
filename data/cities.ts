@@ -1,6 +1,24 @@
 // Tipos estáticos para configuração de cidade.
 // Os tipos completos com campos dinâmicos (Beach, UPA, TrafficRoute) ficam em lib/types.ts.
 
+export type FuelType = 'gasolina' | 'etanol' | 'diesel' | 'gnv';
+
+export interface FuelPrice {
+  type: FuelType;
+  price: number;     // R$/L (ou R$/m³ para GNV)
+  updatedAt: string; // ISO date string
+}
+
+export interface GasStation {
+  id: string;
+  name: string;
+  brand: string;
+  address: string;
+  lat: number;
+  lng: number;
+  fuels: FuelPrice[];
+}
+
 export interface BeachAmenities {
   banheiros: boolean;
   quiosques: boolean;
@@ -63,6 +81,7 @@ export interface City {
   upas: UPAStatic[];
   highways: HighwayStatic[];
   services: CityServices;
+  gasStations: GasStation[];
 }
 
 export const CITIES: City[] = [
@@ -105,6 +124,48 @@ export const CITIES: City[] = [
       passeiosBarco: [{ name: 'Enseadas e ilhotas', departures: '9h e 15h' }],
       temBalsa: false,
     },
+    gasStations: [
+      {
+        id: 'posto-ipiranga-centro-cara',
+        name: 'Ipiranga Centro',
+        brand: 'Ipiranga',
+        address: 'Av. Adhemar de Barros, 980 - Centro, Caraguatatuba',
+        lat: -23.6198,
+        lng: -45.4135,
+        fuels: [
+          { type: 'gasolina', price: 6.59, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.59, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.29, updatedAt: '2026-05-28' },
+        ],
+      },
+      {
+        id: 'posto-shell-indaia-cara',
+        name: 'Shell Indaiá',
+        brand: 'Shell',
+        address: 'Av. Dr. Paulo Figueiredo, 320 - Indaiá, Caraguatatuba',
+        lat: -23.6148,
+        lng: -45.4008,
+        fuels: [
+          { type: 'gasolina', price: 6.69, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.79, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.39, updatedAt: '2026-05-28' },
+        ],
+      },
+      {
+        id: 'posto-petrobras-massaguacu',
+        name: 'Petrobras Massaguaçu',
+        brand: 'Petrobras',
+        address: 'Rod. Rio-Santos, km 156 - Massaguaçu, Caraguatatuba',
+        lat: -23.5618,
+        lng: -45.3285,
+        fuels: [
+          { type: 'gasolina', price: 6.49, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.49, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.19, updatedAt: '2026-05-28' },
+          { type: 'gnv',      price: 3.85, updatedAt: '2026-05-28' },
+        ],
+      },
+    ],
   },
 
   {
@@ -150,6 +211,48 @@ export const CITIES: City[] = [
       passeiosBarco: [{ name: 'Montão de Trigo', departures: '8h e 14h' }],
       temBalsa: true,
     },
+    gasStations: [
+      {
+        id: 'posto-br-ss-centro',
+        name: 'BR São Sebastião',
+        brand: 'BR',
+        address: 'Av. Guarda Mor Lobo Viana, 1220 - Centro, São Sebastião',
+        lat: -23.8092,
+        lng: -45.4082,
+        fuels: [
+          { type: 'gasolina', price: 6.64, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.69, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.34, updatedAt: '2026-05-28' },
+        ],
+      },
+      {
+        id: 'posto-shell-maresias',
+        name: 'Shell Maresias',
+        brand: 'Shell',
+        address: 'Rod. Rio-Santos, km 84 - Maresias, São Sebastião',
+        lat: -23.8001,
+        lng: -45.5318,
+        fuels: [
+          { type: 'gasolina', price: 6.74, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.84, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.44, updatedAt: '2026-05-28' },
+        ],
+      },
+      {
+        id: 'posto-ipiranga-boicucanga',
+        name: 'Ipiranga Boiçucanga',
+        brand: 'Ipiranga',
+        address: 'Rod. Rio-Santos, km 73 - Boiçucanga, São Sebastião',
+        lat: -23.8130,
+        lng: -45.5709,
+        fuels: [
+          { type: 'gasolina', price: 6.54, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.54, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.24, updatedAt: '2026-05-28' },
+          { type: 'gnv',      price: 3.79, updatedAt: '2026-05-28' },
+        ],
+      },
+    ],
   },
 
   {
@@ -198,6 +301,48 @@ export const CITIES: City[] = [
       passeiosBarco: [{ name: 'Ilha Anchieta', departures: '8h e 14h' }],
       temBalsa: false,
     },
+    gasStations: [
+      {
+        id: 'posto-ipiranga-uba-centro',
+        name: 'Ipiranga Ubatuba',
+        brand: 'Ipiranga',
+        address: 'Av. Iperoig, 754 - Centro, Ubatuba',
+        lat: -23.4340,
+        lng: -45.0842,
+        fuels: [
+          { type: 'gasolina', price: 6.56, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.56, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.26, updatedAt: '2026-05-28' },
+          { type: 'gnv',      price: 3.85, updatedAt: '2026-05-28' },
+        ],
+      },
+      {
+        id: 'posto-shell-enseada-uba',
+        name: 'Shell Enseada',
+        brand: 'Shell',
+        address: 'Av. Leovegildo Dias Vieira, 1240 - Enseada, Ubatuba',
+        lat: -23.4960,
+        lng: -45.1105,
+        fuels: [
+          { type: 'gasolina', price: 6.66, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.76, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.36, updatedAt: '2026-05-28' },
+        ],
+      },
+      {
+        id: 'posto-br-itamambuca',
+        name: 'BR Itamambuca',
+        brand: 'BR',
+        address: 'Rod. Rio-Santos, km 39 - Itamambuca, Ubatuba',
+        lat: -23.4097,
+        lng: -45.0730,
+        fuels: [
+          { type: 'gasolina', price: 6.46, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.46, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.16, updatedAt: '2026-05-28' },
+        ],
+      },
+    ],
   },
 
   {
@@ -232,6 +377,48 @@ export const CITIES: City[] = [
       passeiosBarco: [{ name: 'Volta à ilha', departures: '9h' }],
       temBalsa: true,
     },
+    gasStations: [
+      {
+        id: 'posto-ipiranga-perequê-ilh',
+        name: 'Ipiranga Perequê',
+        brand: 'Ipiranga',
+        address: 'R. Dom Sebastião Laranjo, 120 - Perequê, Ilhabela',
+        lat: -23.7782,
+        lng: -45.3530,
+        fuels: [
+          { type: 'gasolina', price: 6.79, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.89, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.49, updatedAt: '2026-05-28' },
+        ],
+      },
+      {
+        id: 'posto-shell-feiticeira-ilh',
+        name: 'Shell Feiticeira',
+        brand: 'Shell',
+        address: 'Av. Princesa Isabel, 580 - Feiticeira, Ilhabela',
+        lat: -23.7893,
+        lng: -45.3628,
+        fuels: [
+          { type: 'gasolina', price: 6.89, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.99, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.59, updatedAt: '2026-05-28' },
+        ],
+      },
+      {
+        id: 'posto-br-vila-ilh',
+        name: 'BR Vila',
+        brand: 'BR',
+        address: 'Av. Pedro Paulo de Moraes, 1840 - Vila, Ilhabela',
+        lat: -23.7760,
+        lng: -45.3514,
+        fuels: [
+          { type: 'gasolina', price: 6.69, updatedAt: '2026-05-28' },
+          { type: 'etanol',   price: 4.79, updatedAt: '2026-05-28' },
+          { type: 'diesel',   price: 6.39, updatedAt: '2026-05-28' },
+          { type: 'gnv',      price: 3.95, updatedAt: '2026-05-28' },
+        ],
+      },
+    ],
   },
 ];
 
