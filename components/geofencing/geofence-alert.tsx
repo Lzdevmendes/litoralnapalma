@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBeaches } from '@/hooks/useBeaches';
 import { useTraffic } from '@/hooks/useTraffic';
 import { useReports } from '@/hooks/useReports';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useCity } from '@/context/city-context';
 import { haversineDistance, formatDistance, occupancyColor, trafficLevelColor } from '@/lib/utils';
+import { sendLocalNotification } from '@/lib/notifications';
 
 interface GeoAlert {
   id: string;
@@ -23,6 +25,7 @@ export function GeofenceAlert() {
   const { data: traffic } = useTraffic(city);
   const { data: reports } = useReports(city);
   const { coords } = useGeolocation();
+  const insets = useSafeAreaInsets();
 
   // Controla quais alertas de proximidade já foram disparados (reset ao sair da área)
   const shownRef = useRef<Set<string>>(new Set());
@@ -96,6 +99,10 @@ export function GeofenceAlert() {
     if (newAlerts.length > 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       setAlerts((prev) => [...newAlerts, ...prev].slice(0, 3));
+      // Notificação local para cada alerta novo (só dispara se app não estiver em foreground)
+      newAlerts.forEach((a) => {
+        sendLocalNotification({ title: a.title, body: a.message });
+      });
       setTimeout(() => {
         setAlerts((prev) => prev.filter((a) => !newAlerts.some((na) => na.id === a.id)));
       }, 8000);
@@ -127,6 +134,9 @@ export function GeofenceAlert() {
     if (newAlerts.length > 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       setAlerts((prev) => [...newAlerts, ...prev].slice(0, 3));
+      newAlerts.forEach((a) => {
+        sendLocalNotification({ title: a.title, body: a.message });
+      });
       setTimeout(() => {
         setAlerts((prev) => prev.filter((a) => !newAlerts.some((na) => na.id === a.id)));
       }, 6000);
@@ -139,7 +149,7 @@ export function GeofenceAlert() {
     <View
       style={{
         position: 'absolute',
-        top: 100,
+        top: insets.top + 72,
         right: 12,
         zIndex: 100,
         gap: 8,
