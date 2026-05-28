@@ -7,6 +7,8 @@ import {
 } from "@/data/mock";
 import { CITIES } from "@/data/cities";
 import { fetchGoogleTraffic } from "@/lib/traffic";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { fetchReportsFromSupabase, submitReportToSupabase } from "@/lib/reports";
 import type { Report, ReportType, WeatherData } from "./types";
 
 const delay = (ms: number) =>
@@ -88,9 +90,13 @@ export async function fetchUPAs(cityId?: string) {
   return cityId ? upas.filter((u) => u.city === cityId) : upas;
 }
 
-export async function fetchReports() {
+export async function fetchReports(cityId?: string): Promise<Report[]> {
+  if (isSupabaseConfigured) {
+    return fetchReportsFromSupabase(cityId);
+  }
   await delay(200 + Math.random() * 200);
-  return getMockReports();
+  const mock = getMockReports();
+  return cityId ? mock.filter((r) => !r.city || r.city === cityId) : mock;
 }
 
 export async function submitReport(data: {
@@ -98,7 +104,17 @@ export async function submitReport(data: {
   description?: string;
   lat: number;
   lng: number;
+  city?: string;
 }): Promise<Report> {
+  if (isSupabaseConfigured && data.city) {
+    return submitReportToSupabase({
+      type: data.type,
+      description: data.description,
+      lat: data.lat,
+      lng: data.lng,
+      city: data.city,
+    });
+  }
   await delay(600 + Math.random() * 400);
   return {
     id: `r${Date.now()}`,

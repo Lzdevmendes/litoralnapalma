@@ -69,7 +69,7 @@ export function AppMapView() {
   const { city } = useCity();
   const { data: beaches } = useBeaches(city);
   const { data: upas } = useUPA(city);
-  const { data: reports } = useReports();
+  const { data: reports } = useReports(city);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef = useRef<any>(null);
 

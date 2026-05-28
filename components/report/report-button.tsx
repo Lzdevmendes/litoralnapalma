@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { useCity } from '@/context/city-context';
 import { ReportModal } from './report-modal';
 
 export function ReportButton() {
   const [open, setOpen] = useState(false);
+  const { city } = useCity();
 
   function handlePress() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -39,7 +41,7 @@ export function ReportButton() {
         </Pressable>
       </View>
 
-      <ReportModal visible={open} onClose={() => setOpen(false)} />
+      <ReportModal visible={open} onClose={() => setOpen(false)} city={city} />
     </>
   );
 }

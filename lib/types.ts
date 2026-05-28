@@ -84,7 +84,9 @@ export interface Report {
   description?: string;
   lat: number;
   lng: number;
+  city?: string;      // ID do município (filtro por cidade)
   createdAt: string;
+  expiresAt?: string; // ISO string — reports expiram em 24h
   upvotes: number;
 }
 
