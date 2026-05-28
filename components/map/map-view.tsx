@@ -30,7 +30,11 @@ if (!isExpoGo) {
   }
 }
 
-const DELTA = { latitudeDelta: 0.1, longitudeDelta: 0.1 };
+/** Converte o zoom do city para latitudeDelta/longitudeDelta do MapView. */
+function zoomToDelta(zoom: number) {
+  const delta = 360 / Math.pow(2, zoom);
+  return { latitudeDelta: delta, longitudeDelta: delta };
+}
 
 const statusColor = { normal: '#22c55e', alerta: '#f59e0b', critico: '#ef4444' } as const;
 const reportEmoji: Record<string, string> = {
@@ -69,10 +73,17 @@ export function AppMapView() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef = useRef<any>(null);
 
+  // Navega para a cidade selecionada com zoom correto ao trocar cidade.
+  // Em react-native-maps, marcadores são JSX declarativos — atualizam
+  // automaticamente a cada re-render (sem gestão imperativa de layers necessária).
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.animateToRegion(
-        { latitude: city.center.lat, longitude: city.center.lng, ...DELTA },
+        {
+          latitude: city.center.lat,
+          longitude: city.center.lng,
+          ...zoomToDelta(city.zoom),
+        },
         500
       );
     }
@@ -82,12 +93,14 @@ export function AppMapView() {
     return <MapPlaceholder />;
   }
 
+  const delta = zoomToDelta(city.zoom);
+
   return (
     <View style={{ borderRadius: 20, overflow: 'hidden', height: 320, boxShadow: '0 2px 16px rgba(0,119,182,0.12)' }}>
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}
-        initialRegion={{ latitude: city.center.lat, longitude: city.center.lng, ...DELTA }}
+        initialRegion={{ latitude: city.center.lat, longitude: city.center.lng, ...delta }}
         showsUserLocation
         showsMyLocationButton={false}
       >
