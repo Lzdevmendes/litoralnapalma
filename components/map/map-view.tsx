@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import Constants from 'expo-constants';
+import { router } from 'expo-router';
 import { useBeaches } from '@/hooks/useBeaches';
 import { useUPA } from '@/hooks/useUPA';
 import { useReports } from '@/hooks/useReports';
@@ -110,6 +111,7 @@ export function AppMapView() {
             coordinate={{ latitude: beach.lat, longitude: beach.lng }}
             title={beach.name}
             description={`${beach.occupancyPercent}% ocupada · Água ${beach.waterQuality}`}
+            onPress={() => router.push(`/praia/${beach.id}`)}
           >
             <View
               style={{

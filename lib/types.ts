@@ -1,4 +1,6 @@
 export type { City } from "@/data/cities";
+import type { BeachAmenities } from "@/data/cities";
+export type { BeachAmenities };
 
 export type TrafficLevel = "livre" | "moderado" | "lento" | "parado";
 export type BeachOccupancy = "vazia" | "moderada" | "lotada";
@@ -32,6 +34,7 @@ export interface Beach {
   lng: number;
   updatedAt: string;
   collectedAt?: string; // data da última amostragem CETESB (ISO string)
+  amenities?: BeachAmenities;
 }
 
 export interface UPA {
