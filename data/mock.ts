@@ -1,4 +1,4 @@
-import { CITIES } from './cities';
+import { CITIES, DEFAULT_CITY } from './cities';
 import type {
   TrafficRoute,
   Beach,
@@ -13,7 +13,7 @@ import type {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function getCityData(cityId = 'caraguatatuba') {
+function getCityData(cityId = DEFAULT_CITY.id) {
   return CITIES.find((c) => c.id === cityId) ?? CITIES[0];
 }
 
