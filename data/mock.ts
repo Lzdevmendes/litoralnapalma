@@ -6,6 +6,7 @@ import type {
   WeatherData,
   SideRoute,
   Report,
+  FerryStatus,
 } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
@@ -141,6 +142,31 @@ export const SIDE_ROUTES: SideRoute[] = [
     lng: -45.4012,
   },
 ];
+
+export function getMockFerry(): FerryStatus {
+  const now = new Date();
+  const hour = now.getHours();
+
+  // Balsa opera 24h com intervalos de 30 min — calcula próxima partida
+  const minutes = now.getMinutes();
+  const nextMin = minutes < 30 ? 30 : 60;
+  const nextDepartureDate = new Date(now);
+  nextDepartureDate.setMinutes(nextMin, 0, 0);
+  const hh = String(nextDepartureDate.getHours()).padStart(2, '0');
+  const mm = String(nextDepartureDate.getMinutes()).padStart(2, '0');
+
+  // Fins de semana e horários de pico têm mais fila
+  const isPeak = hour >= 10 && hour <= 18;
+  const maxWait = isPeak ? 180 : 60;
+
+  return {
+    waitTimeCars: Math.floor(Math.random() * maxWait),
+    waitTimeMotorcycles: Math.floor(Math.random() * 20),
+    nextDeparture: `${hh}:${mm}`,
+    isOperating: true,
+    lastUpdated: new Date().toISOString(),
+  };
+}
 
 export function getMockReports(): Report[] {
   return [
