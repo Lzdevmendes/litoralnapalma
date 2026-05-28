@@ -19,7 +19,7 @@ function minutesToTime(minutes: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-function computeTimes(line: BusLine): BusLineWithTimes {
+export function computeTimes(line: BusLine): BusLineWithTimes {
   const now = new Date();
   const currentMin = now.getHours() * 60 + now.getMinutes();
 

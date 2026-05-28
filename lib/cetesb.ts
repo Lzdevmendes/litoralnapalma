@@ -36,7 +36,7 @@ const CETESB_NAME_MAP: Record<string, string> = {
   'JABAQUARA':     'jabaquara',
 };
 
-function normalize(text: string): string {
+export function normalize(text: string): string {
   return text
     .toUpperCase()
     .normalize('NFD')
@@ -44,7 +44,7 @@ function normalize(text: string): string {
     .trim();
 }
 
-function mapQuality(text: string): 'boa' | 'regular' | 'impropia' {
+export function mapQuality(text: string): 'boa' | 'regular' | 'impropia' {
   const n = normalize(text);
   if (n === 'PROPRIA') return 'boa';
   if (n === 'REGULAR') return 'regular';
