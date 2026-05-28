@@ -14,6 +14,8 @@ import { UPACard } from '@/components/dashboard/upa-card';
 import { FerryCard } from '@/components/dashboard/ferry-card';
 import { GasCard } from '@/components/dashboard/gas-card';
 import { BusCard } from '@/components/dashboard/bus-card';
+import { RestaurantCard } from '@/components/dashboard/restaurant-card';
+import { AttractionCard } from '@/components/dashboard/attraction-card';
 import { ModeContent } from '@/components/dashboard/mode-content';
 import { AppMapView } from '@/components/map/map-view';
 import { SmartRouter } from '@/components/router/smart-router';
@@ -106,6 +108,20 @@ export default function DashboardScreen() {
             <SectionTitle>🏥 Saúde · UPAs</SectionTitle>
             <UPACard />
           </View>
+
+          {/* Turista: restaurantes e atrações */}
+          {mode === 'turista' && (
+            <>
+              <View style={{ gap: 6 }}>
+                <SectionTitle>🍽️ Restaurantes</SectionTitle>
+                <RestaurantCard />
+              </View>
+              <View style={{ gap: 6 }}>
+                <SectionTitle>🗺️ Atrações Turísticas</SectionTitle>
+                <AttractionCard />
+              </View>
+            </>
+          )}
 
           {/* Footer */}
           <Text
