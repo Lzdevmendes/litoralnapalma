@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
 import { verifyOTP, sendEmailOTP, sendPhoneOTP, DEV_OTP } from '@/lib/auth';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import { OTPInput } from '@/components/auth/OTPInput';
 import { PrimaryButton } from '@/components/auth/SocialButton';
 
@@ -57,8 +58,16 @@ export default function VerifyScreen() {
       if (isEmail) await sendEmailOTP(contact ?? '');
       else await sendPhoneOTP(contact ?? '');
       setSeconds(60);
-    } catch {
-      setError('Não foi possível reenviar o código. Tente novamente.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.toLowerCase().includes('rate') || msg.toLowerCase().includes('limit')) {
+        setError('Muitas tentativas. Aguarde alguns minutos e tente novamente.');
+      } else if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('email')) {
+        setError('Endereço inválido. Volte e verifique o e-mail digitado.');
+      } else {
+        setError('Não foi possível reenviar. Tente novamente em instantes.');
+      }
+      setSeconds(30); // permite nova tentativa após 30s mesmo com erro
     } finally {
       setResending(false);
     }
@@ -97,21 +106,23 @@ export default function VerifyScreen() {
             </Text>
           ) : null}
 
-          {/* Dica dev */}
-          <View
-            style={{
-              backgroundColor: 'rgba(0,119,182,0.08)',
-              borderRadius: 10,
-              padding: 10,
-              marginTop: 16,
-              marginBottom: 8,
-            }}
-          >
-            <Text style={{ fontSize: 12, color: '#0077b6', textAlign: 'center' }}>
-              Modo desenvolvimento · use o código{' '}
-              <Text style={{ fontWeight: '800' }}>{DEV_OTP}</Text>
-            </Text>
-          </View>
+          {/* Dica dev — visível apenas sem Supabase configurado */}
+          {!isSupabaseConfigured && (
+            <View
+              style={{
+                backgroundColor: 'rgba(0,119,182,0.08)',
+                borderRadius: 10,
+                padding: 10,
+                marginTop: 16,
+                marginBottom: 8,
+              }}
+            >
+              <Text style={{ fontSize: 12, color: '#0077b6', textAlign: 'center' }}>
+                Modo desenvolvimento · use o código{' '}
+                <Text style={{ fontWeight: '800' }}>{DEV_OTP}</Text>
+              </Text>
+            </View>
+          )}
 
           {/* Botão confirmar */}
           <View style={{ marginTop: 8, marginBottom: 24 }}>
