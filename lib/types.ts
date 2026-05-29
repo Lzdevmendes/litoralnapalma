@@ -56,7 +56,7 @@ export interface WeatherData {
   humidity: number;
   condition: "ensolarado" | "nublado" | "chuva" | "trovoada" | "parcial";
   windSpeed: number;
-  uvIndex: number;
+  cloudCoverage: number; // % de nebulosidade (0–100) — grátis na OWM /weather
   updatedAt: string;
 }
 

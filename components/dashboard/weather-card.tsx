@@ -25,16 +25,6 @@ export function WeatherCard() {
   const cond = CONDITION_EMOJI[data.condition];
   const condLabel = t.weather.conditions[data.condition];
 
-  function uvLabel(uv: number) {
-    if (uv <= 2) return { label: t.weather.uvLabels.low,      color: '#22c55e' };
-    if (uv <= 5) return { label: t.weather.uvLabels.moderate, color: '#f59e0b' };
-    if (uv <= 7) return { label: t.weather.uvLabels.high,     color: '#f97316' };
-    if (uv <= 10) return { label: t.weather.uvLabels.veryHigh, color: '#ef4444' };
-    return { label: t.weather.uvLabels.extreme, color: '#7c3aed' };
-  }
-
-  const uv = uvLabel(data.uvIndex);
-
   return (
     <View
       style={{
@@ -65,10 +55,10 @@ export function WeatherCard() {
 
       <View style={{ flexDirection: 'row', gap: 8 }}>
         {[
-          { label: t.weather.humidity, value: `${data.humidity}%`,        emoji: '💧' },
-          { label: t.weather.wind,     value: `${data.windSpeed} km/h`,   emoji: '💨' },
-          { label: t.weather.uv,       value: uv.label,                   emoji: '🔆', color: uv.color },
-        ].map(({ label, value, emoji, color }) => (
+          { label: t.weather.humidity, value: `${data.humidity}%`,      emoji: '💧' },
+          { label: t.weather.wind,     value: `${data.windSpeed} km/h`, emoji: '💨' },
+          { label: t.weather.clouds,   value: `${data.cloudCoverage}%`, emoji: '☁️' },
+        ].map(({ label, value, emoji }) => (
           <View
             key={label}
             style={{
@@ -82,7 +72,7 @@ export function WeatherCard() {
           >
             <Text style={{ fontSize: 16 }}>{emoji}</Text>
             <Text style={{ fontSize: 9, color: '#94a3b8', textTransform: 'uppercase' }}>{label}</Text>
-            <Text style={{ fontSize: 11, fontWeight: '700', color: color ?? '#374151' }}>{value}</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#374151' }}>{value}</Text>
           </View>
         ))}
       </View>

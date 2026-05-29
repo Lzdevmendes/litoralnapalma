@@ -28,20 +28,13 @@ const pt = {
     feelsLike: 'Sensação',
     humidity: 'Umidade',
     wind: 'Vento',
-    uv: 'UV',
+    clouds: 'Nuvens',
     conditions: {
       ensolarado: 'Ensolarado',
       parcial: 'Parcialmente Nublado',
       nublado: 'Nublado',
       chuva: 'Chuva',
       trovoada: 'Trovoada',
-    },
-    uvLabels: {
-      low: 'Baixo',
-      moderate: 'Moderado',
-      high: 'Alto',
-      veryHigh: 'Muito Alto',
-      extreme: 'Extremo',
     },
   },
   traffic: {
@@ -198,20 +191,13 @@ const en = {
     feelsLike: 'Feels like',
     humidity: 'Humidity',
     wind: 'Wind',
-    uv: 'UV',
+    clouds: 'Clouds',
     conditions: {
       ensolarado: 'Sunny',
       parcial: 'Partly Cloudy',
       nublado: 'Cloudy',
       chuva: 'Rain',
       trovoada: 'Thunderstorm',
-    },
-    uvLabels: {
-      low: 'Low',
-      moderate: 'Moderate',
-      high: 'High',
-      veryHigh: 'Very High',
-      extreme: 'Extreme',
     },
   },
   traffic: {

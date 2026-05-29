@@ -32,17 +32,10 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
     return getMockWeather();
   }
 
-  // Usa a API /weather para condição + temperatura.
-  // O índice UV vem do campo `uvi` dentro de /onecall (One Call API 3.0).
-  // O endpoint legado /uvi foi removido — requer plano pago a partir de jun/2024.
-  const [weatherRes, oneCallRes] = await Promise.all([
-    fetch(
-      `${OWM_BASE}/weather?lat=${lat}&lon=${lng}&appid=${OWM_KEY}&units=metric&lang=pt_br`
-    ),
-    fetch(
-      `${OWM_BASE}/onecall?lat=${lat}&lon=${lng}&appid=${OWM_KEY}&exclude=minutely,hourly,daily,alerts`
-    ),
-  ]);
+  // /weather (plano gratuito) — temperatura, condição, vento, umidade, nebulosidade
+  const weatherRes = await fetch(
+    `${OWM_BASE}/weather?lat=${lat}&lon=${lng}&appid=${OWM_KEY}&units=metric&lang=pt_br`
+  );
 
   // Fallback para mock se a chave ainda não ativou (OWM leva até 2h após cadastro)
   if (!weatherRes.ok) {
@@ -53,12 +46,8 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
     main: { temp: number; feels_like: number; humidity: number };
     wind: { speed: number };
     weather: [{ id: number }];
+    clouds: { all: number };
   };
-
-  // One Call API 3.0 requer plano pago — UV index opcional, não quebra se falhar
-  const uvIndex = oneCallRes.ok
-    ? ((await oneCallRes.json() as { current?: { uvi?: number } }).current?.uvi ?? 0)
-    : 0;
 
   return {
     temperature: Math.round(weather.main.temp),
@@ -66,7 +55,7 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
     humidity: weather.main.humidity,
     condition: mapOWMCondition(weather.weather[0].id),
     windSpeed: Math.round(weather.wind.speed * 3.6), // m/s → km/h
-    uvIndex: Math.round(uvIndex),
+    cloudCoverage: weather.clouds.all,               // % nebulosidade (0–100)
     updatedAt: new Date().toISOString(),
   };
 }

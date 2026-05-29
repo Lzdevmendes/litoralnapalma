@@ -39,7 +39,7 @@ export function getMockWeather(): WeatherData {
     humidity: 70 + Math.floor(Math.random() * 20),
     condition: conditions[Math.floor(Math.random() * conditions.length)],
     windSpeed: 10 + Math.floor(Math.random() * 15),
-    uvIndex: 7 + Math.floor(Math.random() * 4),
+    cloudCoverage: Math.floor(Math.random() * 60),
     updatedAt: new Date().toISOString(),
   };
 }

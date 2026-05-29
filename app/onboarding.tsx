@@ -17,7 +17,7 @@ const FEATURES = [
   { emoji: '🏖️', label: 'Praias',   desc: 'Lotação e qualidade da água' },
   { emoji: '🚗', label: 'Trânsito', desc: 'Tempo real nas rodovias' },
   { emoji: '🏥', label: 'Saúde',    desc: 'Espera nas UPAs da região' },
-  { emoji: '🌤️', label: 'Clima',    desc: 'Temperatura e índice UV' },
+  { emoji: '🌤️', label: 'Clima',    desc: 'Temperatura, vento e nebulosidade' },
 ] as const;
 
 // ── Cards de perfil no slide 3 ────────────────────────────────────────────────
