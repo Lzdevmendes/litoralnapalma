@@ -1,20 +1,28 @@
 /**
  * Serviço de notificações locais via expo-notifications.
  * Push tokens requerem dev build — aqui apenas notificações locais (Expo Go ✓).
+ *
+ * Nota: Expo Go exibe um aviso sobre push remotas removidas no SDK 53+.
+ * Isso NÃO afeta notificações locais — é apenas informativo.
  */
 import * as Notifications from 'expo-notifications';
 import { AppState } from 'react-native';
 
 // Exibe banners enquanto o app está em primeiro plano.
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// O try-catch evita crash em ambientes onde o handler não é suportado.
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+} catch {
+  // silencia em ambientes sem suporte completo (Expo Go antigo)
+}
 
 /** Solicita permissão de notificação ao usuário. */
 export async function requestNotificationPermission(): Promise<boolean> {
