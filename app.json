@@ -13,6 +13,9 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.litoralnapalma.app",
+      "config": {
+        "googleMapsApiKey": "$EXPO_PUBLIC_GOOGLE_MAPS_KEY"
+      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Usamos sua localização para mostrar alertas de praias e trânsito próximos a você.",
         "NSLocationAlwaysUsageDescription": "Usamos sua localização para alertas em tempo real do litoral."
@@ -23,6 +26,11 @@
         "backgroundColor": "#0077b6"
       },
       "package": "com.litoralnapalma.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "$EXPO_PUBLIC_GOOGLE_MAPS_KEY"
+        }
+      },
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
@@ -40,6 +48,12 @@
         {
           "icon": "./assets/icon.png",
           "color": "#0077b6"
+        }
+      ],
+      [
+        "react-native-maps",
+        {
+          "googleMapsApiKey": "$EXPO_PUBLIC_GOOGLE_MAPS_KEY"
         }
       ],
       "expo-font"

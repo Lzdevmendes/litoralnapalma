@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { View, Text } from 'react-native';
+// Text is used inside Marker children
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useBeaches } from '@/hooks/useBeaches';
@@ -8,6 +9,7 @@ import { useReports } from '@/hooks/useReports';
 import { useCity } from '@/context/city-context';
 import { occupancyColor } from '@/lib/utils';
 import { WebViewMap } from '@/components/map/webview-map';
+// app.json deve ter react-native-maps no plugin e GOOGLE_MAPS_API_KEY para dev build
 
 // react-native-maps requer dev build — não está disponível no Expo Go.
 // Usar require() condicional + try-catch evita o crash do TurboModule na inicialização.
@@ -44,28 +46,6 @@ const reportEmoji: Record<string, string> = {
   falta_agua: '💧', falta_luz: '⚡', outro: '📍',
 };
 
-function MapPlaceholder() {
-  return (
-    <View
-      style={{
-        height: 320,
-        borderRadius: 20,
-        backgroundColor: '#e8f4f8',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 10,
-        borderWidth: 1,
-        borderColor: 'rgba(0,119,182,0.18)',
-      }}
-    >
-      <Text style={{ fontSize: 44 }}>🗺️</Text>
-      <Text style={{ fontSize: 15, fontWeight: '700', color: '#0077b6' }}>Mapa ao Vivo</Text>
-      <Text style={{ fontSize: 12, color: '#64748b', textAlign: 'center', paddingHorizontal: 32, lineHeight: 18 }}>
-        Disponível no app completo (dev build).{'\n'}No Expo Go apenas o preview é exibido.
-      </Text>
-    </View>
-  );
-}
 
 export function AppMapView() {
   const { city } = useCity();
