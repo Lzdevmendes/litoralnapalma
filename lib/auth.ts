@@ -1,23 +1,14 @@
 /**
- * Camada de autenticação do app.
- *
- * Implementação atual: mock local para desenvolvimento.
- *
- * TODO: substituir por Supabase Auth quando o projeto for configurado.
- * Referência: https://supabase.com/docs/guides/auth/social-login/auth-google
- * Env vars necessárias:
- *   EXPO_PUBLIC_SUPABASE_URL=...
- *   EXPO_PUBLIC_SUPABASE_ANON_KEY=...
- *   EXPO_PUBLIC_GOOGLE_CLIENT_ID=...
- *
- * Exemplo de swap (supabase):
- *   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
- *   export async function signInWithEmail(...) { return supabase.auth.signInWithOtp({ email }) }
+ * Camada de autenticação — Supabase Auth (OTP por email/telefone + Google OAuth).
+ * Quando Supabase não está configurado (sem env vars), cai em mock local
+ * para que o app continue funcionando em desenvolvimento sem backend.
  */
+
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Código OTP para o modo de desenvolvimento local. */
+/** Código OTP aceito no modo mock (sem Supabase). */
 export const DEV_OTP = '000000';
 
 export interface AuthUser {
@@ -28,70 +19,139 @@ export interface AuthUser {
   photoUrl?: string;
 }
 
-/** Envia OTP para o e-mail informado. */
-export async function sendEmailOTP(_email: string): Promise<void> {
-  await delay(700);
-  // TODO: await supabase.auth.signInWithOtp({ email: _email })
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function supabaseUserToAuthUser(sbUser: {
+  id: string;
+  email?: string | null;
+  phone?: string | null;
+  user_metadata?: Record<string, unknown>;
+}): AuthUser {
+  const meta = sbUser.user_metadata ?? {};
+  const name =
+    (meta.full_name as string | undefined) ??
+    (meta.name as string | undefined) ??
+    sbUser.email?.split('@')[0] ??
+    'Usuário';
+  return {
+    id: sbUser.id,
+    name,
+    email: sbUser.email ?? undefined,
+    phone: sbUser.phone ?? undefined,
+    photoUrl: (meta.avatar_url as string | undefined) ?? undefined,
+  };
 }
 
-/** Envia OTP via SMS para o telefone informado. */
-export async function sendPhoneOTP(_phone: string): Promise<void> {
-  await delay(700);
-  // TODO: await supabase.auth.signInWithOtp({ phone: _phone })
+// ─── Email OTP ────────────────────────────────────────────────────────────────
+
+/** Envia OTP para o e-mail informado (magic link ou código de 6 dígitos). */
+export async function sendEmailOTP(email: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    await delay(700);
+    return; // mock — aceita qualquer email
+  }
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: true },
+  });
+  if (error) throw new Error(error.message);
 }
+
+// ─── Telefone OTP ─────────────────────────────────────────────────────────────
+
+/** Envia OTP via SMS para o número informado. Requer Phone provider habilitado no Supabase. */
+export async function sendPhoneOTP(phone: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    await delay(700);
+    return; // mock
+  }
+  const { error } = await supabase.auth.signInWithOtp({
+    phone,
+    options: { shouldCreateUser: true },
+  });
+  if (error) throw new Error(error.message);
+}
+
+// ─── Verificação de OTP ───────────────────────────────────────────────────────
 
 /** Verifica o código OTP e retorna o usuário autenticado. */
 export async function verifyOTP(
   contact: string,
   code: string,
-  type: 'email' | 'phone'
+  type: 'email' | 'phone',
 ): Promise<AuthUser> {
-  await delay(600);
-  // TODO: const { data, error } = await supabase.auth.verifyOtp({ email/phone, token: code, type: 'email'/'sms' })
-  if (code.length !== 6) throw new Error('Código inválido');
-  const isEmail = type === 'email';
-  return {
-    id: `u_${Date.now()}`,
-    name: isEmail ? contact.split('@')[0] : 'Usuário',
-    email: isEmail ? contact : undefined,
-    phone: isEmail ? undefined : contact,
-  };
+  if (!isSupabaseConfigured || !supabase) {
+    await delay(600);
+    if (code !== DEV_OTP) throw new Error('Código inválido (use 000000 no modo dev)');
+    const isEmail = type === 'email';
+    return {
+      id: `mock_${Date.now()}`,
+      name: isEmail ? contact.split('@')[0] : 'Usuário',
+      email: isEmail ? contact : undefined,
+      phone: isEmail ? undefined : contact,
+    };
+  }
+
+  const otpType = type === 'email' ? 'email' : 'sms';
+  const payload =
+    type === 'email'
+      ? { email: contact, token: code, type: otpType as 'email' }
+      : { phone: contact, token: code, type: otpType as 'sms' };
+
+  const { data, error } = await supabase.auth.verifyOtp(payload);
+  if (error) throw new Error(error.message);
+  if (!data.user) throw new Error('Verificação falhou — tente novamente');
+
+  return supabaseUserToAuthUser(data.user);
 }
 
-/** Cria conta com e-mail + senha e envia confirmação. */
+// ─── Cadastro (alias do OTP — Supabase cria o usuário automaticamente) ────────
+
+/**
+ * Cria conta com e-mail. Com Supabase, `shouldCreateUser: true` já faz o cadastro
+ * no primeiro OTP — esta função é um alias semântico de sendEmailOTP.
+ */
 export async function signUpWithEmail(
   _name: string,
-  _email: string,
-  _password: string
+  email: string,
+  _password: string,
 ): Promise<void> {
-  await delay(800);
-  // TODO: await supabase.auth.signUp({ email: _email, password: _password, options: { data: { name: _name } } })
-}
-
-/** Cria conta com telefone e envia OTP via SMS. */
-export async function signUpWithPhone(_name: string, _phone: string): Promise<void> {
-  await delay(800);
-  // TODO: await supabase.auth.signUp({ phone: _phone, options: { data: { name: _name } } })
+  await sendEmailOTP(email);
 }
 
 /**
- * Login com Google via OAuth.
- * Em produção: usa expo-auth-session + expo-web-browser.
+ * Cria conta com telefone. Alias de sendPhoneOTP.
+ * Requer o provider Phone habilitado no Supabase dashboard.
+ */
+export async function signUpWithPhone(_name: string, phone: string): Promise<void> {
+  await sendPhoneOTP(phone);
+}
+
+// ─── Google OAuth ─────────────────────────────────────────────────────────────
+
+/**
+ * Login com Google.
+ * Requer EXPO_PUBLIC_GOOGLE_CLIENT_ID e OAuth configurado no Supabase dashboard.
+ * Por agora retorna mock — integração OAuth completa em próxima iteração.
  */
 export async function signInWithGoogle(): Promise<AuthUser> {
   await delay(900);
-  // TODO: usar expo-auth-session com Google OAuth + Supabase
-  // const { params } = await AuthSession.startAsync({ authUrl: supabase.auth.getOAuthSignInUrl('google') })
+  // TODO: expo-auth-session + supabase.auth.signInWithOAuth({ provider: 'google' })
   return {
-    id: `g_${Date.now()}`,
+    id: `google_mock_${Date.now()}`,
     name: 'Usuário Google',
     email: 'usuario@gmail.com',
     photoUrl: undefined,
   };
 }
 
+// ─── Sign out ─────────────────────────────────────────────────────────────────
+
 /** Encerra a sessão do usuário. */
 export async function signOut(): Promise<void> {
+  if (isSupabaseConfigured && supabase) {
+    await supabase.auth.signOut();
+    return;
+  }
   await delay(200);
-  // TODO: await supabase.auth.signOut()
 }
