@@ -44,8 +44,9 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
     ),
   ]);
 
+  // Fallback para mock se a chave ainda não ativou (OWM leva até 2h após cadastro)
   if (!weatherRes.ok) {
-    throw new Error(`OpenWeatherMap error: ${weatherRes.status}`);
+    return getMockWeather();
   }
 
   const weather = await weatherRes.json() as {
@@ -54,6 +55,7 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
     weather: [{ id: number }];
   };
 
+  // One Call API 3.0 requer plano pago — UV index opcional, não quebra se falhar
   const uvIndex = oneCallRes.ok
     ? ((await oneCallRes.json() as { current?: { uvi?: number } }).current?.uvi ?? 0)
     : 0;
