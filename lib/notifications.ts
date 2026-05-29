@@ -1,80 +1,92 @@
 /**
- * Serviço de notificações locais via expo-notifications.
- * Push tokens requerem dev build — aqui apenas notificações locais (Expo Go ✓).
- *
- * Nota: Expo Go exibe um aviso sobre push remotas removidas no SDK 53+.
- * Isso NÃO afeta notificações locais — é apenas informativo.
+ * Serviço de notificações locais.
+ * Usa require() condicional para NÃO carregar expo-notifications no Expo Go,
+ * eliminando o ERROR "Android Push notifications removed from Expo Go SDK 53+".
  */
-import * as Notifications from 'expo-notifications';
 import { AppState } from 'react-native';
+import Constants from 'expo-constants';
 
-// Exibe banners enquanto o app está em primeiro plano.
-// O try-catch evita crash em ambientes onde o handler não é suportado.
-try {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
-} catch {
-  // silencia em ambientes sem suporte completo (Expo Go antigo)
+const isExpoGo =
+  Constants.executionEnvironment === 'storeClient' ||
+  (Constants as unknown as { appOwnership?: string }).appOwnership === 'expo';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Notifications: any = null;
+
+if (!isExpoGo) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    Notifications = require('expo-notifications');
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+  } catch {
+    // não disponível nesse ambiente
+  }
 }
 
 /** Solicita permissão de notificação ao usuário. */
 export async function requestNotificationPermission(): Promise<boolean> {
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  if (existing === 'granted') return true;
-
-  const { status } = await Notifications.requestPermissionsAsync();
-  return status === 'granted';
+  if (!Notifications) return false;
+  try {
+    const { status: existing } = await Notifications.getPermissionsAsync();
+    if (existing === 'granted') return true;
+    const { status } = await Notifications.requestPermissionsAsync();
+    return status === 'granted';
+  } catch {
+    return false;
+  }
 }
 
 interface LocalNotificationOptions {
   title: string;
   body: string;
-  /** Dados extras acessíveis ao tratar a notificação. */
   data?: Record<string, unknown>;
-  /** Atraso em segundos antes de exibir (padrão: imediato). */
   delaySeconds?: number;
 }
 
 /**
- * Envia uma notificação local imediata (ou com pequeno atraso).
- * Só dispara quando o app NÃO está em foreground para evitar spam visual
- * (banners continuam funcionando via setNotificationHandler, mas para
- * alertas operacionais — geofence, lotação — é melhor não duplicar com UI).
- *
- * Passe `force: true` para enviar independente do estado do app.
+ * Envia notificação local imediata (ou com atraso).
+ * Silencioso quando o app está em foreground ou no Expo Go.
  */
 export async function sendLocalNotification(
   options: LocalNotificationOptions,
   force = false,
 ): Promise<string | null> {
+  if (!Notifications) return null;
   const isForegrounded = AppState.currentState === 'active';
   if (isForegrounded && !force) return null;
 
   try {
-    const id = await Notifications.scheduleNotificationAsync({
+    return await Notifications.scheduleNotificationAsync({
       content: {
         title: options.title,
         body: options.body,
         data: options.data ?? {},
       },
       trigger: options.delaySeconds
-        ? { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: options.delaySeconds, repeats: false }
+        ? {
+            type: Notifications.SchedulableTriggerInputTypes?.TIME_INTERVAL ?? 'timeInterval',
+            seconds: options.delaySeconds,
+            repeats: false,
+          }
         : null,
     });
-    return id;
   } catch {
     return null;
   }
 }
 
-/** Cancela todas as notificações agendadas pendentes. */
+/** Cancela todas as notificações agendadas. */
 export async function cancelAllNotifications(): Promise<void> {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  if (!Notifications) return;
+  try {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch { /* ignora */ }
 }
