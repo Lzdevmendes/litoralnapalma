@@ -10,16 +10,6 @@ export function trafficLevelColor(level: TrafficLevel): string {
   return map[level];
 }
 
-export function trafficLevelLabel(level: TrafficLevel): string {
-  const map: Record<TrafficLevel, string> = {
-    livre: "Livre",
-    moderado: "Moderado",
-    lento: "Lento",
-    parado: "Parado",
-  };
-  return map[level];
-}
-
 export function occupancyColor(occupancy: BeachOccupancy): string {
   const map: Record<BeachOccupancy, string> = {
     vazia: "#22c55e",

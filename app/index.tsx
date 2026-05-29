@@ -43,72 +43,53 @@ export default function DashboardScreen() {
     });
   }, []);
 
-  // Aguarda carregamento de auth e verificação do onboarding
   if (!onboardingReady || isLoading) return null;
-
-  // Redireciona para onboarding na primeira vez
   if (!seenOnboarding) return <Redirect href="/onboarding" />;
-
-  // Redireciona para login se não autenticado
   if (!user) return <Redirect href="/auth/login" />;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={['top']}>
       <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Sticky header */}
       <Header />
-
-      {/* Floating alerts */}
       <GeofenceAlert />
 
       <ScrollView
         contentContainerStyle={{ gap: 16, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Quick stats strip */}
         <View style={{ paddingTop: 16 }}>
           <QuickStats />
         </View>
 
         <View style={{ paddingHorizontal: 16, gap: 16 }}>
-          {/* Smart router — conditional */}
           <SmartRouter />
-
-          {/* Mode-specific content */}
           <ModeContent mode={mode} />
 
-          {/* Map */}
           <View style={{ gap: 6 }}>
             <SectionTitle>{t.sections.map}</SectionTitle>
             <AppMapView />
           </View>
 
-          {/* Weather */}
           <View style={{ gap: 6 }}>
             <SectionTitle>{t.sections.weather}</SectionTitle>
             <WeatherCard />
           </View>
 
-          {/* Traffic */}
           <View style={{ gap: 6 }}>
             <SectionTitle>{t.sections.traffic}</SectionTitle>
             <TrafficCard />
           </View>
 
-          {/* Gas stations */}
           <View style={{ gap: 6 }}>
             <SectionTitle>{t.sections.gas}</SectionTitle>
             <GasCard />
           </View>
 
-          {/* Bus lines */}
           <View style={{ gap: 6 }}>
             <SectionTitle>{t.sections.bus}</SectionTitle>
             <BusCard />
           </View>
 
-          {/* Ferry — apenas para Ilhabela e São Sebastião */}
           {(city.id === 'ilhabela' || city.id === 'sao-sebastiao') && (
             <View style={{ gap: 6 }}>
               <SectionTitle>{t.sections.ferry}</SectionTitle>
@@ -116,19 +97,16 @@ export default function DashboardScreen() {
             </View>
           )}
 
-          {/* Beaches */}
           <View style={{ gap: 6 }}>
             <SectionTitle>{t.sections.beaches}</SectionTitle>
             <BeachCard />
           </View>
 
-          {/* UPAs */}
           <View style={{ gap: 6 }}>
             <SectionTitle>{t.sections.health}</SectionTitle>
             <UPACard />
           </View>
 
-          {/* Turista: restaurantes e atrações */}
           {mode === 'turista' && (
             <>
               <View style={{ gap: 6 }}>
@@ -142,7 +120,6 @@ export default function DashboardScreen() {
             </>
           )}
 
-          {/* Footer */}
           <Text
             style={{
               textAlign: 'center',
@@ -157,7 +134,6 @@ export default function DashboardScreen() {
         </View>
       </ScrollView>
 
-      {/* Floating report button */}
       <ReportButton />
     </SafeAreaView>
   );

@@ -1,9 +1,14 @@
 /**
  * Operações de CRUD para reports da comunidade usando Supabase.
- * Upvote sem autenticação via fingerprint do device (UUID em AsyncStorage).
+ * Upvote sem autenticação via fingerprint do device (UUID criptográfico em AsyncStorage).
+ *
+ * Nota de segurança: a deduplicação client-side é uma camada de conveniência.
+ * Para prevenção robusta de duplo-voto, adicione uma unique constraint no Supabase:
+ *   ALTER TABLE report_upvotes ADD CONSTRAINT uq_device_report UNIQUE (device_id, report_id);
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Crypto from 'expo-crypto';
 import { supabase } from '@/lib/supabase';
 import type { Report, ReportType } from '@/lib/types';
 
@@ -11,25 +16,19 @@ const DEVICE_ID_KEY = '@litoral_na_palma:device_id';
 const UPVOTED_KEY = '@litoral_na_palma:upvoted_reports';
 
 // ---------------------------------------------------------------------------
-// Device fingerprint
+// Device fingerprint — UUID criptograficamente seguro
 // ---------------------------------------------------------------------------
-
-function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-  });
-}
 
 export async function getDeviceId(): Promise<string> {
   const stored = await AsyncStorage.getItem(DEVICE_ID_KEY);
   if (stored) return stored;
-  const id = generateUUID();
+  // expo-crypto gera UUID v4 usando o CSPRNG do SO (não Math.random)
+  const id = Crypto.randomUUID();
   await AsyncStorage.setItem(DEVICE_ID_KEY, id);
   return id;
 }
 
-/** Verifica se este device já votou no report (evita duplo upvote). */
+/** Verifica se este device já votou no report (camada client-side de conveniência). */
 export async function hasUpvoted(reportId: string): Promise<boolean> {
   const raw = await AsyncStorage.getItem(UPVOTED_KEY);
   const set: string[] = raw ? (JSON.parse(raw) as string[]) : [];
@@ -113,7 +112,7 @@ export async function submitReportToSupabase(data: {
 
 /**
  * Incrementa upvote de um report.
- * Prevenção de duplo-voto via AsyncStorage do device.
+ * Prevenção de duplo-voto: client-side (AsyncStorage) + server-side (unique constraint).
  */
 export async function upvoteReport(reportId: string): Promise<void> {
   if (!supabase) throw new Error('Supabase não configurado');

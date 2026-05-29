@@ -1,7 +1,7 @@
 /**
  * Camada de autenticação do app.
  *
- * Implementação atual: mock local (AsyncStorage) para desenvolvimento.
+ * Implementação atual: mock local para desenvolvimento.
  *
  * TODO: substituir por Supabase Auth quando o projeto for configurado.
  * Referência: https://supabase.com/docs/guides/auth/social-login/auth-google
@@ -17,7 +17,7 @@
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Código OTP para desenvolvimento (qualquer código de 6 dígitos é aceito em prod real) */
+/** Código OTP para o modo de desenvolvimento local. */
 export const DEV_OTP = '000000';
 
 export interface AuthUser {
@@ -29,17 +29,15 @@ export interface AuthUser {
 }
 
 /** Envia OTP para o e-mail informado. */
-export async function sendEmailOTP(email: string): Promise<void> {
+export async function sendEmailOTP(_email: string): Promise<void> {
   await delay(700);
-  // TODO: await supabase.auth.signInWithOtp({ email })
-  console.log(`[auth] OTP enviado para ${email}`);
+  // TODO: await supabase.auth.signInWithOtp({ email: _email })
 }
 
 /** Envia OTP via SMS para o telefone informado. */
-export async function sendPhoneOTP(phone: string): Promise<void> {
+export async function sendPhoneOTP(_phone: string): Promise<void> {
   await delay(700);
-  // TODO: await supabase.auth.signInWithOtp({ phone })
-  console.log(`[auth] SMS OTP enviado para ${phone}`);
+  // TODO: await supabase.auth.signInWithOtp({ phone: _phone })
 }
 
 /** Verifica o código OTP e retorna o usuário autenticado. */
@@ -62,20 +60,18 @@ export async function verifyOTP(
 
 /** Cria conta com e-mail + senha e envia confirmação. */
 export async function signUpWithEmail(
-  name: string,
-  email: string,
+  _name: string,
+  _email: string,
   _password: string
 ): Promise<void> {
   await delay(800);
-  // TODO: await supabase.auth.signUp({ email, password, options: { data: { name } } })
-  console.log(`[auth] Conta criada para ${email}, confirmação enviada`);
+  // TODO: await supabase.auth.signUp({ email: _email, password: _password, options: { data: { name: _name } } })
 }
 
 /** Cria conta com telefone e envia OTP via SMS. */
-export async function signUpWithPhone(name: string, phone: string): Promise<void> {
+export async function signUpWithPhone(_name: string, _phone: string): Promise<void> {
   await delay(800);
-  // TODO: await supabase.auth.signUp({ phone, options: { data: { name } } })
-  console.log(`[auth] Conta criada para ${phone}`);
+  // TODO: await supabase.auth.signUp({ phone: _phone, options: { data: { name: _name } } })
 }
 
 /**
