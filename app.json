@@ -50,12 +50,6 @@
           "color": "#0077b6"
         }
       ],
-      [
-        "react-native-maps",
-        {
-          "googleMapsApiKey": "$EXPO_PUBLIC_GOOGLE_MAPS_KEY"
-        }
-      ],
       "expo-font"
     ],
     "experiments": {
