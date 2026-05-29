@@ -42,8 +42,19 @@ export default function VerifyScreen() {
       const user = await verifyOTP(contact ?? '', code, type ?? 'email');
       await setUser(user);
       router.replace('/');
-    } catch {
-      setError('Código incorreto. Verifique e tente novamente.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message.toLowerCase() : '';
+      if (msg.includes('expired') || msg.includes('expirado')) {
+        setError('Código expirado. Use o botão abaixo para reenviar.');
+      } else if (msg.includes('invalid') || msg.includes('inválido') || msg.includes('token')) {
+        setError('Código incorreto. Verifique e tente novamente.');
+      } else if (msg.includes('rate') || msg.includes('limit')) {
+        setError('Muitas tentativas. Aguarde alguns minutos.');
+      } else if (msg) {
+        setError(msg.charAt(0).toUpperCase() + msg.slice(1));
+      } else {
+        setError('Não foi possível verificar. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }

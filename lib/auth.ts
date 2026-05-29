@@ -65,8 +65,10 @@ export async function sendPhoneOTP(phone: string): Promise<void> {
     await delay(700);
     return; // mock
   }
+  // Supabase exige E.164 — adiciona +55 se não tiver código de país
+  const e164 = phone.startsWith('+') ? phone : `+55${phone.replace(/\D/g, '')}`;
   const { error } = await supabase.auth.signInWithOtp({
-    phone,
+    phone: e164,
     options: { shouldCreateUser: true },
   });
   if (error) throw new Error(error.message);

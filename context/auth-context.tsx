@@ -90,12 +90,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       // 2) Escuta mudanças de sessão (login, logout, token refresh)
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Só limpa o usuário em SIGNED_OUT explícito — evita apagar sessão mock
+      // no evento INITIAL_SESSION que dispara com session=null no boot.
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (session?.user) {
           const u = supabaseSessionToAuthUser(session.user);
           setUserState(u);
           writeSession(u);
-        } else {
+        } else if (event === 'SIGNED_OUT') {
           setUserState(null);
           writeSession(null);
         }
