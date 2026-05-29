@@ -4,7 +4,7 @@
  *   2. Escolher localização: GPS atual ou pin no mapa Leaflet
  *   3. Descrição + envio
  */
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import {
   View,
   Text,
