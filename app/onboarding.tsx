@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { View, Text, Pressable, Dimensions, Animated } from 'react-native';
+import { View, Text, Pressable, Dimensions, Animated, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,10 +9,8 @@ import type { UserMode } from '@/lib/types';
 const { width } = Dimensions.get('window');
 const ONBOARDING_KEY = '@litoral_na_palma:onboarding_done';
 
-// ── Paleta por slide ──────────────────────────────────────────────────────────
 const SLIDE_COLORS = ['#0077b6', '#0096c7', '#023e8a'] as const;
 
-// ── Recursos exibidos no slide 2 ─────────────────────────────────────────────
 const FEATURES = [
   { emoji: '🏖️', label: 'Praias',   desc: 'Lotação e qualidade da água' },
   { emoji: '🚗', label: 'Trânsito', desc: 'Tempo real nas rodovias' },
@@ -20,10 +18,9 @@ const FEATURES = [
   { emoji: '🌤️', label: 'Clima',    desc: 'Temperatura, vento e nebulosidade' },
 ] as const;
 
-// ── Cards de perfil no slide 3 ────────────────────────────────────────────────
 const MODE_OPTIONS: { mode: UserMode; emoji: string; title: string; desc: string }[] = [
-  { mode: 'morador', emoji: '🏠', title: 'Morador',  desc: 'Moro aqui e uso o app no dia a dia' },
-  { mode: 'turista', emoji: '✈️', title: 'Turista',  desc: 'Estou visitando o litoral norte' },
+  { mode: 'morador', emoji: '🏠', title: 'Morador', desc: 'Moro aqui e uso o app no dia a dia' },
+  { mode: 'turista', emoji: '✈️', title: 'Turista', desc: 'Estou visitando o litoral norte' },
 ];
 
 export default function OnboardingScreen() {
@@ -31,35 +28,23 @@ export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const [selectedMode, setSelectedMode] = useState<UserMode>('morador');
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
 
-  // Anima a posição horizontal dos slides (native driver)
-  const slideAnim = useRef(new Animated.Value(0)).current;
-  // Anima a cor de fundo (JS driver — backgroundColor não suporta native)
-  const bgAnim = useRef(new Animated.Value(0)).current;
-
-  const bgColor = bgAnim.interpolate({
-    inputRange: [0, 1, 2],
+  const bgColor = scrollX.interpolate({
+    inputRange: [0, width, width * 2],
     outputRange: [SLIDE_COLORS[0], SLIDE_COLORS[1], SLIDE_COLORS[2]],
   });
 
-  const isLast = step === 2;
+  const skipOpacity = scrollX.interpolate({
+    inputRange: [width, width * 1.5],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
 
-  function navigate(toStep: number) {
-    setStep(toStep);
-    Animated.parallel([
-      Animated.spring(slideAnim, {
-        toValue: -toStep * width,
-        useNativeDriver: true,
-        damping: 22,
-        stiffness: 160,
-        overshootClamping: true,
-      }),
-      Animated.timing(bgAnim, {
-        toValue: toStep,
-        duration: 350,
-        useNativeDriver: false,
-      }),
-    ]).start();
+  function goTo(s: number) {
+    scrollRef.current?.scrollTo({ x: s * width, animated: true });
+    setStep(s);
   }
 
   async function finish() {
@@ -68,39 +53,47 @@ export default function OnboardingScreen() {
     router.replace('/');
   }
 
-  // ── Altura reservada para os controles inferiores ─────────────────────────
-  const BOTTOM_HEIGHT = insets.bottom + 120;
+  const BOTTOM_HEIGHT = insets.bottom + 96;
 
   return (
     <Animated.View style={{ flex: 1, backgroundColor: bgColor }}>
-      {/* Botão pular — sempre visível nos slides 0 e 1 */}
-      {!isLast && (
-        <Pressable
-          onPress={finish}
-          hitSlop={12}
-          style={{
-            position: 'absolute',
-            top: insets.top + 16,
-            right: 24,
-            zIndex: 20,
-          }}
-        >
+
+      {/* Botão pular — desaparece no último slide */}
+      <Animated.View
+        pointerEvents={step === 2 ? 'none' : 'auto'}
+        style={{
+          position: 'absolute',
+          top: insets.top + 16,
+          right: 24,
+          zIndex: 20,
+          opacity: skipOpacity,
+        }}
+      >
+        <Pressable onPress={finish} hitSlop={12}>
           <Text style={{ fontSize: 15, fontWeight: '600', color: 'rgba(255,255,255,0.65)' }}>
             Pular
           </Text>
         </Pressable>
-      )}
+      </Animated.View>
 
-      {/* Slides de conteúdo */}
-      <Animated.View
-        style={{
-          flexDirection: 'row',
-          width: width * 3,
-          flex: 1,
-          transform: [{ translateX: slideAnim }],
+      {/* Slides — swipe horizontal nativo */}
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: false },
+        )}
+        onMomentumScrollEnd={(e) => {
+          setStep(Math.round(e.nativeEvent.contentOffset.x / width));
         }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ alignItems: 'flex-start' }}
       >
-        {/* ── Slide 1: Boas-vindas ─────────────────────────────────────── */}
+        {/* ── Slide 1: Boas-vindas ─────────────────────────────────────────── */}
         <View
           style={{
             width,
@@ -139,7 +132,6 @@ export default function OnboardingScreen() {
             {'Tudo sobre praias, trânsito e serviços\ndo litoral norte de São Paulo.'}
           </Text>
 
-          {/* Chips decorativos */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 40, justifyContent: 'center' }}>
             {FEATURES.map((f) => (
               <View
@@ -159,9 +151,13 @@ export default function OnboardingScreen() {
               </View>
             ))}
           </View>
+
+          <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 48 }}>
+            Deslize para continuar →
+          </Text>
         </View>
 
-        {/* ── Slide 2: Funcionalidades ─────────────────────────────────── */}
+        {/* ── Slide 2: Funcionalidades ──────────────────────────────────────── */}
         <View
           style={{
             width,
@@ -200,7 +196,6 @@ export default function OnboardingScreen() {
             {'Sempre informado sobre o que\nimporta no litoral norte.'}
           </Text>
 
-          {/* Grid 2 × 2 */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, width: width - 48 }}>
             {FEATURES.map((f) => (
               <View
@@ -224,7 +219,7 @@ export default function OnboardingScreen() {
           </View>
         </View>
 
-        {/* ── Slide 3: Escolha de perfil ───────────────────────────────── */}
+        {/* ── Slide 3: Escolha de perfil ────────────────────────────────────── */}
         <View
           style={{
             width,
@@ -322,9 +317,9 @@ export default function OnboardingScreen() {
             })}
           </View>
         </View>
-      </Animated.View>
+      </ScrollView>
 
-      {/* ── Controles inferiores ─────────────────────────────────────────── */}
+      {/* ── Controles inferiores ──────────────────────────────────────────────── */}
       <View
         style={{
           paddingHorizontal: 24,
@@ -332,45 +327,27 @@ export default function OnboardingScreen() {
           gap: 16,
         }}
       >
-        {/* Progress dots */}
+        {/* Dots — clicáveis para navegar */}
         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
           {SLIDE_COLORS.map((_, i) => (
-            <View
-              key={i}
-              style={{
-                height: 8,
-                width: i === step ? 28 : 8,
-                borderRadius: 4,
-                backgroundColor: i === step ? '#fff' : 'rgba(255,255,255,0.3)',
-              }}
-            />
+            <Pressable key={i} onPress={() => goTo(i)} hitSlop={8}>
+              <View
+                style={{
+                  height: 8,
+                  width: i === step ? 28 : 8,
+                  borderRadius: 4,
+                  backgroundColor: i === step ? '#fff' : 'rgba(255,255,255,0.3)',
+                }}
+              />
+            </Pressable>
           ))}
         </View>
 
-        {/* Botões de navegação */}
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          {step > 0 && (
-            <Pressable
-              onPress={() => navigate(step - 1)}
-              style={{
-                flex: 1,
-                paddingVertical: 18,
-                borderRadius: 18,
-                borderWidth: 1.5,
-                borderColor: 'rgba(255,255,255,0.4)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: 56,
-              }}
-            >
-              <Text style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>Voltar</Text>
-            </Pressable>
-          )}
-
+        {/* Botão Começar — só no último slide */}
+        {step === 2 && (
           <Pressable
-            onPress={() => (isLast ? finish() : navigate(step + 1))}
+            onPress={finish}
             style={({ pressed }) => ({
-              flex: step > 0 ? 2 : 1,
               paddingVertical: 18,
               borderRadius: 18,
               backgroundColor: pressed ? 'rgba(255,255,255,0.9)' : '#fff',
@@ -380,11 +357,11 @@ export default function OnboardingScreen() {
               boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
             })}
           >
-            <Text style={{ fontSize: 17, fontWeight: '800', color: SLIDE_COLORS[step] }}>
-              {isLast ? '🚀  Começar' : 'Próximo'}
+            <Text style={{ fontSize: 17, fontWeight: '800', color: SLIDE_COLORS[2] }}>
+              🚀  Começar
             </Text>
           </Pressable>
-        </View>
+        )}
       </View>
     </Animated.View>
   );
