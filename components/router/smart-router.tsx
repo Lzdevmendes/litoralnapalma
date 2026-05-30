@@ -16,8 +16,9 @@ export function SmartRouter() {
   const { data: beaches } = useBeaches();
 
   const order = { livre: 0, moderado: 1, lento: 2, parado: 3 } as const;
-  const centro = traffic?.find((r) => r.id === 'centro-caraguá');
-  const congested = centro ? (order[centro.level] >= 2) : false;
+  // Congestionado se qualquer rota da cidade ativa tiver nível >= lento (2)
+  const worstRoute = traffic?.reduce((a, b) => (order[b.level] > order[a.level] ? b : a));
+  const congested = worstRoute ? order[worstRoute.level] >= 2 : false;
   const busyBeaches = beaches?.filter((b) => b.occupancy === 'lotada') ?? [];
 
   if (!congested && busyBeaches.length === 0) return null;

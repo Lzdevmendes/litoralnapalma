@@ -55,6 +55,7 @@ export default function LoginScreen() {
   }
 
   async function handleGoogle() {
+    // Google OAuth ainda não integrado — usa mock para demo
     setGoogleLoading(true);
     try {
       const user = await signInWithGoogle();
@@ -112,12 +113,17 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Google */}
-          <SocialButton
-            emoji="🔵"
-            label="Continuar com Google"
-            onPress={handleGoogle}
-            loading={googleLoading}
-          />
+          <View>
+            <SocialButton
+              emoji="🔵"
+              label="Continuar com Google"
+              onPress={handleGoogle}
+              loading={googleLoading}
+            />
+            <Text style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center', marginTop: 4 }}>
+              Demo — integração OAuth em breve
+            </Text>
+          </View>
 
           {/* Divisor */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 22 }}>

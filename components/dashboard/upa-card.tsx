@@ -27,6 +27,43 @@ export function UPACard() {
   if (isLoading) return <CardSkeleton />;
   if (isError || !upas) return <ErrorCard error={error} onRetry={refetch} />;
 
+  if (upas.length === 0) {
+    return (
+      <View
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.85)',
+          borderRadius: 20,
+          padding: 16,
+          borderWidth: 1,
+          borderColor: 'rgba(0,0,0,0.06)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            backgroundColor: '#fef2f2',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ fontSize: 20 }}>🏥</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 14, fontWeight: '700', color: '#1e293b' }}>{t.upa.label}</Text>
+          <Text style={{ fontSize: 12, color: '#64748b', marginTop: 2, lineHeight: 18 }}>
+            Sem UPA local. Referência: UPA São Sebastião (balsa + 30 min)
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View
       style={{

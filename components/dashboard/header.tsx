@@ -1,9 +1,12 @@
-import { useRef } from 'react';
-import { View, Text, Pressable, ScrollView, Animated } from 'react-native';
+import { useRef, useState } from 'react';
+import { View, Text, Pressable, ScrollView, Animated, Modal, Alert } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
 import { useUserMode } from '@/context/user-mode-context';
+import { useAuth } from '@/context/auth-context';
+import { signOut } from '@/lib/auth';
 import { CITIES } from '@/data/cities';
 import type { UserMode } from '@/lib/types';
 
@@ -11,11 +14,14 @@ const BLUE = '#0077b6';
 
 export function Header() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { city, setCity } = useCity();
   const { locale, setLocale, t } = useLanguage();
   const { mode, setMode } = useUserMode();
+  const { user, setUser } = useAuth();
   const rotation = useRef(new Animated.Value(0)).current;
   const spinRef = useRef<Animated.CompositeAnimation | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const spin = rotation.interpolate({
     inputRange: [0, 1],
@@ -32,6 +38,26 @@ export function Header() {
     spinRef.current?.stop();
     spinRef.current = null;
     rotation.setValue(0);
+  }
+
+  async function handleSignOut() {
+    setShowUserMenu(false);
+    Alert.alert(
+      'Sair da conta',
+      'Deseja encerrar sua sessão?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Sair',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            await setUser(null);
+            router.replace('/auth/login');
+          },
+        },
+      ]
+    );
   }
 
   return (
@@ -144,7 +170,83 @@ export function Header() {
             🔄
           </Animated.Text>
         </Pressable>
+
+        {/* Avatar / logout */}
+        <Pressable
+          onPress={() => setShowUserMenu(true)}
+          style={({ pressed }) => ({
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: pressed ? `${BLUE}30` : `${BLUE}18`,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1.5,
+            borderColor: `${BLUE}30`,
+          })}
+        >
+          <Text style={{ fontSize: 16 }}>👤</Text>
+        </Pressable>
       </View>
+
+      {/* User menu modal */}
+      <Modal
+        visible={showUserMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowUserMenu(false)}
+      >
+        <Pressable
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}
+          onPress={() => setShowUserMenu(false)}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={{
+              position: 'absolute',
+              top: 60,
+              right: 12,
+              backgroundColor: '#fff',
+              borderRadius: 18,
+              padding: 16,
+              minWidth: 200,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+              gap: 12,
+            }}
+          >
+            {/* Info do usuário */}
+            <View style={{ gap: 2 }}>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: '#1e293b' }}>
+                {user?.name ?? 'Usuário'}
+              </Text>
+              {(user?.email || user?.phone) && (
+                <Text style={{ fontSize: 11, color: '#94a3b8' }} numberOfLines={1}>
+                  {user.email ?? user.phone}
+                </Text>
+              )}
+            </View>
+
+            <View style={{ height: 1, backgroundColor: '#f1f5f9' }} />
+
+            {/* Botão sair */}
+            <Pressable
+              onPress={handleSignOut}
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 10,
+                paddingVertical: 8,
+                paddingHorizontal: 4,
+                borderRadius: 10,
+                backgroundColor: pressed ? '#fef2f2' : 'transparent',
+              })}
+            >
+              <Text style={{ fontSize: 18 }}>🚪</Text>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#ef4444' }}>Sair da conta</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Seletor de município */}
       <ScrollView

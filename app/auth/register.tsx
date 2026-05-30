@@ -62,8 +62,6 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -73,16 +71,12 @@ export default function RegisterScreen() {
   const emailError = submitted && method === 'email' && !emailRegex.test(email) ? 'E-mail inválido' : '';
   const phoneError = submitted && method === 'phone' && phone.replace(/\D/g, '').length < 10
     ? 'Informe DDD + número (mínimo 10 dígitos)' : '';
-  const passwordError = submitted && method === 'email' && password.length < 8
-    ? 'Mínimo 8 caracteres' : '';
-  const confirmError = submitted && method === 'email' && password !== confirmPassword
-    ? 'As senhas não conferem' : '';
   const termsError = submitted && !acceptedTerms ? 'Aceite os termos para continuar' : '';
 
   const isValid =
     name.trim().length >= 2 &&
     (method === 'email'
-      ? emailRegex.test(email) && password.length >= 8 && password === confirmPassword
+      ? emailRegex.test(email)
       : phone.replace(/\D/g, '').length >= 10) &&
     acceptedTerms;
 
@@ -93,7 +87,7 @@ export default function RegisterScreen() {
     if (!isValid) return;
     setLoading(true);
     try {
-      if (method === 'email') await signUpWithEmail(name.trim(), email, password);
+      if (method === 'email') await signUpWithEmail(name.trim(), email, '');
       else await signUpWithPhone(name.trim(), phone.replace(/\D/g, ''));
       router.push(`/auth/verify?contact=${encodeURIComponent(contact)}&type=${method}`);
     } catch {
@@ -194,27 +188,22 @@ export default function RegisterScreen() {
               )}
             </View>
 
-            {/* Senha (apenas e-mail) */}
-            {method === 'email' && (
-              <>
-                <Field
-                  label="Senha"
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="Mínimo 8 caracteres"
-                  error={passwordError}
-                  secureTextEntry
-                />
-                <Field
-                  label="Confirmar senha"
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  placeholder="Repita a senha"
-                  error={confirmError}
-                  secureTextEntry
-                />
-              </>
-            )}
+            {/* Aviso de código OTP */}
+            <View
+              style={{
+                backgroundColor: 'rgba(0,119,182,0.07)',
+                borderRadius: 12,
+                padding: 12,
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                gap: 8,
+              }}
+            >
+              <Text style={{ fontSize: 14 }}>🔐</Text>
+              <Text style={{ fontSize: 12, color: '#0077b6', flex: 1, lineHeight: 18 }}>
+                Você receberá um código de verificação{method === 'email' ? ' no e-mail' : ' por SMS'} para confirmar seu cadastro.
+              </Text>
+            </View>
 
             {/* Termos */}
             <TouchableOpacity

@@ -34,7 +34,7 @@ export function QuickStats() {
   const worstRoute = traffic?.reduce((a, b) => (order[b.level] > order[a.level] ? b : a));
   const freeBeaches = beaches?.filter((b) => b.occupancy === 'vazia').length ?? 0;
   const totalBeaches = beaches?.length ?? 0;
-  const upaStatus = upas?.[0]?.status ?? 'normal';
+  const firstUPA = upas && upas.length > 0 ? upas[0] : null;
 
   const stats = [
     {
@@ -60,8 +60,12 @@ export function QuickStats() {
     {
       emoji: '🏥',
       label: 'UPA',
-      value: { normal: 'Normal', alerta: 'Alerta', critico: 'Crítico' }[upaStatus],
-      color: { normal: '#22c55e', alerta: '#f59e0b', critico: '#ef4444' }[upaStatus],
+      value: firstUPA
+        ? { normal: 'Normal', alerta: 'Alerta', critico: 'Crítico' }[firstUPA.status]
+        : 'N/A',
+      color: firstUPA
+        ? { normal: '#22c55e', alerta: '#f59e0b', critico: '#ef4444' }[firstUPA.status]
+        : '#94a3b8',
     },
   ];
 

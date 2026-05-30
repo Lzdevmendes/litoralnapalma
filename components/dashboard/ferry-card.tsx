@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/skeleton';
+import { ErrorCard } from '@/components/ui/error-card';
 import { useFerry } from '@/hooks/useFerry';
 import { useLanguage } from '@/context/language-context';
 import { timeAgo } from '@/lib/utils';
@@ -14,9 +15,10 @@ function waitColor(minutes: number): string {
 
 export function FerryCard() {
   const { locale, t } = useLanguage();
-  const { data: ferry, isLoading } = useFerry();
+  const { data: ferry, isLoading, isError, error, refetch } = useFerry();
 
-  if (isLoading || !ferry) return <CardSkeleton />;
+  if (isLoading) return <CardSkeleton />;
+  if (isError || !ferry) return <ErrorCard error={error} onRetry={refetch} />;
 
   const carColor = waitColor(ferry.waitTimeCars);
   const motoColor = waitColor(ferry.waitTimeMotorcycles);
