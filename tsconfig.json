@@ -10,5 +10,6 @@
       "@/data/*": ["./data/*"],
       "@/context/*": ["./context/*"]
     }
-  }
+  },
+  "exclude": ["node_modules", "supabase/functions"]
 }
