@@ -45,3 +45,45 @@ pnpm start              # Expo Go (sem mapa — react-native-maps não suportado
 npx expo run:android    # Dev build com mapa (requer Android SDK)
 npx expo run:ios        # Dev build com mapa (requer Xcode)
 ```
+
+## Edge Functions (Supabase)
+
+Duas funções deployadas em `supabase/functions/`:
+
+| Função | Trigger | Serviço |
+|---|---|---|
+| `send-auth-email` | Auth Hook → Custom Email Sender | Resend API |
+| `send-auth-sms` | Auth Hook → Custom SMS Sender | Twilio API |
+
+### Ativar os hooks (Supabase Dashboard)
+
+1. **Supabase Dashboard → Authentication → Auth Hooks**
+2. Adicionar hook **"Custom Email Sender"**:
+   - URL: `https://nkkaaopslozyisicyjne.supabase.co/functions/v1/send-auth-email`
+   - Copiar o **Hook Secret** gerado
+3. Adicionar hook **"Custom SMS Sender"**:
+   - URL: `https://nkkaaopslozyisicyjne.supabase.co/functions/v1/send-auth-sms`
+   - Copiar o **Hook Secret** gerado
+
+### Configurar secrets das funções
+
+**Supabase Dashboard → Edge Functions → Manage secrets** (ou `supabase secrets set`):
+
+```
+# Resend (email)
+RESEND_API_KEY=re_xxxxxxxxxxxxxx
+RESEND_FROM=Litoral na Palma <noreply@seudominio.com.br>
+SEND_EMAIL_HOOK_SECRET=<copiado do hook acima>
+
+# Twilio (SMS)
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxx
+TWILIO_PHONE_FROM=+55119xxxxxxxx
+SEND_SMS_HOOK_SECRET=<copiado do hook acima>
+```
+
+> **Resend sem domínio próprio:** use `noreply@resend.dev` como FROM para testar.
+> Para produção, verificar domínio em resend.com → Domains.
+
+> **Twilio SMS no Brasil:** habilitar "Geo Permissions" para Brasil em
+> console.twilio.com → Messaging → Settings → Geo Permissions.
