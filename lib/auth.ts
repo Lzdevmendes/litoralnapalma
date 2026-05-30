@@ -21,7 +21,7 @@ export interface AuthUser {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function supabaseUserToAuthUser(sbUser: {
+export function supabaseUserToAuthUser(sbUser: {
   id: string;
   email?: string | null;
   phone?: string | null;

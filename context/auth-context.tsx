@@ -13,7 +13,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { type AuthUser } from '@/lib/auth';
+import { type AuthUser, supabaseUserToAuthUser } from '@/lib/auth';
 
 const STORAGE_KEY = 'litoral_na_palma_auth_user';
 
@@ -48,26 +48,6 @@ async function writeSession(user: AuthUser | null): Promise<void> {
   }
 }
 
-function supabaseSessionToAuthUser(sbUser: {
-  id: string;
-  email?: string | null;
-  phone?: string | null;
-  user_metadata?: Record<string, unknown>;
-}): AuthUser {
-  const meta = sbUser.user_metadata ?? {};
-  return {
-    id: sbUser.id,
-    name:
-      (meta.full_name as string | undefined) ??
-      (meta.name as string | undefined) ??
-      sbUser.email?.split('@')[0] ??
-      'Usuário',
-    email: sbUser.email ?? undefined,
-    phone: sbUser.phone ?? undefined,
-    photoUrl: (meta.avatar_url as string | undefined) ?? undefined,
-  };
-}
-
 // ─── Provider ────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -79,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 1) Sessão ativa no Supabase (token no AsyncStorage)
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
-          const u = supabaseSessionToAuthUser(session.user);
+          const u = supabaseUserToAuthUser(session.user);
           setUserState(u);
           writeSession(u);
         } else {
@@ -94,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // no evento INITIAL_SESSION que dispara com session=null no boot.
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (session?.user) {
-          const u = supabaseSessionToAuthUser(session.user);
+          const u = supabaseUserToAuthUser(session.user);
           setUserState(u);
           writeSession(u);
         } else if (event === 'SIGNED_OUT') {
