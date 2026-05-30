@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/context/auth-context';
-import { sendEmailOTP, sendPhoneOTP, signInWithGoogle } from '@/lib/auth';
+import { sendEmailOTP, sendPhoneOTP } from '@/lib/auth';
 import { SocialButton, PrimaryButton } from '@/components/auth/SocialButton';
 
 type Method = 'email' | 'phone';
@@ -20,7 +19,6 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { setUser } = useAuth();
   const insets = useSafeAreaInsets();
 
   const [method, setMethod] = useState<Method>('email');
@@ -28,7 +26,7 @@ export default function LoginScreen() {
   const [phone, setPhone] = useState('');
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const isEmailValid = emailRegex.test(email);
   const isPhoneValid = phone.replace(/\D/g, '').length >= 10;
@@ -41,31 +39,31 @@ export default function LoginScreen() {
 
   async function handleContinue() {
     setTouched(true);
+    setError('');
     if (!isValid) return;
     setLoading(true);
     try {
       if (method === 'email') await sendEmailOTP(email);
       else await sendPhoneOTP(phone.replace(/\D/g, ''));
       router.push(`/auth/verify?contact=${encodeURIComponent(contact)}&type=${method}`);
-    } catch {
-      // erro silencioso no mock
+    } catch (err) {
+      const msg = err instanceof Error ? err.message.toLowerCase() : '';
+      if (msg.includes('rate') || msg.includes('limit')) {
+        setError('Muitas tentativas. Aguarde alguns minutos.');
+      } else if (msg.includes('invalid') || msg.includes('inválido')) {
+        setError(`${method === 'email' ? 'E-mail' : 'Telefone'} inválido.`);
+      } else if (msg.includes('phone') || msg.includes('sms')) {
+        setError('Serviço de SMS indisponível no momento.');
+      } else {
+        setError('Não foi possível enviar o código. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }
   }
 
   async function handleGoogle() {
-    // Google OAuth ainda não integrado — usa mock para demo
-    setGoogleLoading(true);
-    try {
-      const user = await signInWithGoogle();
-      await setUser(user);
-      router.replace('/');
-    } catch {
-      // erro silencioso no mock
-    } finally {
-      setGoogleLoading(false);
-    }
+    setError('Login com Google em breve. Use e-mail ou telefone.');
   }
 
   return (
@@ -118,7 +116,6 @@ export default function LoginScreen() {
               emoji="🔵"
               label="Continuar com Google"
               onPress={handleGoogle}
-              loading={googleLoading}
             />
             <Text style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center', marginTop: 4 }}>
               Demo — integração OAuth em breve
@@ -209,6 +206,12 @@ export default function LoginScreen() {
             disabled={touched && !isValid}
             loading={loading}
           />
+
+          {error ? (
+            <Text style={{ fontSize: 13, color: '#ef4444', textAlign: 'center', marginTop: 12 }}>
+              {error}
+            </Text>
+          ) : null}
 
           {/* Link cadastro */}
           <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 28, gap: 4 }}>

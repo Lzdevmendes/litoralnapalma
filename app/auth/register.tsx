@@ -65,6 +65,7 @@ export default function RegisterScreen() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Validações
   const nameError = submitted && name.trim().length < 2 ? 'Informe seu nome completo' : '';
@@ -84,14 +85,24 @@ export default function RegisterScreen() {
 
   async function handleRegister() {
     setSubmitted(true);
+    setError('');
     if (!isValid) return;
     setLoading(true);
     try {
       if (method === 'email') await signUpWithEmail(name.trim(), email, '');
       else await signUpWithPhone(name.trim(), phone.replace(/\D/g, ''));
       router.push(`/auth/verify?contact=${encodeURIComponent(contact)}&type=${method}`);
-    } catch {
-      // erro silencioso no mock
+    } catch (err) {
+      const msg = err instanceof Error ? err.message.toLowerCase() : '';
+      if (msg.includes('rate') || msg.includes('limit')) {
+        setError('Muitas tentativas. Aguarde alguns minutos.');
+      } else if (msg.includes('already') || msg.includes('exists')) {
+        setError('Conta já cadastrada. Tente fazer login.');
+      } else if (msg.includes('phone') || msg.includes('sms')) {
+        setError('Serviço de SMS indisponível no momento.');
+      } else {
+        setError('Não foi possível criar a conta. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }
@@ -246,6 +257,12 @@ export default function RegisterScreen() {
               disabled={submitted && !isValid}
               loading={loading}
             />
+
+            {error ? (
+              <Text style={{ fontSize: 13, color: '#ef4444', textAlign: 'center', marginTop: 4 }}>
+                {error}
+              </Text>
+            ) : null}
 
             {/* Link login */}
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 4, marginTop: 8 }}>
