@@ -93,16 +93,7 @@ export default function RegisterScreen() {
       else await signUpWithPhone(name.trim(), phone.replace(/\D/g, ''));
       router.push(`/auth/verify?contact=${encodeURIComponent(contact)}&type=${method}`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message.toLowerCase() : '';
-      if (msg.includes('rate') || msg.includes('limit')) {
-        setError('Muitas tentativas. Aguarde alguns minutos.');
-      } else if (msg.includes('already') || msg.includes('exists')) {
-        setError('Conta já cadastrada. Tente fazer login.');
-      } else if (msg.includes('phone') || msg.includes('sms')) {
-        setError('Serviço de SMS indisponível no momento.');
-      } else {
-        setError('Não foi possível criar a conta. Tente novamente.');
-      }
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
