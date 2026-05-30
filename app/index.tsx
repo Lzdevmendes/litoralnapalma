@@ -43,9 +43,14 @@ export default function DashboardScreen() {
     });
   }, []);
 
-  if (!onboardingReady || isLoading) return null;
-  if (!seenOnboarding) return <Redirect href="/onboarding" />;
+  // Aguarda sessão Supabase e leitura do AsyncStorage
+  if (isLoading || !onboardingReady) return null;
+
+  // Não autenticado → login primeiro
   if (!user) return <Redirect href="/auth/login" />;
+
+  // Logado mas ainda não fez onboarding nesta sessão → onboarding obrigatório
+  if (!seenOnboarding) return <Redirect href="/onboarding" />;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={['top']}>

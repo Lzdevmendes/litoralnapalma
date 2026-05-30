@@ -65,7 +65,7 @@ export default function OnboardingScreen() {
   async function finish() {
     setMode(selectedMode);
     await AsyncStorage.setItem(ONBOARDING_KEY, '1');
-    router.replace('/auth/login');
+    router.replace('/');
   }
 
   // ── Altura reservada para os controles inferiores ─────────────────────────

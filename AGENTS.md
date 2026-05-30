@@ -32,7 +32,7 @@ data/          # Mock data (TODO: substituir por APIs reais)
 
 - Inline styles — **sem** Tailwind, CSS ou StyleSheet.create
 - Aliases: `@/components/*`, `@/lib/*`, `@/hooks/*`, `@/data/*`
-- Commits: `feat:`, `chore:`, `fix:`, `refactor:` — somente título, sem body
+- Commits: `feat:`, `chore:`, `fix:`, `refactor:` — **somente título, sem body, sem descrição adicional**
 - `boxShadow` via CSS string (New Arch): `{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }`
 - `process.env.EXPO_OS` em vez de `Platform.OS`
 - `expo-image` para SF Symbols (iOS) e imagens

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Animated, Modal, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useCity } from '@/context/city-context';
@@ -9,6 +10,8 @@ import { useAuth } from '@/context/auth-context';
 import { signOut } from '@/lib/auth';
 import { CITIES } from '@/data/cities';
 import type { UserMode } from '@/lib/types';
+
+const ONBOARDING_KEY = '@litoral_na_palma:onboarding_done';
 
 const BLUE = '#0077b6';
 
@@ -51,6 +54,7 @@ export function Header() {
           text: 'Sair',
           style: 'destructive',
           onPress: async () => {
+            await AsyncStorage.removeItem(ONBOARDING_KEY);
             await signOut();
             await setUser(null);
             router.replace('/auth/login');
