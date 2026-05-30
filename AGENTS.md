@@ -22,7 +22,7 @@ components/    # Componentes UI reutilizáveis
   map/         # MapView
   report/      # Modal de reporte
   router/      # Smart Router
-  ui/          # Primitivos (Badge, ProgressBar, Skeleton, GlassCard)
+  ui/          # Primitivos (Badge, ProgressBar, Skeleton, ErrorCard, ErrorBoundary)
 hooks/         # Custom hooks (useWeather, useBeaches, useTraffic, useUPA, useReports)
 lib/           # Tipos, utils, api
 data/          # Mock data (TODO: substituir por APIs reais)
@@ -53,7 +53,7 @@ Duas funções deployadas em `supabase/functions/`:
 | Função | Trigger | Serviço |
 |---|---|---|
 | `send-auth-email` | Auth Hook → Custom Email Sender | Resend API |
-| `send-auth-sms` | Auth Hook → Custom SMS Sender | Twilio API |
+| `send-auth-sms` | Auth Hook → Custom SMS Sender | Infobip API |
 
 ### Ativar os hooks (Supabase Dashboard)
 
@@ -75,15 +75,13 @@ RESEND_API_KEY=re_xxxxxxxxxxxxxx
 RESEND_FROM=Litoral na Palma <noreply@seudominio.com.br>
 SEND_EMAIL_HOOK_SECRET=<copiado do hook acima>
 
-# Twilio (SMS)
-TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxx
-TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxx
-TWILIO_PHONE_FROM=+55119xxxxxxxx
+# Infobip (SMS)
+INFOBIP_API_KEY=xxxxxxxxxxxxxx
+INFOBIP_BASE_URL=xxxxxx.api.infobip.com
 SEND_SMS_HOOK_SECRET=<copiado do hook acima>
 ```
 
 > **Resend sem domínio próprio:** use `noreply@resend.dev` como FROM para testar.
 > Para produção, verificar domínio em resend.com → Domains.
 
-> **Twilio SMS no Brasil:** habilitar "Geo Permissions" para Brasil em
-> console.twilio.com → Messaging → Settings → Geo Permissions.
+> **Infobip:** conta gratuita em infobip.com com 60 dias de trial e créditos de SMS.
