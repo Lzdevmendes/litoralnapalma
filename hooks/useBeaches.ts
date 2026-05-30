@@ -8,6 +8,6 @@ export function useBeaches(city: City = DEFAULT_CITY) {
     queryKey: ["beaches", city.id],
     queryFn: () => fetchBeaches(city.id),
     refetchInterval: 3 * 60 * 1000,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 3 * 60 * 1000,
   });
 }

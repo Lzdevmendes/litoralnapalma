@@ -8,6 +8,6 @@ export function useUPA(city: City = DEFAULT_CITY) {
     queryKey: ["upas", city.id],
     queryFn: () => fetchUPAs(city.id),
     refetchInterval: 3 * 60 * 1000,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 3 * 60 * 1000,
   });
 }
