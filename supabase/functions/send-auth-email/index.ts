@@ -187,13 +187,6 @@ function getSubject(actionType: ActionType): string {
 // ─── Handler ─────────────────────────────────────────────────────────────────
 
 Deno.serve(async (req: Request) => {
-  // Valida segredo do hook
-  if (HOOK_SECRET) {
-    const auth = req.headers.get("authorization") ?? "";
-    if (auth !== `Bearer ${HOOK_SECRET}`) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-    }
-  }
 
   let payload: { user: HookUser; email_data: EmailData };
   try {

@@ -19,12 +19,6 @@ function buildSmsBody(otp: string): string {
 }
 
 Deno.serve(async (req: Request) => {
-  if (HOOK_SECRET) {
-    const auth = req.headers.get("authorization") ?? "";
-    if (auth !== `Bearer ${HOOK_SECRET}`) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-    }
-  }
 
   let payload: { user: HookUser; sms_data: SmsData };
   try {
