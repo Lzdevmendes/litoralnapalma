@@ -1,9 +1,9 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const TWILIO_SID   = Deno.env.get("TWILIO_ACCOUNT_SID") ?? "";
-const TWILIO_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN") ?? "";
-const TWILIO_FROM  = Deno.env.get("TWILIO_PHONE_FROM") ?? "";
-const HOOK_SECRET  = Deno.env.get("SEND_SMS_HOOK_SECRET") ?? "";
+const INFOBIP_KEY     = Deno.env.get("INFOBIP_API_KEY") ?? "";
+const INFOBIP_BASE    = Deno.env.get("INFOBIP_BASE_URL") ?? "";
+const HOOK_SECRET     = Deno.env.get("SEND_SMS_HOOK_SECRET") ?? "";
+const SENDER_NAME     = "LitoralPalma";
 
 interface SmsData {
   otp: string;
@@ -14,17 +14,11 @@ interface HookUser {
   phone: string;
 }
 
-// ─── Template de SMS ─────────────────────────────────────────────────────────
-// SMS é texto simples — conciso, com branding e instrução de segurança.
-
 function buildSmsBody(otp: string): string {
   return `🌊 Litoral na Palma\n\nSeu código de acesso: ${otp}\n\nVálido por 10 minutos. Não compartilhe este código com ninguém.`;
 }
 
-// ─── Handler ─────────────────────────────────────────────────────────────────
-
 Deno.serve(async (req: Request) => {
-  // Valida segredo do hook
   if (HOOK_SECRET) {
     const auth = req.headers.get("authorization") ?? "";
     if (auth !== `Bearer ${HOOK_SECRET}`) {
@@ -41,29 +35,30 @@ Deno.serve(async (req: Request) => {
 
   const { user, sms_data } = payload;
 
-  if (!TWILIO_SID || !TWILIO_TOKEN || !TWILIO_FROM) {
-    console.error("Twilio credentials not configured");
+  if (!INFOBIP_KEY || !INFOBIP_BASE) {
+    console.error("Infobip credentials not configured");
     return new Response(JSON.stringify({ error: "SMS provider not configured" }), { status: 500 });
   }
 
-  const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`;
-
-  const twilioRes = await fetch(twilioUrl, {
+  const infobipRes = await fetch(`https://${INFOBIP_BASE}/sms/2/text/advanced`, {
     method: "POST",
     headers: {
-      Authorization: `Basic ${btoa(`${TWILIO_SID}:${TWILIO_TOKEN}`)}`,
-      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `App ${INFOBIP_KEY}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
     },
-    body: new URLSearchParams({
-      From: TWILIO_FROM,
-      To:   user.phone,
-      Body: buildSmsBody(sms_data.otp),
+    body: JSON.stringify({
+      messages: [{
+        from: SENDER_NAME,
+        destinations: [{ to: user.phone }],
+        text: buildSmsBody(sms_data.otp),
+      }],
     }),
   });
 
-  if (!twilioRes.ok) {
-    const err = await twilioRes.text();
-    console.error("Twilio error:", err);
+  if (!infobipRes.ok) {
+    const err = await infobipRes.text();
+    console.error("Infobip error:", err);
     return new Response(JSON.stringify({ error: "Failed to send SMS" }), { status: 500 });
   }
 
