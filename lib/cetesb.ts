@@ -9,51 +9,47 @@
  */
 
 const CETESB_URL =
-  'https://arcgis.cetesb.sp.gov.br/server/rest/services/Hosted/Praias/FeatureServer/0/query';
+  "https://arcgis.cetesb.sp.gov.br/server/rest/services/Hosted/Praias/FeatureServer/0/query";
 
 // Mapeia nome da praia no CETESB (sem acento, uppercase) → ID interno do app
 const CETESB_NAME_MAP: Record<string, string> = {
   // caraguatatuba
-  'MARTIM DE SA':  'martim-de-sa',
-  'INDAIA':        'indaia',
-  'COCANHA':       'cocanha',
-  'MASSAGUACU':    'massaguacu',
-  'PORTO NOVO':    'porto-novo',
+  "MARTIM DE SA": "martim-de-sa",
+  INDAIA: "indaia",
+  COCANHA: "cocanha",
+  MASSAGUACU: "massaguaçu",
+  "PORTO NOVO": "porto-novo",
   // São Sebastião
-  'BOICUCANGA':    'boicucanga',
-  'CAMBURI':       'camburi',
-  'MARESIAS':      'maresias',
+  BOICUCANGA: "boicucanga",
+  CAMBURI: "camburi",
+  MARESIAS: "maresias",
   // Ubatuba
-  'ENSEADA':       'enseada',
-  'LAZARO':        'lazaro',
-  'DOMINGAS DIAS': 'domingas-dias',
-  'PICINGUABA':    'picinguaba',
+  ENSEADA: "enseada",
+  LAZARO: "lazaro",
+  "DOMINGAS DIAS": "domingas-dias",
+  PICINGUABA: "picinguaba",
   // Ilhabela
-  'PEREQUÊ':       'perequê',
-  'PEREQUE':       'perequê',
-  'CURRAL':        'curral',
-  'VIANA':         'viana',
-  'JABAQUARA':     'jabaquara',
+  PEREQUÊ: "perequê",
+  PEREQUE: "perequê",
+  CURRAL: "curral",
+  VIANA: "viana",
+  JABAQUARA: "jabaquara",
 };
 
 export function normalize(text: string): string {
-  return text
-    .toUpperCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .trim();
+  return text.toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
 }
 
-export function mapQuality(text: string): 'boa' | 'regular' | 'impropia' {
+export function mapQuality(text: string): "boa" | "regular" | "impropia" {
   const n = normalize(text);
-  if (n === 'PROPRIA') return 'boa';
-  if (n === 'REGULAR') return 'regular';
-  return 'impropia';
+  if (n === "PROPRIA") return "boa";
+  if (n === "REGULAR") return "regular";
+  return "impropia";
 }
 
 export interface WaterQualityResult {
   beachId: string;
-  quality: 'boa' | 'regular' | 'impropia';
+  quality: "boa" | "regular" | "impropia";
   collectedAt: string; // ISO string da data_amostra_final
 }
 
@@ -77,9 +73,9 @@ interface CETESBResponse {
 export async function fetchCETESBWaterQuality(): Promise<WaterQualityResult[]> {
   const params = new URLSearchParams({
     where: "ugrhi='Litoral Norte'",
-    outFields: 'praia,municipio,classificacao_texto,data_amostra_final',
-    returnGeometry: 'false',
-    f: 'json',
+    outFields: "praia,municipio,classificacao_texto,data_amostra_final",
+    returnGeometry: "false",
+    f: "json",
   });
 
   const res = await fetch(`${CETESB_URL}?${params.toString()}`);
@@ -91,13 +87,14 @@ export async function fetchCETESBWaterQuality(): Promise<WaterQualityResult[]> {
   const json = (await res.json()) as CETESBResponse;
 
   if (!Array.isArray(json.features)) {
-    throw new Error('CETESB: resposta inesperada');
+    throw new Error("CETESB: resposta inesperada");
   }
 
   const results: WaterQualityResult[] = [];
 
   for (const feature of json.features) {
-    const { praia, classificacao_texto, data_amostra_final } = feature.attributes;
+    const { praia, classificacao_texto, data_amostra_final } =
+      feature.attributes;
     const beachId = CETESB_NAME_MAP[normalize(praia)];
     if (!beachId) continue; // praia não mapeada — ignorar
 
