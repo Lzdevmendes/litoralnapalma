@@ -48,7 +48,9 @@ export default function LoginScreen() {
       router.push(`/auth/verify?contact=${encodeURIComponent(contact)}&type=${method}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message.toLowerCase() : '';
-      if (msg.includes('rate') || msg.includes('limit')) {
+      if (msg.includes('not found') || msg.includes('no user') || msg.includes('invalid login')) {
+        setError('Conta não encontrada. Faça o cadastro primeiro.');
+      } else if (msg.includes('rate') || msg.includes('limit') || msg.includes('security')) {
         setError('Muitas tentativas. Aguarde alguns minutos.');
       } else if (msg.includes('invalid') || msg.includes('inválido')) {
         setError(`${method === 'email' ? 'E-mail' : 'Telefone'} inválido.`);

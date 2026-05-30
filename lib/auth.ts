@@ -44,32 +44,31 @@ export function supabaseUserToAuthUser(sbUser: {
 
 // ─── Email OTP ────────────────────────────────────────────────────────────────
 
-/** Envia OTP para o e-mail informado (magic link ou código de 6 dígitos). */
+/** Envia OTP para e-mail existente. Não cria conta nova — apenas login. */
 export async function sendEmailOTP(email: string): Promise<void> {
   if (!isSupabaseConfigured || !supabase) {
     await delay(700);
-    return; // mock — aceita qualquer email
+    return;
   }
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { shouldCreateUser: true },
+    options: { shouldCreateUser: false },
   });
   if (error) throw new Error(error.message);
 }
 
 // ─── Telefone OTP ─────────────────────────────────────────────────────────────
 
-/** Envia OTP via SMS para o número informado. Requer Phone provider habilitado no Supabase. */
+/** Envia OTP via SMS para número existente. Não cria conta nova — apenas login. */
 export async function sendPhoneOTP(phone: string): Promise<void> {
   if (!isSupabaseConfigured || !supabase) {
     await delay(700);
-    return; // mock
+    return;
   }
-  // Supabase exige E.164 — adiciona +55 se não tiver código de país
   const e164 = phone.startsWith('+') ? phone : `+55${phone.replace(/\D/g, '')}`;
   const { error } = await supabase.auth.signInWithOtp({
     phone: e164,
-    options: { shouldCreateUser: true },
+    options: { shouldCreateUser: false },
   });
   if (error) throw new Error(error.message);
 }
@@ -109,24 +108,31 @@ export async function verifyOTP(
 
 // ─── Cadastro (alias do OTP — Supabase cria o usuário automaticamente) ────────
 
-/**
- * Cria conta com e-mail. Com Supabase, `shouldCreateUser: true` já faz o cadastro
- * no primeiro OTP — esta função é um alias semântico de sendEmailOTP.
- */
-export async function signUpWithEmail(
-  _name: string,
-  email: string,
-  _password: string,
-): Promise<void> {
-  await sendEmailOTP(email);
+/** Cria conta com e-mail salvando o nome em user_metadata. */
+export async function signUpWithEmail(name: string, email: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    await delay(700);
+    return;
+  }
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: true, data: { full_name: name } },
+  });
+  if (error) throw new Error(error.message);
 }
 
-/**
- * Cria conta com telefone. Alias de sendPhoneOTP.
- * Requer o provider Phone habilitado no Supabase dashboard.
- */
-export async function signUpWithPhone(_name: string, phone: string): Promise<void> {
-  await sendPhoneOTP(phone);
+/** Cria conta com telefone salvando o nome em user_metadata. */
+export async function signUpWithPhone(name: string, phone: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    await delay(700);
+    return;
+  }
+  const e164 = phone.startsWith('+') ? phone : `+55${phone.replace(/\D/g, '')}`;
+  const { error } = await supabase.auth.signInWithOtp({
+    phone: e164,
+    options: { shouldCreateUser: true, data: { full_name: name } },
+  });
+  if (error) throw new Error(error.message);
 }
 
 // ─── Google OAuth ─────────────────────────────────────────────────────────────

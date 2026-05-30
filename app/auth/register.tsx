@@ -89,7 +89,7 @@ export default function RegisterScreen() {
     if (!isValid) return;
     setLoading(true);
     try {
-      if (method === 'email') await signUpWithEmail(name.trim(), email, '');
+      if (method === 'email') await signUpWithEmail(name.trim(), email);
       else await signUpWithPhone(name.trim(), phone.replace(/\D/g, ''));
       router.push(`/auth/verify?contact=${encodeURIComponent(contact)}&type=${method}`);
     } catch (err) {
