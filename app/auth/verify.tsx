@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, KeyboardAvoidingView } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
-import { verifyOTP, sendEmailOTP, sendPhoneOTP, DEV_OTP } from '@/lib/auth';
+import { verifyOTP, resendEmailOTP, resendPhoneOTP, DEV_OTP } from '@/lib/auth';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { OTPInput } from '@/components/auth/OTPInput';
 import { PrimaryButton } from '@/components/auth/SocialButton';
@@ -66,8 +66,8 @@ export default function VerifyScreen() {
     setCode('');
     setError('');
     try {
-      if (isEmail) await sendEmailOTP(contact ?? '');
-      else await sendPhoneOTP(contact ?? '');
+      if (isEmail) await resendEmailOTP(contact ?? '');
+      else await resendPhoneOTP(contact ?? '');
       setSeconds(60);
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';

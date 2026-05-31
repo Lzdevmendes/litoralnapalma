@@ -44,6 +44,33 @@ export function supabaseUserToAuthUser(sbUser: {
 
 // ─── Email OTP ────────────────────────────────────────────────────────────────
 
+/** Reenvia OTP para email — funciona para login e registro (shouldCreateUser: true sem dados extras). */
+export async function resendEmailOTP(email: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    await delay(700);
+    return;
+  }
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: true },
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** Reenvia OTP para telefone — funciona para login e registro. */
+export async function resendPhoneOTP(phone: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    await delay(700);
+    return;
+  }
+  const e164 = phone.startsWith('+') ? phone : `+55${phone.replace(/\D/g, '')}`;
+  const { error } = await supabase.auth.signInWithOtp({
+    phone: e164,
+    options: { shouldCreateUser: true },
+  });
+  if (error) throw new Error(error.message);
+}
+
 /** Envia OTP para e-mail existente. Não cria conta nova — apenas login. */
 export async function sendEmailOTP(email: string): Promise<void> {
   if (!isSupabaseConfigured || !supabase) {
