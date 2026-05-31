@@ -111,16 +111,11 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Google */}
-          <View>
-            <SocialButton
-              emoji="🔵"
-              label="Continuar com Google"
-              onPress={handleGoogle}
-            />
-            <Text style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center', marginTop: 4 }}>
-              Demo — integração OAuth em breve
-            </Text>
-          </View>
+          <SocialButton
+            emoji="🔵"
+            label="Continuar com Google"
+            onPress={handleGoogle}
+          />
 
           {/* Divisor */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 22 }}>
