@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { ScrollView, View, Text } from 'react-native';
+import { useEffect, useState, useCallback } from 'react';
+import { ScrollView, View, Text, RefreshControl } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, Redirect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,6 +23,8 @@ import { AppMapView } from '@/components/map/map-view';
 import { SmartRouter } from '@/components/router/smart-router';
 import { ReportButton } from '@/components/report/report-button';
 import { GeofenceAlert } from '@/components/geofencing/geofence-alert';
+import { LocationConsent } from '@/components/ui/location-consent';
+import { useGeolocation } from '@/hooks/useGeolocation';
 import { useLanguage } from '@/context/language-context';
 
 const ONBOARDING_KEY = '@litoral_na_palma:onboarding_done';
@@ -35,6 +38,15 @@ export default function DashboardScreen() {
 
   const [onboardingReady, setOnboardingReady] = useState(false);
   const [seenOnboarding, setSeenOnboarding] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+  const { consentState, requestConsent, denyConsent } = useGeolocation();
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries();
+    setRefreshing(false);
+  }, [queryClient]);
 
   useEffect(() => {
     AsyncStorage.getItem(ONBOARDING_KEY).then((v) => {
@@ -55,12 +67,25 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={['top']}>
       <Stack.Screen options={{ headerShown: false }} />
+      <LocationConsent
+        visible={consentState === 'pending'}
+        onAllow={requestConsent}
+        onDeny={denyConsent}
+      />
       <Header />
       <GeofenceAlert />
 
       <ScrollView
         contentContainerStyle={{ gap: 16, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#0077b6"
+            colors={['#0077b6']}
+          />
+        }
       >
         <View style={{ paddingTop: 16 }}>
           <QuickStats />
