@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
+import * as WebBrowser from 'expo-web-browser';
 import { CityProvider } from '@/context/city-context';
 import { AuthProvider } from '@/context/auth-context';
 import { LanguageProvider } from '@/context/language-context';
@@ -12,6 +13,9 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { useNotifications } from '@/hooks/useNotifications';
 
 SplashScreen.preventAutoHideAsync();
+
+// Necessário para iOS fechar o browser OAuth e retornar à sessão do app
+WebBrowser.maybeCompleteAuthSession();
 
 /** Inicializa permissões e listeners de notificação. */
 function NotificationSetup() {

@@ -5,13 +5,15 @@ interface SocialButtonProps {
   label: string;
   emoji: string;
   loading?: boolean;
+  disabled?: boolean;
 }
 
-export function SocialButton({ onPress, label, emoji, loading }: SocialButtonProps) {
+export function SocialButton({ onPress, label, emoji, loading, disabled }: SocialButtonProps) {
+  const inactive = loading || disabled;
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={loading}
+      disabled={inactive}
       activeOpacity={0.8}
       style={{
         flexDirection: 'row',
@@ -23,7 +25,7 @@ export function SocialButton({ onPress, label, emoji, loading }: SocialButtonPro
         borderColor: '#dbeafe',
         borderRadius: 16,
         paddingVertical: 16,
-        opacity: loading ? 0.6 : 1,
+        opacity: inactive ? 0.6 : 1,
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
       }}
     >

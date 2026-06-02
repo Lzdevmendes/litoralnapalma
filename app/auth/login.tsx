@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { sendEmailOTP, sendPhoneOTP } from '@/lib/auth';
+import { sendEmailOTP, sendPhoneOTP, signInWithGoogle } from '@/lib/auth';
 import { SocialButton, PrimaryButton } from '@/components/auth/SocialButton';
 
 type Method = 'email' | 'phone';
@@ -26,6 +26,7 @@ export default function LoginScreen() {
   const [phone, setPhone] = useState('');
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
 
   const isEmailValid = emailRegex.test(email);
@@ -63,7 +64,24 @@ export default function LoginScreen() {
   }
 
   async function handleGoogle() {
-    setError('Login com Google em breve. Use e-mail ou telefone.');
+    setError('');
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      // AuthContext detecta onAuthStateChange → navegação automática para dashboard
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg === 'LOGIN_CANCELLED') return;
+      if (msg.includes('Supabase')) {
+        setError('Supabase não configurado. Verifique as variáveis de ambiente.');
+      } else if (msg.includes('dev build') || msg.includes('Expo Go')) {
+        setError('Login com Google requer dev build — não funciona no Expo Go.');
+      } else {
+        setError('Não foi possível entrar com Google. Tente novamente.');
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
   }
 
   return (
@@ -115,6 +133,7 @@ export default function LoginScreen() {
             emoji="🔵"
             label="Continuar com Google"
             onPress={handleGoogle}
+            loading={googleLoading}
           />
 
           {/* Divisor */}

@@ -4,6 +4,8 @@
  * para que o app continue funcionando em desenvolvimento sem backend.
  */
 
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -165,15 +167,37 @@ export async function signUpWithPhone(name: string, phone: string): Promise<void
 // ─── Google OAuth ─────────────────────────────────────────────────────────────
 
 /**
- * Login com Google.
- * Requer EXPO_PUBLIC_GOOGLE_CLIENT_ID e OAuth configurado no Supabase dashboard.
- * Por agora retorna mock — integração OAuth completa em próxima iteração.
+ * Login com Google via Supabase OAuth + expo-web-browser.
+ * Fluxo: abre Chrome Custom Tab → Google autentica → redireciona para
+ * litoralnapalma://auth/callback → exchangeCodeForSession → onAuthStateChange
+ * dispara no AuthContext → usuário logado automaticamente.
+ *
+ * Requer Google OAuth ativado no Supabase Dashboard → Authentication → Providers.
+ * Não funciona no Expo Go — apenas em dev build ou produção.
  */
-export async function signInWithGoogle(): Promise<AuthUser> {
-  throw new Error(
-    'Google OAuth não implementado — use e-mail ou telefone. ' +
-    'Pendente: expo-auth-session + supabase.auth.signInWithIdToken',
-  );
+export async function signInWithGoogle(): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Configure as variáveis EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_ANON_KEY.');
+  }
+
+  const redirectTo = Linking.createURL('auth/callback');
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo, skipBrowserRedirect: true },
+  });
+
+  if (error) throw new Error(error.message);
+  if (!data.url) throw new Error('URL de autenticação não recebida do Supabase.');
+
+  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+  if (result.type === 'success') {
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(result.url);
+    if (exchangeError) throw new Error(exchangeError.message);
+  } else if (result.type === 'cancel') {
+    throw new Error('LOGIN_CANCELLED');
+  }
 }
 
 // ─── Sign out ─────────────────────────────────────────────────────────────────

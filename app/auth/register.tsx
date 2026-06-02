@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { signUpWithEmail, signUpWithPhone } from '@/lib/auth';
-import { PrimaryButton } from '@/components/auth/SocialButton';
+import { signUpWithEmail, signUpWithPhone, signInWithGoogle } from '@/lib/auth';
+import { PrimaryButton, SocialButton } from '@/components/auth/SocialButton';
 
 type Method = 'email' | 'phone';
 
@@ -65,6 +65,7 @@ export default function RegisterScreen() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Validações
@@ -126,9 +127,35 @@ export default function RegisterScreen() {
           <Text style={{ fontSize: 26, fontWeight: '800', color: '#1e293b', marginBottom: 4 }}>
             Criar conta
           </Text>
-          <Text style={{ fontSize: 14, color: '#64748b', marginBottom: 28 }}>
+          <Text style={{ fontSize: 14, color: '#64748b', marginBottom: 20 }}>
             Preencha todos os campos para continuar
           </Text>
+
+          <SocialButton
+            emoji="🔵"
+            label="Cadastrar com Google"
+            onPress={async () => {
+              setError('');
+              setGoogleLoading(true);
+              try {
+                await signInWithGoogle();
+              } catch (err) {
+                const msg = err instanceof Error ? err.message : '';
+                if (msg !== 'LOGIN_CANCELLED') {
+                  setError('Não foi possível entrar com Google. Tente novamente.');
+                }
+              } finally {
+                setGoogleLoading(false);
+              }
+            }}
+            loading={googleLoading}
+          />
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 16 }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: '#e2e8f0' }} />
+            <Text style={{ fontSize: 13, color: '#94a3b8' }}>ou</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: '#e2e8f0' }} />
+          </View>
 
           <View style={{ gap: 16 }}>
             {/* Nome */}
