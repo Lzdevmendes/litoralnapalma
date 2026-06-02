@@ -64,7 +64,7 @@ export async function fetchTraffic(cityId?: string) {
   const city = CITIES.find((c) => c.id === cityId) ?? CITIES[0];
 
   const realData = await fetchGoogleTraffic(city.highways).catch(
-    () => ({}) as Partial<Record<string, never>>
+    (): Partial<Record<string, { level: import('./types').TrafficLevel; travelTime: number }>> => ({})
   );
   const hasRealData = Object.keys(realData).length > 0;
 

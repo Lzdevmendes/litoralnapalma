@@ -14,6 +14,5 @@ export function useFerry() {
     queryFn: getMockFerry,
     staleTime: 10 * 60 * 1000,
     refetchInterval: 10 * 60 * 1000,
-    refetchOnWindowFocus: true,
   });
 }

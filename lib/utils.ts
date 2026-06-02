@@ -19,13 +19,12 @@ export function occupancyColor(occupancy: BeachOccupancy): string {
   return map[occupancy];
 }
 
-export function occupancyLabel(occupancy: BeachOccupancy): string {
-  const map: Record<BeachOccupancy, string> = {
-    vazia: "Vazia",
-    moderada: "Moderada",
-    lotada: "Lotada",
+export function occupancyLabel(occupancy: BeachOccupancy, locale: 'pt' | 'en' = 'pt'): string {
+  const labels: Record<'pt' | 'en', Record<BeachOccupancy, string>> = {
+    pt: { vazia: 'Vazia', moderada: 'Moderada', lotada: 'Lotada' },
+    en: { vazia: 'Empty', moderada: 'Moderate', lotada: 'Crowded' },
   };
-  return map[occupancy];
+  return labels[locale][occupancy];
 }
 
 export function formatWaitTime(minutes: number): string {

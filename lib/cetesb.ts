@@ -78,7 +78,20 @@ export async function fetchCETESBWaterQuality(): Promise<WaterQualityResult[]> {
     f: "json",
   });
 
-  const res = await fetch(`${CETESB_URL}?${params.toString()}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10_000);
+
+  let res: Response;
+  try {
+    res = await fetch(`${CETESB_URL}?${params.toString()}`, { signal: controller.signal });
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('CETESB: timeout — servidor demorou mais de 10s');
+    }
+    throw err;
+  }
+  clearTimeout(timeoutId);
 
   if (!res.ok) {
     throw new Error(`CETESB FeatureServer error: ${res.status}`);
