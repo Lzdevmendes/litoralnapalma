@@ -7,18 +7,15 @@ import { useUPA } from '@/hooks/useUPA';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
 import { formatWaitTime } from '@/lib/utils';
+import { C, R, CARD_BASE } from '@/lib/design';
 
-const statusEmoji: Record<'normal' | 'alerta' | 'critico', string> = {
-  normal: '🟢',
-  alerta: '🟡',
-  critico: '🔴',
-};
+const STATUS_COLOR = {
+  normal:  C.success,
+  alerta:  C.warning,
+  critico: C.danger,
+} as const;
 
-const statusColor: Record<'normal' | 'alerta' | 'critico', string> = {
-  normal: '#22c55e',
-  alerta: '#f59e0b',
-  critico: '#ef4444',
-};
+const STATUS_EMOJI = { normal: '🟢', alerta: '🟡', critico: '🔴' } as const;
 
 export function UPACard() {
   const { city } = useCity();
@@ -30,104 +27,86 @@ export function UPACard() {
 
   if (upas.length === 0) {
     return (
-      <View
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.85)',
-          borderRadius: 20,
-          padding: 16,
-          borderWidth: 1,
-          borderColor: 'rgba(0,0,0,0.06)',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 12,
-        }}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            backgroundColor: '#fef2f2',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Text style={{ fontSize: 20 }}>🏥</Text>
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: '#1e293b' }}>{t.upa.label}</Text>
-          <Text style={{ fontSize: 12, color: '#64748b', marginTop: 2, lineHeight: 18 }}>
-            Sem UPA local. Referência: UPA São Sebastião (balsa + 30 min)
-          </Text>
+      <View style={CARD_BASE}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{ width: 4, height: 14, borderRadius: 2, backgroundColor: C.danger }} />
+          <View style={{
+            width: 34, height: 34, borderRadius: R.icon,
+            backgroundColor: '#fef2f2', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Text style={{ fontSize: 17 }}>🏥</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: C.textPrimary }}>{t.upa.label}</Text>
+            <Text style={{ fontSize: 12, color: C.textSecondary, marginTop: 2 }}>
+              {city.name === 'Ilhabela'
+                ? 'Referência: UPA São Sebastião (balsa + 30 min)'
+                : 'Sem UPA nesta cidade'}
+            </Text>
+          </View>
         </View>
       </View>
     );
   }
 
   return (
-    <View
-      style={{
-        backgroundColor: 'rgba(255,255,255,0.85)',
-        borderRadius: 20,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.06)',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-        gap: 12,
-      }}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <View
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            backgroundColor: '#fef2f2',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Text style={{ fontSize: 18 }}>🏥</Text>
+    <View style={CARD_BASE}>
+      {/* Cabeçalho */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ width: 4, height: 14, borderRadius: 2, backgroundColor: C.danger }} />
+          <View style={{
+            width: 34, height: 34, borderRadius: R.icon,
+            backgroundColor: '#fef2f2', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Text style={{ fontSize: 17 }}>🏥</Text>
+          </View>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: C.textPrimary }}>{t.upa.label}</Text>
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.upa.label}</Text>
-        </View>
-        <MockBadge message="Tempos de espera são estimados. Integração com SES-SP em andamento." />
+        <MockBadge message={
+          t.upa.label === 'Saúde · UPAs'
+            ? 'Tempos de espera são estimados. Integração com SES-SP em andamento.'
+            : 'Wait times are estimated. SES-SP integration in progress.'
+        } />
       </View>
 
+      {/* Lista de UPAs */}
       <View style={{ gap: 8 }}>
         {upas.map((upa) => {
-          const emoji = statusEmoji[upa.status];
-          const color = statusColor[upa.status];
-          const label = t.upa.status[upa.status];
+          const color = STATUS_COLOR[upa.status];
           return (
             <View
               key={upa.id}
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: 'rgba(0,0,0,0.03)',
+                backgroundColor: C.surfaceAlt,
                 borderRadius: 14,
                 padding: 12,
-                gap: 12,
+                gap: 8,
+                borderLeftWidth: 3,
+                borderLeftColor: color,
               }}
             >
-              <Text style={{ fontSize: 20 }}>{emoji}</Text>
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                  <Text style={{ fontSize: 14, fontWeight: '600', color: '#1e293b' }}>{upa.name}</Text>
-                  <Badge color={color}>{label}</Badge>
-                </View>
-                <Text style={{ fontSize: 12, color: '#64748b' }} selectable>
-                  {upa.address}
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: C.textPrimary, flex: 1 }}>
+                  {STATUS_EMOJI[upa.status]} {upa.name}
                 </Text>
-                <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
-                  <Text style={{ fontSize: 12, color: '#64748b' }}>
-                    ⏳ {t.upa.wait}:{' '}
-                    <Text style={{ color, fontWeight: '700' }}>{formatWaitTime(upa.waitTime)}</Text>
+                <Badge color={color}>{t.upa.status[upa.status]}</Badge>
+              </View>
+
+              <Text style={{ fontSize: 11, color: C.textMuted }} selectable>
+                {upa.address}
+              </Text>
+
+              <View style={{ flexDirection: 'row', gap: 14 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={{ fontSize: 11, color: C.textSecondary }}>⏳ {t.upa.wait}:</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color }}>{formatWaitTime(upa.waitTime)}</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={{ fontSize: 11, color: C.textSecondary }}>👤</Text>
+                  <Text style={{ fontSize: 12, color: C.textSecondary }}>
+                    {upa.patientsWaiting} {t.upa.waiting}
                   </Text>
-                  <Text style={{ fontSize: 12, color: '#64748b' }}>👤 {upa.patientsWaiting} {t.upa.waiting}</Text>
                 </View>
               </View>
             </View>

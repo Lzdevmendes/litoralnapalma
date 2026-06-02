@@ -171,8 +171,11 @@ export default function DashboardScreen() {
 
 function SectionTitle({ children }: { children: string }) {
   return (
-    <Text style={{ fontSize: 13, fontWeight: '700', color: '#475569', paddingHorizontal: 2 }}>
-      {children}
-    </Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 2 }}>
+      <View style={{ width: 3, height: 12, borderRadius: 2, backgroundColor: '#0077b6' }} />
+      <Text style={{ fontSize: 11, fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+        {children}
+      </Text>
+    </View>
   );
 }
