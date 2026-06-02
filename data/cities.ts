@@ -69,6 +69,7 @@ export interface BeachAmenities {
   estacionamento: boolean;
 }
 
+
 export interface BeachStatic {
   id: string;
   name: string;

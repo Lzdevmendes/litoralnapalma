@@ -92,3 +92,4 @@ export interface Report {
   expiresAt?: string; // ISO string — reports expiram em 24h
   upvotes: number;
 }
+
