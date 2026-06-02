@@ -2,7 +2,6 @@ import { View, Text } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
-import { MockBadge } from '@/components/ui/mock-badge';
 import { useFerry } from '@/hooks/useFerry';
 import { useLanguage } from '@/context/language-context';
 import { timeAgo } from '@/lib/utils';
@@ -86,12 +85,9 @@ export function FerryCard() {
       </View>
 
       {/* Rodapé */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <MockBadge message="Status da balsa é estimado. API DER-SP em integração." />
-        <Text style={{ fontSize: 10, color: C.textMuted }}>
-          {t.ferry.updated} {timeAgo(ferry.lastUpdated, locale)}
-        </Text>
-      </View>
+      <Text style={{ fontSize: 10, color: C.textMuted, textAlign: 'right' }}>
+        {t.ferry.updated} {timeAgo(ferry.lastUpdated, locale)}
+      </Text>
     </View>
   );
 }

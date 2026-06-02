@@ -2,7 +2,6 @@ import { View, Text } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
-import { MockBadge } from '@/components/ui/mock-badge';
 import { useUPA } from '@/hooks/useUPA';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
@@ -52,22 +51,15 @@ export function UPACard() {
   return (
     <View style={CARD_BASE}>
       {/* Cabeçalho */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <View style={{ width: 4, height: 14, borderRadius: 2, backgroundColor: C.danger }} />
-          <View style={{
-            width: 34, height: 34, borderRadius: R.icon,
-            backgroundColor: '#fef2f2', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Text style={{ fontSize: 17 }}>🏥</Text>
-          </View>
-          <Text style={{ fontSize: 15, fontWeight: '700', color: C.textPrimary }}>{t.upa.label}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ width: 4, height: 14, borderRadius: 2, backgroundColor: C.danger }} />
+        <View style={{
+          width: 34, height: 34, borderRadius: R.icon,
+          backgroundColor: '#fef2f2', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Text style={{ fontSize: 17 }}>🏥</Text>
         </View>
-        <MockBadge message={
-          t.upa.label === 'Saúde · UPAs'
-            ? 'Tempos de espera são estimados. Integração com SES-SP em andamento.'
-            : 'Wait times are estimated. SES-SP integration in progress.'
-        } />
+        <Text style={{ fontSize: 15, fontWeight: '700', color: C.textPrimary }}>{t.upa.label}</Text>
       </View>
 
       {/* Lista de UPAs */}
