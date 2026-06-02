@@ -4,11 +4,14 @@ import { useBeaches } from '@/hooks/useBeaches';
 import { useTraffic } from '@/hooks/useTraffic';
 import { useUPA } from '@/hooks/useUPA';
 import { useCity } from '@/context/city-context';
+import { useLanguage } from '@/context/language-context';
 import { trafficLevelColor } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { C } from '@/lib/design';
 
 export function QuickStats() {
   const { city } = useCity();
+  const { t } = useLanguage();
   const { data: weather, isLoading: loadingWeather } = useWeather(city);
   const { data: beaches, isLoading: loadingBeaches } = useBeaches(city);
   const { data: traffic, isLoading: loadingTraffic } = useTraffic(city);
@@ -24,7 +27,7 @@ export function QuickStats() {
         contentContainerStyle={{ gap: 10, paddingHorizontal: 16 }}
       >
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} style={{ width: 96, height: 80, borderRadius: 16 }} />
+          <Skeleton key={i} style={{ width: 100, height: 86, borderRadius: 18 }} />
         ))}
       </ScrollView>
     );
@@ -36,36 +39,38 @@ export function QuickStats() {
   const totalBeaches = beaches?.length ?? 0;
   const firstUPA = upas && upas.length > 0 ? upas[0] : null;
 
+  const upaStatusColor = firstUPA
+    ? ({ normal: C.success, alerta: C.warning, critico: C.danger } as const)[firstUPA.status]
+    : C.textMuted;
+
   const stats = [
     {
       emoji: '🌡️',
-      label: 'Temperatura',
-      value: weather ? `${weather.temperature}°C` : '---',
+      label: t.quickStats.temperature,
+      value: weather ? `${weather.temperature}°` : '—',
+      sub: weather ? `↑ ${weather.feelsLike}°` : '',
       color: '#f59e0b',
     },
     {
       emoji: '🚗',
-      label: 'Trânsito',
-      value: worstRoute
-        ? ({ livre: 'Livre', moderado: 'Moderado', lento: 'Lento', parado: 'Parado' }[worstRoute.level])
-        : '---',
-      color: worstRoute ? trafficLevelColor(worstRoute.level) : '#94a3b8',
+      label: t.quickStats.traffic,
+      value: worstRoute ? t.traffic.levels[worstRoute.level] : '—',
+      sub: worstRoute ? worstRoute.shortName : '',
+      color: worstRoute ? trafficLevelColor(worstRoute.level) : C.textMuted,
     },
     {
       emoji: '🏖️',
-      label: 'Praias Livres',
-      value: beaches ? `${freeBeaches}/${totalBeaches}` : '---',
-      color: freeBeaches > 0 ? '#22c55e' : '#f59e0b',
+      label: t.quickStats.freeBeaches,
+      value: beaches ? `${freeBeaches}/${totalBeaches}` : '—',
+      sub: beaches ? `${Math.round((freeBeaches / totalBeaches) * 100)}%` : '',
+      color: freeBeaches > 0 ? C.success : C.warning,
     },
     {
       emoji: '🏥',
-      label: 'UPA',
-      value: firstUPA
-        ? { normal: 'Normal', alerta: 'Alerta', critico: 'Crítico' }[firstUPA.status]
-        : 'N/A',
-      color: firstUPA
-        ? { normal: '#22c55e', alerta: '#f59e0b', critico: '#ef4444' }[firstUPA.status]
-        : '#94a3b8',
+      label: t.quickStats.upa,
+      value: firstUPA ? t.upa.status[firstUPA.status] : 'N/A',
+      sub: firstUPA ? `${firstUPA.waitTime} min` : '',
+      color: upaStatusColor,
     },
   ];
 
@@ -75,28 +80,35 @@ export function QuickStats() {
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ gap: 10, paddingHorizontal: 16 }}
     >
-      {stats.map(({ emoji, label, value, color }) => (
+      {stats.map(({ emoji, label, value, sub, color }) => (
         <View
           key={label}
           style={{
             backgroundColor: '#fff',
-            borderRadius: 16,
-            paddingHorizontal: 16,
-            paddingVertical: 14,
+            borderRadius: 18,
+            paddingHorizontal: 14,
+            paddingVertical: 12,
             alignItems: 'center',
-            gap: 4,
-            minWidth: 92,
+            gap: 3,
+            minWidth: 96,
             borderWidth: 1,
-            borderColor: `${color}20`,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            borderColor: `${color}22`,
+            boxShadow: `0 2px 10px ${color}14`,
           }}
         >
+          {/* Dot indicator */}
+          <View style={{
+            width: 6, height: 6, borderRadius: 3,
+            backgroundColor: color, marginBottom: 2,
+          }} />
           <Text style={{ fontSize: 22 }}>{emoji}</Text>
-          {/* Valor grande e em destaque — regra: valor > label */}
-          <Text style={{ fontSize: 16, fontWeight: '800', color, lineHeight: 20 }}>{value}</Text>
-          <Text style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.4 }}>
+          <Text style={{ fontSize: 15, fontWeight: '800', color, lineHeight: 18 }}>{value}</Text>
+          <Text style={{ fontSize: 9, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 }}>
             {label}
           </Text>
+          {sub ? (
+            <Text style={{ fontSize: 10, color, fontWeight: '600' }}>{sub}</Text>
+          ) : null}
         </View>
       ))}
     </ScrollView>
