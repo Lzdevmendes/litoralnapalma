@@ -170,14 +170,10 @@ export async function signUpWithPhone(name: string, phone: string): Promise<void
  * Por agora retorna mock — integração OAuth completa em próxima iteração.
  */
 export async function signInWithGoogle(): Promise<AuthUser> {
-  await delay(900);
-  // TODO: expo-auth-session + supabase.auth.signInWithOAuth({ provider: 'google' })
-  return {
-    id: `google_mock_${Date.now()}`,
-    name: 'Usuário Google',
-    email: 'usuario@gmail.com',
-    photoUrl: undefined,
-  };
+  throw new Error(
+    'Google OAuth não implementado — use e-mail ou telefone. ' +
+    'Pendente: expo-auth-session + supabase.auth.signInWithIdToken',
+  );
 }
 
 // ─── Sign out ─────────────────────────────────────────────────────────────────

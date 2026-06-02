@@ -22,6 +22,26 @@ interface HookUser {
   user_metadata?: { full_name?: string; name?: string };
 }
 
+// ─── HMAC validation ─────────────────────────────────────────────────────────
+
+async function verifyHookSignature(req: Request, rawBody: string): Promise<boolean> {
+  if (!HOOK_SECRET) return true; // dev: sem secret configurado, permite tudo
+  const sig = req.headers.get("x-supabase-signature") ?? "";
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(HOOK_SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signatureBytes = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
+  const expectedHex = Array.from(new Uint8Array(signatureBytes))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return sig === expectedHex;
+}
+
 // ─── Templates ───────────────────────────────────────────────────────────────
 
 function buildEmailHTML(token: string, actionType: ActionType): string {
@@ -87,16 +107,13 @@ function buildEmailHTML(token: string, actionType: ActionType): string {
           <!-- ── Body ── -->
           <tr>
             <td style="padding:40px 36px 32px;">
-
               <h1 style="margin:0 0 14px;font-size:22px;font-weight:800;color:#0f172a;
                           letter-spacing:-0.3px;line-height:1.3;">
                 ${headline}
               </h1>
-
               <p style="margin:0 0 36px;font-size:15px;color:#475569;line-height:1.7;">
                 ${body}
               </p>
-
               <!-- OTP Box -->
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
                 style="background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);
@@ -118,7 +135,6 @@ function buildEmailHTML(token: string, actionType: ActionType): string {
                   </td>
                 </tr>
               </table>
-
               <!-- Warning -->
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
                 style="background:#fef9ec;border:1px solid #fde68a;border-radius:12px;
@@ -132,31 +148,15 @@ function buildEmailHTML(token: string, actionType: ActionType): string {
                   </td>
                 </tr>
               </table>
-
               <p style="margin:0;font-size:13px;color:#94a3b8;text-align:center;line-height:1.6;">
                 Se você não solicitou este código, pode ignorar este e-mail com segurança.
               </p>
-
-            </td>
-          </tr>
-
-          <!-- ── Divider ── -->
-          <tr>
-            <td style="padding:0 36px;">
-              <hr style="border:none;border-top:1px solid #e2e8f0;margin:0;">
             </td>
           </tr>
 
           <!-- ── Footer ── -->
           <tr>
-            <td style="padding:24px 36px;text-align:center;">
-              <div style="margin-bottom:14px;">
-                <span style="display:inline-flex;align-items:center;gap:6px;
-                             background:#f0f9ff;border-radius:100px;
-                             padding:6px 14px 6px 10px;font-size:13px;color:#0077b6;font-weight:600;">
-                  🏖️ &nbsp;Praias &nbsp;·&nbsp; 🚗 Trânsito &nbsp;·&nbsp; 🌤️ Clima &nbsp;·&nbsp; 🏥 UPAs
-                </span>
-              </div>
+            <td style="padding:24px 36px;text-align:center;border-top:1px solid #e2e8f0;">
               <div style="font-size:12px;color:#94a3b8;line-height:1.8;">
                 © 2026 Litoral na Palma · São Paulo, Brasil<br>
                 Este e-mail foi enviado automaticamente — não responda.
@@ -187,10 +187,15 @@ function getSubject(actionType: ActionType): string {
 // ─── Handler ─────────────────────────────────────────────────────────────────
 
 Deno.serve(async (req: Request) => {
+  const rawBody = await req.text();
+
+  if (!(await verifyHookSignature(req, rawBody))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
 
   let payload: { user: HookUser; email_data: EmailData };
   try {
-    payload = await req.json();
+    payload = JSON.parse(rawBody) as { user: HookUser; email_data: EmailData };
   } catch {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400 });
   }

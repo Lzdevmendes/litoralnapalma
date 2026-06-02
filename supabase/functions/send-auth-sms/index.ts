@@ -1,9 +1,9 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const INFOBIP_KEY     = Deno.env.get("INFOBIP_API_KEY") ?? "";
-const INFOBIP_BASE    = Deno.env.get("INFOBIP_BASE_URL") ?? "";
-const HOOK_SECRET     = Deno.env.get("SEND_SMS_HOOK_SECRET") ?? "";
-const SENDER_NAME     = "LitoralPalma";
+const INFOBIP_KEY  = Deno.env.get("INFOBIP_API_KEY") ?? "";
+const INFOBIP_BASE = Deno.env.get("INFOBIP_BASE_URL") ?? "";
+const HOOK_SECRET  = Deno.env.get("SEND_SMS_HOOK_SECRET") ?? "";
+const SENDER_NAME  = "LitoralPalma";
 
 interface SmsData {
   otp: string;
@@ -14,15 +14,44 @@ interface HookUser {
   phone: string;
 }
 
+// ─── HMAC validation ─────────────────────────────────────────────────────────
+
+async function verifyHookSignature(req: Request, rawBody: string): Promise<boolean> {
+  if (!HOOK_SECRET) return true; // dev: sem secret configurado, permite tudo
+  const sig = req.headers.get("x-supabase-signature") ?? "";
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(HOOK_SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signatureBytes = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
+  const expectedHex = Array.from(new Uint8Array(signatureBytes))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return sig === expectedHex;
+}
+
+// ─── SMS body ────────────────────────────────────────────────────────────────
+
 function buildSmsBody(otp: string): string {
   return `🌊 Litoral na Palma\n\nSeu código de acesso: ${otp}\n\nVálido por 10 minutos. Não compartilhe este código com ninguém.`;
 }
 
+// ─── Handler ─────────────────────────────────────────────────────────────────
+
 Deno.serve(async (req: Request) => {
+  const rawBody = await req.text();
+
+  if (!(await verifyHookSignature(req, rawBody))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
 
   let payload: { user: HookUser; sms_data: SmsData };
   try {
-    payload = await req.json();
+    payload = JSON.parse(rawBody) as { user: HookUser; sms_data: SmsData };
   } catch {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400 });
   }
