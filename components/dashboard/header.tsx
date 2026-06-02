@@ -232,16 +232,27 @@ export function Header() {
 
             <View style={{ height: 1, backgroundColor: '#f1f5f9' }} />
 
+            {/* Configurações */}
+            <Pressable
+              onPress={() => { setShowUserMenu(false); router.push('/settings'); }}
+              style={({ pressed }) => ({
+                flexDirection: 'row', alignItems: 'center', gap: 10,
+                paddingVertical: 8, paddingHorizontal: 4, borderRadius: 10,
+                backgroundColor: pressed ? '#f0f9ff' : 'transparent',
+              })}
+            >
+              <Text style={{ fontSize: 18 }}>⚙️</Text>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#1e293b' }}>Configurações</Text>
+            </Pressable>
+
+            <View style={{ height: 1, backgroundColor: '#f1f5f9' }} />
+
             {/* Botão sair */}
             <Pressable
               onPress={handleSignOut}
               style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 10,
-                paddingVertical: 8,
-                paddingHorizontal: 4,
-                borderRadius: 10,
+                flexDirection: 'row', alignItems: 'center', gap: 10,
+                paddingVertical: 8, paddingHorizontal: 4, borderRadius: 10,
                 backgroundColor: pressed ? '#fef2f2' : 'transparent',
               })}
             >
