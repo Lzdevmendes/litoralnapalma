@@ -20,8 +20,6 @@ const config: ExpoConfig = {
     infoPlist: {
       NSLocationWhenInUseUsageDescription:
         "Usamos sua localização para mostrar alertas de praias e trânsito próximos a você.",
-      NSLocationAlwaysUsageDescription:
-        "Usamos sua localização para alertas em tempo real do litoral.",
     },
   },
   android: {
