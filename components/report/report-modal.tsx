@@ -20,6 +20,7 @@ import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
 import * as Location from 'expo-location';
 import { useSubmitReport } from '@/hooks/useReports';
+import { canSubmitReport, recordReportSubmission, formatCooldown } from '@/lib/report-rate-limit';
 import type { City } from '@/data/cities';
 import type { ReportType } from '@/lib/types';
 
@@ -108,6 +109,8 @@ export function ReportModal({ visible, onClose, city }: Props) {
   const [locMode, setLocMode]         = useState<'gps' | 'map' | null>(null);
   const [gpsLoading, setGpsLoading]   = useState(false);
   const [gpsError, setGpsError]       = useState('');
+  const [mapError, setMapError]       = useState(false);
+  const [rateLimitMsg, setRateLimitMsg] = useState('');
 
   const { mutate: submit, isPending, isSuccess } = useSubmitReport();
 
@@ -146,14 +149,25 @@ export function ReportModal({ visible, onClose, city }: Props) {
     } catch { /* malformed */ }
   }
 
-  function handleSubmit() {
+  function handleMapError() {
+    setMapError(true);
+  }
+
+  async function handleSubmit() {
     if (!selected) return;
+    const { allowed, remainingMs } = await canSubmitReport();
+    if (!allowed) {
+      setRateLimitMsg(`Aguarde ${formatCooldown(remainingMs)} antes de enviar outro reporte.`);
+      return;
+    }
+    setRateLimitMsg('');
     const coords = location ?? { lat: city.center.lat, lng: city.center.lng };
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     submit(
       { type: selected, description, lat: coords.lat, lng: coords.lng, city: city.id },
       {
         onSuccess: () => {
+          recordReportSubmission().catch(() => {});
           setTimeout(() => handleClose(), 1200);
         },
       },
@@ -287,15 +301,26 @@ export function ReportModal({ visible, onClose, city }: Props) {
 
             {/* Leaflet picker */}
             <View style={{ flex: 1, marginHorizontal: 16, borderRadius: 16, overflow: 'hidden', borderWidth: 1.5, borderColor: locMode === 'map' ? '#0077b6' : '#e2e8f0' }}>
-              <WebView
-                source={{ html: pickerHTML }}
-                onMessage={handleMapMessage}
-                javaScriptEnabled
-                domStorageEnabled
-                originWhitelist={['*']}
-                mixedContentMode="always"
-                style={{ flex: 1 }}
-              />
+              {mapError ? (
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#f8fafc' }}>
+                  <Text style={{ fontSize: 32 }}>🗺️</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#1e293b' }}>Mapa indisponível</Text>
+                  <Text style={{ fontSize: 12, color: '#64748b', textAlign: 'center', paddingHorizontal: 24 }}>
+                    Sem conexão com internet. Use o GPS ou pule esta etapa.
+                  </Text>
+                </View>
+              ) : (
+                <WebView
+                  source={{ html: pickerHTML }}
+                  onMessage={handleMapMessage}
+                  onError={handleMapError}
+                  javaScriptEnabled
+                  domStorageEnabled
+                  originWhitelist={['*']}
+                  mixedContentMode="always"
+                  style={{ flex: 1 }}
+                />
+              )}
             </View>
 
             <View style={{ padding: 16, gap: 10 }}>
@@ -375,8 +400,9 @@ export function ReportModal({ visible, onClose, city }: Props) {
             </Text>
             <TextInput
               value={description}
-              onChangeText={setDescription}
+              onChangeText={(t) => setDescription(t.slice(0, 280))}
               placeholder="Ex: Acidente na Rio-Santos, km 178..."
+              maxLength={280}
               placeholderTextColor="#94a3b8"
               multiline
               numberOfLines={3}
@@ -411,6 +437,11 @@ export function ReportModal({ visible, onClose, city }: Props) {
                     </Text>}
               </TouchableOpacity>
             </View>
+            {rateLimitMsg ? (
+              <Text style={{ fontSize: 12, color: '#f59e0b', textAlign: 'center', marginTop: 4 }}>
+                ⏳ {rateLimitMsg}
+              </Text>
+            ) : null}
           </ScrollView>
         )}
       </View>
