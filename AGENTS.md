@@ -25,7 +25,7 @@ app/
   praia/[id].tsx       # Detalhe de praia
   posto/[id].tsx       # Detalhe de posto
 components/
-  dashboard/           # Cards: weather, traffic, beach, upa, ferry, gas, bus, restaurant, attraction
+  dashboard/           # Cards: weather, traffic, beach, upa, ferry, gas, bus, parking, restaurant, attraction
   geofencing/          # GeofenceAlert — alertas por distância GPS
   map/                 # map-view.tsx (nativo ou WebView), webview-map.tsx
   report/              # ReportButton, ReportModal (3 etapas + Leaflet picker)
@@ -37,21 +37,22 @@ context/
   language-context.tsx # Locale pt/en (AsyncStorage)
   user-mode-context.tsx# morador ou turista (AsyncStorage)
 hooks/
-  useWeather.ts        # OWM API ou mock, refetch 5min
-  useTraffic.ts        # Google Routes API ou mock, refetch 5min
-  useBeaches.ts        # mock (ocupação dinâmica), refetch 3min
+  useWeather.ts        # OWM API ou estimativa, refetch 5min
+  useTraffic.ts        # Google Routes API ou estimativa, refetch 5min
+  useBeaches.ts        # estimativa dinâmica, refetch 3min
   useWaterQuality.ts   # CETESB ArcGIS (pública), staleTime 24h
-  useUPA.ts            # mock, refetch 3min
-  useFerry.ts          # mock, refetch 10min (TODO: API DER-SP)
+  useUPA.ts            # estimativa, refetch 3min
+  useFerry.ts          # estimativa, refetch 10min
   useGasStations.ts    # estático de cities.ts, staleTime 6h
   useBusLines.ts       # estático + computeTimes() dinâmico, refetch 1min
-  useReports.ts        # Supabase ou mock, refetch 60s
+  useReports.ts        # Supabase ou estimativa, refetch 60s
+  useParkingZones.ts   # API Zona Azul ou estimativa por horário, refetch 2min
   useAttractions.ts    # estático de cities.ts
   useRestaurants.ts    # estático de cities.ts
   useGeolocation.ts    # expo-location foreground, watchPosition 50m/30s
   useNotifications.ts  # solicita permissão + listener de resposta
 lib/
-  api.ts               # Orquestra: decide mock vs real para cada serviço
+  api.ts               # Orquestra: decide API real vs estimativa para cada serviço
   auth.ts              # OTP email/phone, verifyOTP, signUpWith*, signOut
   cetesb.ts            # Fetch CETESB ArcGIS → mapeia para beachId interno
   i18n.ts              # Dicionário PT/EN (as const), tipo Translations
@@ -59,29 +60,52 @@ lib/
   reports.ts           # CRUD Supabase: fetchReports, submitReport, upvoteReport
   supabase.ts          # createClient com AsyncStorage como session adapter
   traffic.ts           # Google Routes API → TrafficLevel
-  types.ts             # TrafficRoute, Beach, UPA, Report, FerryStatus, WeatherData, AuthUser
+  zonaazul.ts          # API Zona Azul → ParkingZone[] (fallback por horário)
+  types.ts             # TrafficRoute, Beach, UPA, Report, FerryStatus, WeatherData, ParkingZone, AuthUser
   utils.ts             # trafficLevelColor, occupancyColor, formatWaitTime, timeAgo, haversine
 data/
-  cities.ts            # CITIES: array estático com praias, UPAs, rodovias, postos, ônibus, etc.
-  mock.ts              # Generators: getMockWeather/Traffic/Beaches/UPAs/Ferry/Reports
+  cities.ts            # CITIES: array estático com praias, UPAs, rodovias, postos, ônibus, parkingZones, etc.
+  mock.ts              # Generators: estimativas dinâmicas para Weather/Traffic/Beaches/UPAs/Ferry/Reports/Parking
 ```
 
-## Arquitetura mock vs real
+## Arquitetura API real vs estimativa
 
 ```
-Dado         | Condição real                    | Fallback
--------------|----------------------------------|----------------------------
-Clima        | EXPO_PUBLIC_OPENWEATHER_KEY      | getMockWeather()
-Trânsito     | EXPO_PUBLIC_GOOGLE_ROUTES_KEY    | getMockTraffic()
-Reports      | EXPO_PUBLIC_SUPABASE_URL + KEY   | getMockReports()
-Balneabilidade| (API pública CETESB, sem chave) | Lança erro → React Query error state
-Auth OTP     | EXPO_PUBLIC_SUPABASE_URL + KEY   | DEV_OTP='000000' aceito
-Balsa        | SEMPRE MOCK                      | getMockFerry()
-Praias dinâm.| SEMPRE MOCK                      | getMockBeaches()
-UPA dinâmica | SEMPRE MOCK                      | getMockUPAs()
+Dado           | Condição real                            | Sem chave / fallback
+---------------|------------------------------------------|----------------------------
+Clima          | EXPO_PUBLIC_OPENWEATHER_KEY              | estimativa por região
+Trânsito       | EXPO_PUBLIC_GOOGLE_ROUTES_KEY            | estimativa ponderada
+Reports        | EXPO_PUBLIC_SUPABASE_URL + KEY           | memória local (sessão)
+Balneabilidade | API pública CETESB (sem chave)           | Lança erro → error state
+Auth OTP       | EXPO_PUBLIC_SUPABASE_URL + KEY           | DEV_OTP='000000' aceito
+Zona Azul      | EXPO_PUBLIC_ZONA_AZUL_API_KEY + BASE     | estimativa por hora do dia
+Balsa          | (sem API pública disponível)             | estimativa por hora/dia
+Praias dinâm.  | (sem API pública disponível)             | estimativa de ocupação
+UPA dinâmica   | (sem API pública disponível)             | estimativa de tempo de espera
 ```
 
-**Fronteira mock↔real em `lib/api.ts`** — ponto único de decisão para a maioria dos serviços. `lib/cetesb.ts` e `lib/traffic.ts` têm a decisão internamente.
+**Fronteira real↔estimativa em `lib/api.ts`** — ponto único de decisão para a maioria dos serviços. `lib/cetesb.ts`, `lib/traffic.ts` e `lib/zonaazul.ts` têm a decisão internamente.
+
+## Zona Azul — integração
+
+`lib/zonaazul.ts` gerencia a ocupação das vagas regulamentadas:
+- **Com `EXPO_PUBLIC_ZONA_AZUL_API_KEY`**: consome API municipal (contrato com prefeitura), mescla dados dinâmicos (`availableSpots`, `updatedAt`) com dados estáticos de `cities.ts`
+- **Sem chave**: `getMockParkingZones()` em `data/mock.ts` estima disponibilidade com base na hora do dia (pico 10h–18h = 75% das vagas ocupadas; fora de pico = 35%)
+
+Zonas cadastradas por cidade em `data/cities.ts → City.parkingZones`:
+- Caraguatatuba: 3 zonas (170 vagas total)
+- São Sebastião: 3 zonas (210 vagas total)
+- Ubatuba: 3 zonas (180 vagas total)
+- Ilhabela: 2 zonas (130 vagas total)
+
+## Mapa WebView (Expo Go)
+
+`components/map/webview-map.tsx` usa Leaflet carregado via CDN (`unpkg.com`).
+
+**Configuração crítica para funcionar em dev:**
+- `source={{ html, baseUrl: 'https://unpkg.com' }}` — define origem para permitir recursos externos
+- `allowFileAccess` + `allowUniversalAccessFromFileURLs` — compatibilidade Android/iOS
+- SRI (`integrity`/`crossorigin`) **removido intencionalmente** — atributos CORS/SRI bloqueiam recursos externos quando HTML é carregado de null origin no WebView nativo
 
 ## Supabase — segurança (RLS obrigatório)
 
@@ -109,8 +133,8 @@ Sem RLS em `reports`: qualquer pessoa pode ler, inserir, atualizar ou deletar to
 ```
 Cadastro:  signUpWithEmail/Phone(name, contact) → OTP enviado → verifyOTP → AuthUser
 Login:     sendEmailOTP/sendPhoneOTP(contact)   → OTP enviado → verifyOTP → AuthUser
-Dev/mock:  qualquer OTP, DEV_OTP='000000' aceito em verifyOTP
-Google:    signInWithGoogle() → MOCK hardcoded (não implementado em produção)
+Dev:       qualquer OTP, DEV_OTP='000000' aceito em verifyOTP
+Google:    signInWithGoogle() → não implementado em produção (requer expo-auth-session)
 ```
 
 `AuthContext` persiste `AuthUser` em SecureStore e escuta `onAuthStateChange` do Supabase para sincronizar tokens.
@@ -156,11 +180,11 @@ supabase secrets set SEND_SMS_HOOK_SECRET=<copiado acima>
 > **Resend sem domínio:** use `noreply@resend.dev` para testes.
 > **Infobip:** conta gratuita com 60 dias de trial.
 
-## Problemas conhecidos / TODOs
+## TODOs
 
-- `useFerry` — sempre mock; API DER-SP ainda não mapeada
-- `signInWithGoogle` — mock hardcoded; requer expo-auth-session + Supabase OAuth
+- `signInWithGoogle` — requer expo-auth-session + Supabase OAuth
 - `submitReportToSupabase` — sem validação de tamanho máximo de description no client
 - `NSLocationAlwaysUsageDescription` em `app.config.ts` — presente mas app só solicita foreground permission; remover para evitar rejeição na App Store
 - Sessão Supabase em `AsyncStorage` — não criptografado; migrar para LargeSecureStore em versão futura
 - Edge functions sem validação de HMAC do Hook Secret — adicionar verificação de assinatura
+- API DER-SP (balsa) — nenhuma API pública mapeada ainda
