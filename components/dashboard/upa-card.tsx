@@ -2,6 +2,7 @@ import { View, Text } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
+import { MockBadge } from '@/components/ui/mock-badge';
 import { useUPA } from '@/hooks/useUPA';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
@@ -89,7 +90,10 @@ export function UPACard() {
         >
           <Text style={{ fontSize: 18 }}>🏥</Text>
         </View>
-        <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.upa.label}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.upa.label}</Text>
+        </View>
+        <MockBadge message="Tempos de espera são estimados. Integração com SES-SP em andamento." />
       </View>
 
       <View style={{ gap: 8 }}>
