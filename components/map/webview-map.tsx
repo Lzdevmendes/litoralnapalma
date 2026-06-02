@@ -2,6 +2,10 @@
  * Mapa interativo via Leaflet + OpenStreetMap — funciona no Expo Go.
  * Renderiza praias (cor por lotação), UPAs (cor por status) e reports da comunidade.
  * Tocar em um marcador abre o popup; tocar numa praia navega para a tela de detalhes.
+ *
+ * Nota: SRI (integrity/crossorigin) removido intencionalmente — atributos CORS/SRI
+ * bloqueiam o carregamento de recursos externos quando a WebView carrega HTML inline
+ * (null origin). A segurança é mantida pela execução em contexto nativo isolado.
  */
 import { useMemo } from 'react';
 import { View, Text } from 'react-native';
@@ -24,8 +28,7 @@ function buildLeafletHTML(city: City, beaches: Beach[], upas: UPA[], reports: Re
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;background:#cae0f5}
@@ -43,8 +46,7 @@ html,body{height:100%;background:#cae0f5}
 </head>
 <body>
 <div id="map"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLs=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 var D={
   city:{lat:${city.center.lat},lng:${city.center.lng},zoom:${city.zoom}},
@@ -150,13 +152,15 @@ export function WebViewMap({ city, beaches = [], upas = [], reports = [] }: Prop
       }}
     >
       <WebView
-        source={{ html }}
+        source={{ html, baseUrl: 'https://unpkg.com' }}
         style={{ flex: 1 }}
         onMessage={handleMessage}
         javaScriptEnabled
         domStorageEnabled
         originWhitelist={['*']}
         mixedContentMode="always"
+        allowFileAccess
+        allowUniversalAccessFromFileURLs
         renderError={() => (
           <View
             style={{
