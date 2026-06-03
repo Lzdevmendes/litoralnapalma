@@ -53,8 +53,7 @@ function buildPickerHTML(center: LatLng, pinLat?: number, pinLng?: number): stri
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body,#map{height:100%;width:100%}
@@ -66,8 +65,7 @@ html,body,#map{height:100%;width:100%}
 <body>
 <div id="map"></div>
 <div id="hint">Toque para marcar a localização</div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLs=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 var map=L.map('map',{zoomControl:false}).setView([${center.lat},${center.lng}],14);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
@@ -311,13 +309,15 @@ export function ReportModal({ visible, onClose, city }: Props) {
                 </View>
               ) : (
                 <WebView
-                  source={{ html: pickerHTML }}
+                  source={{ html: pickerHTML, baseUrl: 'https://unpkg.com' }}
                   onMessage={handleMapMessage}
                   onError={handleMapError}
                   javaScriptEnabled
                   domStorageEnabled
                   originWhitelist={['*']}
                   mixedContentMode="always"
+                  allowFileAccess
+                  allowUniversalAccessFromFileURLs
                   style={{ flex: 1 }}
                 />
               )}
