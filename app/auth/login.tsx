@@ -55,6 +55,8 @@ export default function LoginScreen() {
         setError('Muitas tentativas. Aguarde alguns minutos.');
       } else if (msg.includes('invalid') || msg.includes('inválido')) {
         setError(`${method === 'email' ? 'E-mail' : 'Telefone'} inválido.`);
+      } else if (msg.includes('phone') || msg.includes('sms') || msg.includes('otp')) {
+        setError('Não foi possível enviar o SMS. Tente entrar com e-mail.');
       } else {
         setError('Não foi possível enviar o código. Tente novamente.');
       }

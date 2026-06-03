@@ -14,8 +14,8 @@ const sections = [
     body: 'O Litoral na Palma oferece informações em tempo real sobre praias, trânsito, balsa, UPAs, postos de combustível, linhas de ônibus, restaurantes e atrações do Litoral Norte de São Paulo (Caraguatatuba, Ubatuba, São Sebastião e Ilhabela). As informações são meramente informativas e não substituem comunicados oficiais de autoridades.',
   },
   {
-    title: '3. Dados Simulados',
-    body: 'Algumas funcionalidades (como tempo de espera na balsa, ocupação de praias e tempo de espera nas UPAs) utilizam dados estimados ou simulados enquanto integrações com fontes oficiais estão em desenvolvimento. O App indica claramente quando os dados são simulados. Não tome decisões críticas de segurança baseadas exclusivamente nestas informações.',
+    title: '3. Precisão dos Dados',
+    body: 'O App combina dados de fontes oficiais (CETESB para balneabilidade, Google Routes para trânsito, Supabase para reportes) com estimativas baseadas em padrões históricos para funcionalidades como tempo de espera na balsa, ocupação de praias e filas nas UPAs, quando APIs públicas não estão disponíveis. Não tome decisões críticas de segurança baseadas exclusivamente nestas informações.',
   },
   {
     title: '4. Reportes da Comunidade',

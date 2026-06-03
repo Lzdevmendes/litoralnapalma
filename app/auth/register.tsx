@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Pressable, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { signUpWithEmail, signUpWithPhone, signInWithGoogle } from '@/lib/auth';
@@ -101,8 +101,8 @@ export default function RegisterScreen() {
         setError('E-mail já cadastrado. Tente fazer login.');
       } else if (msg.includes('invalid') || msg.includes('inválido')) {
         setError(`${method === 'email' ? 'E-mail' : 'Telefone'} inválido.`);
-      } else if (msg.includes('phone') || msg.includes('sms')) {
-        setError('Serviço de SMS indisponível no momento.');
+      } else if (msg.includes('phone') || msg.includes('sms') || msg.includes('otp')) {
+        setError('Não foi possível enviar o SMS. Tente cadastrar com e-mail.');
       } else {
         setError('Não foi possível criar a conta. Tente novamente.');
       }
@@ -249,12 +249,9 @@ export default function RegisterScreen() {
             </View>
 
             {/* Termos */}
-            <TouchableOpacity
-              onPress={() => setAcceptedTerms((v) => !v)}
-              activeOpacity={0.8}
-              style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}
-            >
-              <View
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
+              <Pressable
+                onPress={() => setAcceptedTerms((v) => !v)}
                 style={{
                   width: 22,
                   height: 22,
@@ -264,23 +261,33 @@ export default function RegisterScreen() {
                   backgroundColor: acceptedTerms ? '#0077b6' : '#fff',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: 1,
+                  marginTop: 2,
                 }}
               >
                 {acceptedTerms && <Text style={{ color: '#fff', fontSize: 13, fontWeight: '700' }}>✓</Text>}
-              </View>
+              </Pressable>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 13, color: '#374151', lineHeight: 20 }}>
+                <Text style={{ fontSize: 13, color: '#374151', lineHeight: 22 }}>
                   Li e aceito os{' '}
-                  <Text style={{ color: '#0077b6', fontWeight: '600' }}>termos de uso</Text>
+                  <Text
+                    onPress={() => router.push('/legal/terms')}
+                    style={{ color: '#0077b6', fontWeight: '600', textDecorationLine: 'underline' }}
+                  >
+                    termos de uso
+                  </Text>
                   {' '}e a{' '}
-                  <Text style={{ color: '#0077b6', fontWeight: '600' }}>política de privacidade</Text>
+                  <Text
+                    onPress={() => router.push('/legal/privacy')}
+                    style={{ color: '#0077b6', fontWeight: '600', textDecorationLine: 'underline' }}
+                  >
+                    política de privacidade
+                  </Text>
                 </Text>
                 {termsError ? (
                   <Text style={{ fontSize: 12, color: '#ef4444', marginTop: 2 }}>{termsError}</Text>
                 ) : null}
               </View>
-            </TouchableOpacity>
+            </View>
 
             {/* Botão criar conta */}
             <PrimaryButton
