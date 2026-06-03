@@ -6,7 +6,12 @@
 
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
+import Constants from 'expo-constants';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+
+const isExpoGo =
+  Constants.executionEnvironment === 'storeClient' ||
+  (Constants as unknown as { appOwnership?: string }).appOwnership === 'expo';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -176,10 +181,16 @@ export async function signUpWithPhone(name: string, phone: string): Promise<void
  * Não funciona no Expo Go — apenas em dev build ou produção.
  */
 export async function signInWithGoogle(): Promise<void> {
+  // Expo Go não suporta deep link com scheme customizado — OAuth requer dev build
+  if (isExpoGo) {
+    throw new Error('EXPO_GO_NOT_SUPPORTED');
+  }
+
   if (!isSupabaseConfigured || !supabase) {
     throw new Error('Configure as variáveis EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_ANON_KEY.');
   }
 
+  // Em dev build/produção: Linking.createURL retorna litoralnapalma://auth/callback
   const redirectTo = Linking.createURL('auth/callback');
 
   const { data, error } = await supabase.auth.signInWithOAuth({

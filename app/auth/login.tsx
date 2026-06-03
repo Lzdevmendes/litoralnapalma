@@ -72,10 +72,12 @@ export default function LoginScreen() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
       if (msg === 'LOGIN_CANCELLED') return;
-      if (msg.includes('Supabase')) {
-        setError('Supabase não configurado. Verifique as variáveis de ambiente.');
-      } else if (msg.includes('dev build') || msg.includes('Expo Go')) {
-        setError('Login com Google requer dev build — não funciona no Expo Go.');
+      if (msg === 'EXPO_GO_NOT_SUPPORTED') {
+        setError('Login com Google disponível apenas no app instalado — use e-mail ou telefone aqui.');
+        return;
+      }
+      if (msg.includes('Supabase') || msg.includes('variáveis')) {
+        setError('Serviço indisponível. Verifique sua conexão e tente novamente.');
       } else {
         setError('Não foi possível entrar com Google. Tente novamente.');
       }

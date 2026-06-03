@@ -141,9 +141,12 @@ export default function RegisterScreen() {
                 await signInWithGoogle();
               } catch (err) {
                 const msg = err instanceof Error ? err.message : '';
-                if (msg !== 'LOGIN_CANCELLED') {
-                  setError('Não foi possível entrar com Google. Tente novamente.');
+                if (msg === 'LOGIN_CANCELLED') return;
+                if (msg === 'EXPO_GO_NOT_SUPPORTED') {
+                  setError('Login com Google disponível apenas no app instalado — use e-mail ou telefone aqui.');
+                  return;
                 }
+                setError('Não foi possível entrar com Google. Tente novamente.');
               } finally {
                 setGoogleLoading(false);
               }
