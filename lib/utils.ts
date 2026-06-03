@@ -71,3 +71,18 @@ export function haversineDistance(
 export function formatDistance(km: number): string {
   return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`;
 }
+
+/**
+ * Gera a URL de navegação para o app de mapas nativo da plataforma.
+ * iOS → Apple Maps (maps:), Android → Google Maps via geo:, fallback → web.
+ */
+export function mapsNavigationUrl(lat: number, lng: number, name: string): string {
+  const os = process.env.EXPO_OS;
+  if (os === 'ios') {
+    return `maps:?q=${encodeURIComponent(name)}&ll=${lat},${lng}`;
+  }
+  if (os === 'android') {
+    return `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(name)})`;
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+}

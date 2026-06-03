@@ -7,7 +7,7 @@ import { useBeaches } from '@/hooks/useBeaches';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { occupancyColor, occupancyLabel } from '@/lib/utils';
+import { occupancyColor, occupancyLabel, mapsNavigationUrl } from '@/lib/utils';
 import type { Beach } from '@/lib/types';
 
 // ── react-native-maps (só disponível em dev build) ───────────────────────────
@@ -79,7 +79,7 @@ export default function BeachDetailScreen() {
 
   const { city, beachStatic } = found;
   const beach = beaches?.find((b) => b.id === id);
-  const mapsUrl = `https://maps.google.com/?q=${beachStatic.lat},${beachStatic.lng}`;
+  const mapsUrl = mapsNavigationUrl(beachStatic.lat, beachStatic.lng, beachStatic.name);
 
   const amenities = beachStatic.amenities;
   const amenityItems = [

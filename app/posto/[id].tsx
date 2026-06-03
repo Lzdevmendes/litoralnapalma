@@ -4,6 +4,7 @@ import { useLocalSearchParams, router, Stack } from 'expo-router';
 import Constants from 'expo-constants';
 import { CITIES } from '@/data/cities';
 import type { FuelType, GasStation } from '@/data/cities';
+import { mapsNavigationUrl } from '@/lib/utils';
 
 // ── react-native-maps (só disponível em dev build) ───────────────────────────
 const isExpoGo =
@@ -91,7 +92,7 @@ export default function GasStationDetailScreen() {
 
   const { city, station } = found;
   const brandAccent = brandColor[station.brand] ?? '#6366f1';
-  const mapsUrl = `https://maps.google.com/?q=${station.lat},${station.lng}`;
+  const mapsUrl = mapsNavigationUrl(station.lat, station.lng, station.name);
 
   // Todos os postos da cidade para a listagem completa
   const allStations = city.gasStations;
