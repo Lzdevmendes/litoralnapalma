@@ -101,8 +101,8 @@ export default function RegisterScreen() {
         setError('E-mail já cadastrado. Tente fazer login.');
       } else if (msg.includes('invalid') || msg.includes('inválido')) {
         setError(`${method === 'email' ? 'E-mail' : 'Telefone'} inválido.`);
-      } else if (msg.includes('phone') || msg.includes('sms')) {
-        setError('Serviço de SMS indisponível no momento.');
+      } else if (msg.includes('phone') || msg.includes('sms') || msg.includes('otp')) {
+        setError('Não foi possível enviar o SMS. Tente cadastrar com e-mail.');
       } else {
         setError('Não foi possível criar a conta. Tente novamente.');
       }
