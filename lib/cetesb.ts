@@ -11,29 +11,43 @@
 const CETESB_URL =
   "https://arcgis.cetesb.sp.gov.br/server/rest/services/Hosted/Praias/FeatureServer/0/query";
 
-// Mapeia nome da praia no CETESB (sem acento, uppercase) → ID interno do app
+/**
+ * Mapeia nome/município do CETESB → ID interno do app.
+ *
+ * Formatos aceitos como chave:
+ *   "PRAIA"              — casamento exato ou por prefixo (ex: "MASSAGUACU" casa com
+ *                          "MASSAGUACU - R. M. CARLOTA" retornado pela API)
+ *   "MUNICIPIO:PRAIA"    — qualificado por município para nomes ambíguos como "GRANDE"
+ *                          (que aparece em Ilhabela, São Sebastião e Ubatuba)
+ */
 const CETESB_NAME_MAP: Record<string, string> = {
-  // caraguatatuba
+  // Caraguatatuba
   "MARTIM DE SA": "martim-de-sa",
   INDAIA: "indaia",
   COCANHA: "cocanha",
-  MASSAGUACU: "massaguaçu",
+  MASSAGUACU: "massaguacu",   // casamento por prefixo: "MASSAGUACU - R. M. CARLOTA"
   "PORTO NOVO": "porto-novo",
-  // São Sebastião
+  // São Sebastião — "GRANDE" qualificado por município para evitar ambiguidade
+  "SAO SEBASTIAO:GRANDE": "praia-grande-ss",
   BOICUCANGA: "boicucanga",
   CAMBURI: "camburi",
-  MARESIAS: "maresias",
+  MARESIAS: "maresias",       // casa também "MARESIAS - TOTEM" por prefixo
+  JUQUEI: "juquei",           // casa "JUQUEÍ - R. CRISTIANA" e "JUQUEÍ - TRAV. ..." por prefixo
+  BORACEIA: "boraceia",       // casa "BORACEIA - NORTE" e "BORACEIA - RUA CUBATÃO" por prefixo
+  "TOQUE-TOQUE PEQUENO": "toque-toque-pequeno",
   // Ubatuba
   ENSEADA: "enseada",
   LAZARO: "lazaro",
   "DOMINGAS DIAS": "domingas-dias",
   PICINGUABA: "picinguaba",
+  FELIX: "felix",             // CETESB: "FÉLIX" → normalize → "FELIX"
+  ITAMAMBUCA: "itamambuca",
+  "PRAIA DO PRUMIRIM": "prumirim",
+  "LAGOA PRUMIRIM": "prumirim",
   // Ilhabela
-  PEREQUÊ: "perequê",
   PEREQUE: "perequê",
   CURRAL: "curral",
   VIANA: "viana",
-  JABAQUARA: "jabaquara",
 };
 
 export function normalize(text: string): string {
@@ -66,9 +80,39 @@ interface CETESBResponse {
   features: CETESBFeature[];
 }
 
+// Pior qualidade vence quando há múltiplos pontos para a mesma praia
+const QUALITY_RANK: Record<"boa" | "regular" | "impropia", number> = {
+  impropia: 0,
+  regular: 1,
+  boa: 2,
+};
+
+function findBeachId(municipio: string, praia: string): string | undefined {
+  const nm = normalize(municipio);
+  const np = normalize(praia);
+
+  // 1. Chave qualificada por município ("MUNICIPIO:PRAIA")
+  const qualified = CETESB_NAME_MAP[`${nm}:${np}`];
+  if (qualified) return qualified;
+
+  // 2. Casamento exato pelo nome da praia
+  const exact = CETESB_NAME_MAP[np];
+  if (exact) return exact;
+
+  // 3. Casamento por prefixo — trata sufixos como "- R. M. CARLOTA", "- NORTE", etc.
+  //    Não testa chaves qualificadas por município nessa etapa.
+  for (const [key, beachId] of Object.entries(CETESB_NAME_MAP)) {
+    if (key.includes(":")) continue;
+    if (np.startsWith(key + " ") || np.startsWith(key + "-")) return beachId;
+  }
+
+  return undefined;
+}
+
 /**
  * Busca a classificação atual de balneabilidade para todas as praias
  * do Litoral Norte. O resultado é cacheado pelo TanStack Query (staleTime 24h).
+ * Quando há múltiplos pontos de coleta por praia, prevalece o pior resultado.
  */
 export async function fetchCETESBWaterQuality(): Promise<WaterQualityResult[]> {
   const params = new URLSearchParams({
@@ -86,8 +130,8 @@ export async function fetchCETESBWaterQuality(): Promise<WaterQualityResult[]> {
     res = await fetch(`${CETESB_URL}?${params.toString()}`, { signal: controller.signal });
   } catch (err) {
     clearTimeout(timeoutId);
-    if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error('CETESB: timeout — servidor demorou mais de 10s');
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error("CETESB: timeout — servidor demorou mais de 10s");
     }
     throw err;
   }
@@ -103,20 +147,25 @@ export async function fetchCETESBWaterQuality(): Promise<WaterQualityResult[]> {
     throw new Error("CETESB: resposta inesperada");
   }
 
-  const results: WaterQualityResult[] = [];
+  // Acumula pior qualidade por praia quando há múltiplos pontos de coleta
+  const beachMap = new Map<string, WaterQualityResult>();
 
   for (const feature of json.features) {
-    const { praia, classificacao_texto, data_amostra_final } =
-      feature.attributes;
-    const beachId = CETESB_NAME_MAP[normalize(praia)];
-    if (!beachId) continue; // praia não mapeada — ignorar
+    const { praia, municipio, classificacao_texto, data_amostra_final } = feature.attributes;
+    const beachId = findBeachId(municipio, praia);
+    if (!beachId) continue;
 
-    results.push({
-      beachId,
-      quality: mapQuality(classificacao_texto),
-      collectedAt: new Date(data_amostra_final).toISOString(),
-    });
+    const quality = mapQuality(classificacao_texto);
+    const existing = beachMap.get(beachId);
+
+    if (!existing || QUALITY_RANK[quality] < QUALITY_RANK[existing.quality]) {
+      beachMap.set(beachId, {
+        beachId,
+        quality,
+        collectedAt: new Date(data_amostra_final).toISOString(),
+      });
+    }
   }
 
-  return results;
+  return Array.from(beachMap.values());
 }
