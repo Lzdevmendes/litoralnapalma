@@ -21,28 +21,28 @@ App de informações em tempo real para o **Litoral Norte de São Paulo** — Ca
 
 ## Tech Stack
 
-| Peça | Versão | Papel |
-|---|---|---|
-| Expo SDK | 54 | Runtime, build, plugins nativos |
-| expo-router | ~6.0.24 | File-based routing |
-| React Native | 0.81.5 | Framework mobile (New Architecture) |
-| React | 19.1.0 | UI |
-| TanStack Query | v5 | Cache, loading, refetch automático |
-| Supabase | v2 | Auth (OTP) + banco (reports) |
-| react-native-maps | 1.20.1 | Mapa nativo (dev build) |
-| Leaflet / WebView | 1.9.4 | Mapa web (Expo Go) |
-| expo-location | ~19 | GPS foreground + geofencing |
-| expo-notifications | ~0.32 | Notificações locais |
-| expo-secure-store | ~15 | Armazenamento seguro de sessão |
+| Peça               | Versão  | Papel                               |
+| ------------------ | ------- | ----------------------------------- |
+| Expo SDK           | 54      | Runtime, build, plugins nativos     |
+| expo-router        | ~6.0.24 | File-based routing                  |
+| React Native       | 0.81.5  | Framework mobile (New Architecture) |
+| React              | 19.1.0  | UI                                  |
+| TanStack Query     | v5      | Cache, loading, refetch automático  |
+| Supabase           | v2      | Auth (OTP) + banco (reports)        |
+| react-native-maps  | 1.20.1  | Mapa nativo (dev build)             |
+| Leaflet / WebView  | 1.9.4   | Mapa web (Expo Go)                  |
+| expo-location      | ~19     | GPS foreground + geofencing         |
+| expo-notifications | ~0.32   | Notificações locais                 |
+| expo-secure-store  | ~15     | Armazenamento seguro de sessão      |
 
 ## Cidades cobertas
 
-| Cidade | Praias | UPA | Balsa | Zonas de Estacionamento | Restaurantes | Atrações |
-|--------|--------|-----|-------|-------------------------|---|---|
-| Caraguatatuba | 5 | 1 | Não | 3 | 6 | 4 |
-| São Sebastião | 9 | 1 | Sim | 3 | 6 | 4 |
-| Ubatuba | 11 | 1 | Não | 3 | 6 | 4 |
-| Ilhabela | 8 | — (referência SS) | Sim | 2 | 6 | 4 |
+| Cidade        | Praias | UPA               | Balsa | Zonas de Estacionamento | Restaurantes | Atrações |
+| ------------- | ------ | ----------------- | ----- | ----------------------- | ------------ | -------- |
+| Caraguatatuba | 5      | 1                 | Não   | 3                       | 6            | 4        |
+| São Sebastião | 9      | 1                 | Sim   | 3                       | 6            | 4        |
+| Ubatuba       | 11     | 1                 | Não   | 3                       | 6            | 4        |
+| Ilhabela      | 8      | — (referência SS) | Sim   | 2                       | 6            | 4        |
 
 ## Rodar localmente
 
@@ -110,15 +110,15 @@ cp .env.example .env.local
 
 ### Tabela de variáveis
 
-| Variável | Serviço | Obrigatória? | Sem ela |
-|---|---|---|---|
-| `EXPO_PUBLIC_SUPABASE_URL` | Supabase | Não | Auth fake, reports em memória |
-| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase | Não (par com URL) | — |
-| `EXPO_PUBLIC_OPENWEATHER_KEY` | OpenWeatherMap | Não | Clima estimado |
-| `EXPO_PUBLIC_GOOGLE_MAPS_KEY` | Google Maps SDK | Não | Mapa usa Leaflet/WebView |
-| `EXPO_PUBLIC_GOOGLE_ROUTES_KEY` | Google Routes API | Não | Trânsito estimado |
-| `EXPO_PUBLIC_ZONA_AZUL_API_KEY` | API municipal | Não | Vagas estimadas por horário |
-| `EXPO_PUBLIC_ZONA_AZUL_API_BASE` | API municipal | Não (par com KEY) | — |
+| Variável                         | Serviço           | Obrigatória?      | Sem ela                       |
+| -------------------------------- | ----------------- | ----------------- | ----------------------------- |
+| `EXPO_PUBLIC_SUPABASE_URL`       | Supabase          | Não               | Auth fake, reports em memória |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY`  | Supabase          | Não (par com URL) | —                             |
+| `EXPO_PUBLIC_OPENWEATHER_KEY`    | OpenWeatherMap    | Não               | Clima estimado                |
+| `EXPO_PUBLIC_GOOGLE_MAPS_KEY`    | Google Maps SDK   | Não               | Mapa usa Leaflet/WebView      |
+| `EXPO_PUBLIC_GOOGLE_ROUTES_KEY`  | Google Routes API | Não               | Trânsito estimado             |
+| `EXPO_PUBLIC_ZONA_AZUL_API_KEY`  | API municipal     | Não               | Vagas estimadas por horário   |
+| `EXPO_PUBLIC_ZONA_AZUL_API_BASE` | API municipal     | Não (par com KEY) | —                             |
 
 > ⚠️ Todas as `EXPO_PUBLIC_*` ficam visíveis no bundle do app. Restrinja chaves Google por bundle ID/SHA1 no GCP Console e mantenha RLS ativo no Supabase.
 
@@ -138,10 +138,10 @@ npx tsc --noEmit    # Type check
 
 Duas funções Deno em `supabase/functions/` entregam emails e SMS de OTP customizados:
 
-| Função | Trigger | Serviço |
-|---|---|---|
-| `send-auth-email` | Auth Hook → Custom Email Sender | Resend API |
-| `send-auth-sms` | Auth Hook → Custom SMS Sender | Infobip API |
+| Função            | Trigger                         | Serviço     |
+| ----------------- | ------------------------------- | ----------- |
+| `send-auth-email` | Auth Hook → Custom Email Sender | Resend API  |
+| `send-auth-sms`   | Auth Hook → Custom SMS Sender   | Infobip API |
 
 Consulte [AGENTS.md](AGENTS.md) para instruções de configuração dos hooks e secrets.
 
