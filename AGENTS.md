@@ -100,12 +100,14 @@ Zonas cadastradas por cidade em `data/cities.ts → City.parkingZones`:
 
 ## Mapa WebView (Expo Go)
 
-`components/map/webview-map.tsx` usa Leaflet carregado via CDN (`unpkg.com`).
+Dois componentes usam Leaflet via CDN (`unpkg.com`) em uma WebView:
+- `components/map/webview-map.tsx` — mapa principal do dashboard
+- `components/report/report-modal.tsx` — picker de localização na etapa 2 do reporte
 
-**Configuração crítica para funcionar em dev:**
-- `source={{ html, baseUrl: 'https://unpkg.com' }}` — define origem para permitir recursos externos
+**Configuração obrigatória em ambos (qualquer WebView com HTML inline + recursos externos):**
+- `source={{ html, baseUrl: 'https://unpkg.com' }}` — define a origin; sem isso o carregamento de CSS/JS externos falha com null origin
 - `allowFileAccess` + `allowUniversalAccessFromFileURLs` — compatibilidade Android/iOS
-- SRI (`integrity`/`crossorigin`) **removido intencionalmente** — atributos CORS/SRI bloqueiam recursos externos quando HTML é carregado de null origin no WebView nativo
+- SRI (`integrity`/`crossorigin`) **removido intencionalmente** — CORS/SRI bloqueiam recursos externos com null origin no WebView nativo
 
 ## Supabase — segurança (RLS obrigatório)
 
@@ -183,7 +185,6 @@ supabase secrets set SEND_SMS_HOOK_SECRET=<copiado acima>
 ## TODOs
 
 - `signInWithGoogle` — requer expo-auth-session + Supabase OAuth
-- `submitReportToSupabase` — sem validação de tamanho máximo de description no client
 - `NSLocationAlwaysUsageDescription` em `app.config.ts` — presente mas app só solicita foreground permission; remover para evitar rejeição na App Store
 - Sessão Supabase em `AsyncStorage` — não criptografado; migrar para LargeSecureStore em versão futura
 - Edge functions sem validação de HMAC do Hook Secret — adicionar verificação de assinatura
