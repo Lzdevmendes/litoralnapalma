@@ -48,6 +48,8 @@ export interface UPA {
   address: string;
   lat: number;
   lng: number;
+  phone?: string;
+  hours?: string;
 }
 
 export interface WeatherData {

@@ -1,11 +1,11 @@
-import { View, Text } from 'react-native';
+import { View, Text, Pressable, Linking } from 'react-native';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
 import { useUPA } from '@/hooks/useUPA';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
-import { formatWaitTime } from '@/lib/utils';
+import { formatWaitTime, mapsNavigationUrl } from '@/lib/utils';
 import { C, R, CARD_BASE } from '@/lib/design';
 
 const STATUS_COLOR = {
@@ -100,6 +100,38 @@ export function UPACard() {
                     {upa.patientsWaiting} {t.upa.waiting}
                   </Text>
                 </View>
+                {upa.hours && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Text style={{ fontSize: 11, color: C.textSecondary }}>🕐 {upa.hours}</Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Pressable
+                  onPress={() => Linking.openURL(mapsNavigationUrl(upa.lat, upa.lng, upa.name))}
+                  style={({ pressed }) => ({
+                    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                    gap: 4, paddingVertical: 8, borderRadius: 10,
+                    backgroundColor: pressed ? `${color}22` : `${color}14`,
+                  })}
+                >
+                  <Text style={{ fontSize: 12 }}>📍</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color }}>Como chegar</Text>
+                </Pressable>
+                {upa.phone && (
+                  <Pressable
+                    onPress={() => Linking.openURL(`tel:${upa.phone}`)}
+                    style={({ pressed }) => ({
+                      flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                      gap: 4, paddingVertical: 8, borderRadius: 10,
+                      backgroundColor: pressed ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.04)',
+                    })}
+                  >
+                    <Text style={{ fontSize: 12 }}>📞</Text>
+                    <Text style={{ fontSize: 12, fontWeight: '600', color: C.textSecondary }}>{upa.phone}</Text>
+                  </Pressable>
+                )}
               </View>
             </View>
           );
