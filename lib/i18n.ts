@@ -229,9 +229,11 @@ const pt = {
     occupied: 'ocupada',
     waterLabel: 'Água',
     water: { boa: 'Própria', regular: 'Regular', impropia: 'Imprópria' },
+    loadError: 'Verifique sua conexão\npara carregar o mapa',
     report: {
       upvoteBtn: 'Apoiar reporte',
       upvotes: 'apoio(s)',
+      fallback: 'Reporte',
       types: {
         lotacao_praia: 'Praia lotada',
         acidente: 'Acidente',
@@ -473,9 +475,11 @@ const en = {
     occupied: 'occupied',
     waterLabel: 'Water',
     water: { boa: 'Safe', regular: 'Fair', impropia: 'Unsafe' },
+    loadError: 'Check your connection\nto load the map',
     report: {
       upvoteBtn: 'Support report',
       upvotes: 'support(s)',
+      fallback: 'Report',
       types: {
         lotacao_praia: 'Crowded beach',
         acidente: 'Accident',

@@ -75,7 +75,7 @@ var UPAC={normal:'#22c55e',alerta:'#f59e0b',critico:'#ef4444'};
 var RPTE={lotacao_praia:'🏖️',acidente:'🚨',blitz:'🚔',falta_agua:'💧',falta_luz:'⚡',outro:'📍'};
 var RPTL={lotacao_praia:'${t.map.report.types.lotacao_praia}',acidente:'${t.map.report.types.acidente}',blitz:'${t.map.report.types.blitz}',falta_agua:'${t.map.report.types.falta_agua}',falta_luz:'${t.map.report.types.falta_luz}',outro:'${t.map.report.types.outro}'};
 var WATERQ={boa:'${t.map.water.boa}',regular:'${t.map.water.regular}',impropia:'${t.map.water.impropia}'};
-var L10N={occupied:'${t.map.occupied}',waterLabel:'${t.map.waterLabel}',wait:'${t.upa.wait}',waiting:'${t.upa.waiting}',upvoteBtn:'${t.map.report.upvoteBtn}',upvotes:'${t.map.report.upvotes}'};
+var L10N={occupied:'${t.map.occupied}',waterLabel:'${t.map.waterLabel}',wait:'${t.upa.wait}',waiting:'${t.upa.waiting}',upvoteBtn:'${t.map.report.upvoteBtn}',upvotes:'${t.map.report.upvotes}',fallback:'${t.map.report.fallback}'};
 
 function post(t,id){
   if(window.ReactNativeWebView)
@@ -138,7 +138,7 @@ D.upas.forEach(function(u){
 // Reports da comunidade
 D.reports.forEach(function(r){
   var e=RPTE[r.type]||'📍';
-  var label=RPTL[r.type]||'Reporte';
+  var label=RPTL[r.type]||L10N.fallback;
   var pop='<strong>'+e+' '+label+'</strong><br>'+
     '<span>'+esc(r.description||label)+'</span><br>'+
     '<span style="color:#64748b">👍 '+r.upvotes+' '+L10N.upvotes+'</span>'+
@@ -215,7 +215,7 @@ export function WebViewMap({ city, beaches = [], upas = [], reports = [] }: Prop
           >
             <Text style={{ fontSize: 36 }}>🗺️</Text>
             <Text style={{ fontSize: 13, color: '#64748b', textAlign: 'center' }}>
-              {'Verifique sua conexão\npara carregar o mapa'}
+              {t.map.loadError}
             </Text>
           </View>
         )}
