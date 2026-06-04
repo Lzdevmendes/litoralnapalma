@@ -1,5 +1,6 @@
 // Tipos estáticos para configuração de cidade.
 // Os tipos completos com campos dinâmicos (Beach, UPA, TrafficRoute) ficam em lib/types.ts.
+import type { SideRoute } from '@/lib/types';
 
 export type RestaurantCategory = 'frutos_do_mar' | 'pizza' | 'churrasco' | 'variado' | 'cafe' | 'bar';
 
@@ -132,6 +133,7 @@ export interface City {
   busLines: BusLine[];
   restaurants: Restaurant[];
   attractions: Attraction[];
+  sideRoutes: SideRoute[];
 }
 
 export const CITIES: City[] = [
@@ -289,6 +291,12 @@ export const CITIES: City[] = [
       { id: 'cara-a2', name: 'Mirante do Morro São João', type: 'mirante', description: 'Vista panorâmica de 360° do litoral norte, do centro de Caraguatatuba às ilhas ao horizonte.', entryFee: null, rating: 4.4, lat: -23.6050, lng: -45.4300, tips: ['Melhor ao entardecer', 'Trilha de 40 min', 'Leve lanterna se for à noite'], mapsUrl: 'https://maps.google.com/?q=-23.6050,-45.4300' },
       { id: 'cara-a3', name: 'Parque Estadual da Serra do Mar', type: 'parque', description: 'Maior remanescente de Mata Atlântica do estado, com trilhas, cachoeiras e fauna exuberante.', entryFee: 10, rating: 4.7, lat: -23.5500, lng: -45.5000, tips: ['Reserva obrigatória no site', 'Proibido entrar com comida', 'Guia é obrigatório para trilhas longas'], mapsUrl: 'https://maps.google.com/?q=-23.5500,-45.5000' },
       { id: 'cara-a4', name: 'Igreja Matriz N. Sra. da Ajuda', type: 'historico', description: 'Igreja do século XVIII, um dos símbolos históricos de Caraguatatuba, reconstruída após o deslizamento de 1967.', entryFee: null, rating: 4.0, lat: -23.6201, lng: -45.4129, tips: ['Visitas guiadas às quintas', 'Museu no interior', 'Evento junino imperdível'], mapsUrl: 'https://maps.google.com/?q=-23.6201,-45.4129' },
+    ],
+    sideRoutes: [
+      { id: 'cara-sr1', name: 'Cachoeira do Paraibuna', description: 'Cachoeira de água cristalina no sopé da Serra do Mar — alternativa fresca ao calor da praia.', type: 'cachoeira', distance: 22, estimatedTime: 35, difficulty: 'moderado', tags: ['cachoeira', 'natureza', 'frescor'], lat: -23.5200, lng: -45.4500, mapsUrl: 'https://maps.google.com/?q=-23.5200,-45.4500' },
+      { id: 'cara-sr2', name: 'Mirante do Morro São João', description: 'Vista panorâmica de 360° do litoral norte — ideal quando a Rio-Santos está travada.', type: 'trilha', distance: 8, estimatedTime: 15, difficulty: 'fácil', tags: ['mirante', 'trilha', 'pôr do sol'], lat: -23.6050, lng: -45.4300, mapsUrl: 'https://maps.google.com/?q=-23.6050,-45.4300' },
+      { id: 'cara-sr3', name: 'Praia de Tabatinga', description: 'Praia calma no sul da cidade, bem menos frequentada que o Centro.', type: 'praia', distance: 8, estimatedTime: 12, tags: ['praia', 'tranquilo', 'sul'], lat: -23.6415, lng: -45.4200, mapsUrl: 'https://maps.google.com/?q=-23.6415,-45.4200' },
+      { id: 'cara-sr4', name: 'Praia de Massaguaçu', description: 'Praia extensa ao norte, geralmente mais vazia que o centro mesmo nos fins de semana.', type: 'praia', distance: 7, estimatedTime: 12, tags: ['praia', 'surf', 'norte'], lat: -23.5621, lng: -45.3291, mapsUrl: 'https://maps.google.com/?q=-23.5621,-45.3291' },
     ],
   },
 
@@ -462,6 +470,12 @@ export const CITIES: City[] = [
       { id: 'ss-a2', name: 'Museu de Arte Sacra', type: 'historico', description: 'Acervo com peças do século XVII ao XIX, na casa histórica do Porto — uma das mais antigas do litoral.', entryFee: 5, rating: 4.2, lat: -23.8092, lng: -45.4082, tips: ['Fechado às segundas', 'Visita guiada inclusa', 'Loja de artesanato na saída'], mapsUrl: 'https://maps.google.com/?q=-23.8092,-45.4082' },
       { id: 'ss-a3', name: 'Trilha do Costão', type: 'trilha', description: 'Trilha de nível moderado entre costões rochosos com vista espetacular para as ilhas de São Sebastião.', entryFee: null, rating: 4.5, lat: -23.8100, lng: -45.4100, tips: ['Leve água e protetor solar', 'Boa forma física recomendada', 'Saída às 7h para evitar sol forte'], mapsUrl: 'https://maps.google.com/?q=-23.8100,-45.4100' },
       { id: 'ss-a4', name: 'Lagoa dos Bambus', type: 'parque', description: 'Lagoa de água doce cercada de bambuzal exótico, ótima para stand-up paddle e contemplação.', entryFee: null, rating: 4.3, lat: -23.7900, lng: -45.5050, tips: ['Aluguel de SUP no local', 'Mosquitos ao entardecer — leve repelente', 'Ótima para fotos'], mapsUrl: 'https://maps.google.com/?q=-23.7900,-45.5050' },
+    ],
+    sideRoutes: [
+      { id: 'ss-sr1', name: 'Praia de Camburi', description: 'Uma das mais preservadas do litoral paulista — proibida música alta, ideal para quem foge da multidão.', type: 'praia', distance: 28, estimatedTime: 40, tags: ['praia', 'natureza', 'preservada'], lat: -23.7672, lng: -45.5879, mapsUrl: 'https://maps.google.com/?q=-23.7672,-45.5879' },
+      { id: 'ss-sr2', name: 'Trilha do Costão', description: 'Trilha moderada entre costões rochosos com vistas espetaculares para as ilhas de São Sebastião.', type: 'trilha', distance: 5, estimatedTime: 20, difficulty: 'moderado', tags: ['trilha', 'costão', 'vista'], lat: -23.8100, lng: -45.4100, mapsUrl: 'https://maps.google.com/?q=-23.8100,-45.4100' },
+      { id: 'ss-sr3', name: 'Lagoa dos Bambus', description: 'Lagoa de água doce cercada de bambuzal — aluguel de SUP no local, longe do barulho da praia.', type: 'cachoeira', distance: 25, estimatedTime: 35, tags: ['lagoa', 'paddle', 'tranquilo'], lat: -23.7900, lng: -45.5050, mapsUrl: 'https://maps.google.com/?q=-23.7900,-45.5050' },
+      { id: 'ss-sr4', name: 'Centro Histórico de São Sebastião', description: 'Casarões coloniais do século XVII ao redor do porto mais antigo do litoral paulista.', type: 'cultural', distance: 2, estimatedTime: 5, tags: ['história', 'colonial', 'museu'], lat: -23.8090, lng: -45.4080, mapsUrl: 'https://maps.google.com/?q=-23.8090,-45.4080' },
     ],
   },
 
@@ -641,6 +655,12 @@ export const CITIES: City[] = [
       { id: 'uba-a3', name: 'Cachoeira da Toca', type: 'cachoeira', description: 'Cachoeira de 12 m de queda com poço natural para banho, dentro da Mata Atlântica preservada.', entryFee: null, rating: 4.6, lat: -23.4150, lng: -45.0620, tips: ['Trilha de 20 min pelo mato', 'Água gelada mesmo no verão', 'Levar calçado fechado'], mapsUrl: 'https://maps.google.com/?q=-23.4150,-45.0620' },
       { id: 'uba-a4', name: 'Mirante do Félix', type: 'mirante', description: 'Ponto mais alto da região urbana de Ubatuba, com vista de 180° do litoral e das ilhas vizinhas.', entryFee: null, rating: 4.5, lat: -23.4485, lng: -45.0860, tips: ['Subida íngreme de moto táxi disponível', 'Melhor vista ao pôr do sol', 'Leve agasalho — ventoso'], mapsUrl: 'https://maps.google.com/?q=-23.4485,-45.0860' },
     ],
+    sideRoutes: [
+      { id: 'uba-sr1', name: 'Praia do Félix', description: 'Praia escondida de acesso difícil, raramente lotada — ideal quando as centrais estiverem cheias.', type: 'praia', distance: 14, estimatedTime: 22, tags: ['praia', 'escondida', 'tranquilo'], lat: -23.4850, lng: -45.0850, mapsUrl: 'https://maps.google.com/?q=-23.4850,-45.0850' },
+      { id: 'uba-sr2', name: 'Cachoeira da Toca', description: 'Cachoeira de 12m com poço natural de água gelada, trilha de 20 min pela mata fechada.', type: 'cachoeira', distance: 6, estimatedTime: 20, difficulty: 'fácil', tags: ['cachoeira', 'trilha', 'frescor'], lat: -23.4150, lng: -45.0620, mapsUrl: 'https://maps.google.com/?q=-23.4150,-45.0620' },
+      { id: 'uba-sr3', name: 'Núcleo Picinguaba — Serra do Mar', description: 'Trilha com comunidade caiçara, praias selvagens quase intocadas e matas de Mata Atlântica.', type: 'trilha', distance: 38, estimatedTime: 55, difficulty: 'moderado', tags: ['parque', 'trilha', 'caiçara'], lat: -23.3701, lng: -44.9401, mapsUrl: 'https://maps.google.com/?q=-23.3701,-44.9401' },
+      { id: 'uba-sr4', name: 'Ilha Anchieta', description: 'Ilha com ruínas históricas, praias cristalinas e snorkel incrível — barco sai do Saco da Ribeira.', type: 'praia', distance: 20, estimatedTime: 40, tags: ['ilha', 'snorkel', 'histórico'], lat: -23.5350, lng: -45.0760, mapsUrl: 'https://maps.google.com/?q=-23.5350,-45.0760' },
+    ],
   },
 
   {
@@ -780,6 +800,12 @@ export const CITIES: City[] = [
       { id: 'ilh-a2', name: 'Pico do Baepi', type: 'trilha', description: 'Trilha até o ponto mais alto acessível da ilha (640m), com vista de 360° do arquipélago.', entryFee: null, rating: 4.8, lat: -23.7800, lng: -45.3200, tips: ['Saída às 6h para evitar chuva da tarde', 'Guia obrigatório em temporada', 'Nível difícil — prepare-se bem'], mapsUrl: 'https://maps.google.com/?q=-23.7800,-45.3200' },
       { id: 'ilh-a3', name: 'Cachoeira da Laje', type: 'cachoeira', description: 'Queda d\'água de 30m com piscina natural esmeralda, acessível por trilha de 1h pela mata.', entryFee: null, rating: 4.7, lat: -23.8100, lng: -45.3400, tips: ['Leve roupas para molhar', 'Trilha moderada — tênis fechado', 'Evitar no verão chuvoso'], mapsUrl: 'https://maps.google.com/?q=-23.8100,-45.3400' },
       { id: 'ilh-a4', name: 'Museu Histórico de Ilhabela', type: 'historico', description: 'Sede colonial do século XVIII com acervo sobre piratas, naufrácios e a cultura caiçara da ilha.', entryFee: 8, rating: 4.2, lat: -23.7760, lng: -45.3514, tips: ['Fechado às terças', 'Visita guiada inclusa no ingresso', 'Loja de artesanato caiçara'], mapsUrl: 'https://maps.google.com/?q=-23.7760,-45.3514' },
+    ],
+    sideRoutes: [
+      { id: 'ilh-sr1', name: 'Praia dos Castelhanos', description: 'A mais bela de Ilhabela — acesso via 4x4 ou barco, ondas incríveis e quase nenhum turismo de massa.', type: 'praia', distance: 30, estimatedTime: 60, difficulty: 'difícil', tags: ['praia', 'surf', 'selvagem'], lat: -23.8580, lng: -45.2850, mapsUrl: 'https://maps.google.com/?q=-23.8580,-45.2850' },
+      { id: 'ilh-sr2', name: 'Cachoeira da Laje', description: 'Queda de 30m com piscina natural esmeralda — trilha de 1h pela mata atlântica preservada.', type: 'cachoeira', distance: 12, estimatedTime: 25, difficulty: 'moderado', tags: ['cachoeira', 'trilha', 'natureza'], lat: -23.8100, lng: -45.3400, mapsUrl: 'https://maps.google.com/?q=-23.8100,-45.3400' },
+      { id: 'ilh-sr3', name: 'Pico do Baepi', description: 'Trilha até 640m com vista de 360° do arquipélago — saída às 6h para evitar chuva da tarde.', type: 'trilha', distance: 8, estimatedTime: 30, difficulty: 'difícil', tags: ['trilha', 'altitude', 'vista 360°'], lat: -23.7800, lng: -45.3200, mapsUrl: 'https://maps.google.com/?q=-23.7800,-45.3200' },
+      { id: 'ilh-sr4', name: 'Praia do Jabaquara', description: 'Praia de baía com águas calmas e rasas, ideal para famílias com crianças — bem menos movimentada.', type: 'praia', distance: 4, estimatedTime: 8, tags: ['praia', 'família', 'calmo'], lat: -23.7600, lng: -45.3500, mapsUrl: 'https://maps.google.com/?q=-23.7600,-45.3500' },
     ],
   },
 ];

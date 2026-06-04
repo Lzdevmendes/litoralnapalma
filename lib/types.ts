@@ -73,6 +73,7 @@ export interface SideRoute {
   tags: string[];
   lat: number;
   lng: number;
+  mapsUrl: string;
 }
 
 export interface FerryStatus {

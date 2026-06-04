@@ -47,9 +47,29 @@ export async function requestNotificationPermission(): Promise<boolean> {
 interface LocalNotificationOptions {
   title: string;
   body: string;
+  type?: 'beach' | 'traffic' | 'report' | 'general';
   data?: Record<string, unknown>;
   delaySeconds?: number;
 }
+
+const NOTIFICATION_TEMPLATE = {
+  beach: {
+    prefix: 'Praia',
+    category: 'beach-alert',
+  },
+  traffic: {
+    prefix: 'Trânsito',
+    category: 'traffic-alert',
+  },
+  report: {
+    prefix: 'Comunidade',
+    category: 'community-report',
+  },
+  general: {
+    prefix: 'Litoral na Palma',
+    category: 'general',
+  },
+} as const;
 
 /**
  * Envia notificação local imediata (ou com atraso).
@@ -64,11 +84,19 @@ export async function sendLocalNotification(
   if (isForegrounded && !force) return null;
 
   try {
+    const template = NOTIFICATION_TEMPLATE[options.type ?? 'general'];
+    const title = options.title.includes(template.prefix)
+      ? options.title
+      : `${template.prefix} · ${options.title}`;
+
     return await Notifications.scheduleNotificationAsync({
       content: {
-        title: options.title,
+        title,
+        subtitle: template.prefix,
         body: options.body,
-        data: options.data ?? {},
+        data: { ...(options.data ?? {}), type: options.type ?? 'general' },
+        categoryIdentifier: template.category,
+        sound: true,
       },
       trigger: options.delaySeconds
         ? {

@@ -10,6 +10,7 @@ const pt = {
     resident: '🏠 Morador',
     tourist: '🧳 Turista',
     tagline: 'Litoral Norte SP',
+    changeInSettings: 'Altere em Configurações',
   },
   sections: {
     map: '🗺️ Mapa ao Vivo',
@@ -40,6 +41,7 @@ const pt = {
   traffic: {
     label: 'Trânsito',
     overall: 'no geral',
+    mainRoute: 'Rodovia principal',
     levels: {
       livre: 'Livre',
       moderado: 'Moderado',
@@ -174,6 +176,12 @@ const pt = {
     signingOut: 'Saindo...',
     deleting: 'Excluindo...',
     cancel: 'Cancelar',
+    user: 'Usuário',
+    signOutConfirm: 'Deseja encerrar sua sessão?',
+    deleteConfirm: 'Esta ação é irreversível. Todos os seus dados serão excluídos permanentemente.',
+    confirmDelete: 'Confirmar exclusão',
+    noSession: 'Sem sessão ativa',
+    genericError: 'Erro',
   },
   settings: {
     title: 'Configurações',
@@ -211,6 +219,34 @@ const pt = {
     ferry: 'Balsa SS ↔ Ilhabela',
     eco: 'Mata Atlântica',
   },
+  map: {
+    legend: {
+      beachEmpty: 'Praia vazia',
+      beachModerate: 'Praia moderada',
+      beachCrowded: 'Praia lotada / reporte',
+      upa: 'UPA',
+    },
+    occupied: 'ocupada',
+    waterLabel: 'Água',
+    water: { boa: 'Própria', regular: 'Regular', impropia: 'Imprópria' },
+    report: {
+      upvoteBtn: 'Apoiar reporte',
+      upvotes: 'apoio(s)',
+      types: {
+        lotacao_praia: 'Praia lotada',
+        acidente: 'Acidente',
+        blitz: 'Blitz',
+        falta_agua: 'Falta de água',
+        falta_luz: 'Falta de luz',
+        outro: 'Reporte',
+      },
+    },
+  },
+  smartRouter: {
+    title: '🧭 Roteiro Lado B',
+    congestedMsg: 'Centro congestionado — explore alternativas incríveis!',
+    crowdedMsg: 'Praias lotadas — descubra locais mais tranquilos',
+  },
 } as const;
 
 const en = {
@@ -218,6 +254,7 @@ const en = {
     resident: '🏠 Resident',
     tourist: '🧳 Tourist',
     tagline: 'North Coast SP',
+    changeInSettings: 'Change in Settings',
   },
   sections: {
     map: '🗺️ Live Map',
@@ -248,6 +285,7 @@ const en = {
   traffic: {
     label: 'Traffic',
     overall: 'overall',
+    mainRoute: 'Main route',
     levels: {
       livre: 'Clear',
       moderado: 'Moderate',
@@ -382,6 +420,12 @@ const en = {
     signingOut: 'Signing out...',
     deleting: 'Deleting...',
     cancel: 'Cancel',
+    user: 'User',
+    signOutConfirm: 'Sign out of your account?',
+    deleteConfirm: 'This action is irreversible. All your data will be permanently deleted.',
+    confirmDelete: 'Confirm deletion',
+    noSession: 'No active session',
+    genericError: 'Error',
   },
   settings: {
     title: 'Settings',
@@ -418,6 +462,34 @@ const en = {
     boatTours: 'Boat Tours',
     ferry: 'Ferry SS ↔ Ilha',
     eco: 'Atlantic Forest',
+  },
+  map: {
+    legend: {
+      beachEmpty: 'Empty beach',
+      beachModerate: 'Moderate beach',
+      beachCrowded: 'Crowded beach / report',
+      upa: 'Urgent Care',
+    },
+    occupied: 'occupied',
+    waterLabel: 'Water',
+    water: { boa: 'Safe', regular: 'Fair', impropia: 'Unsafe' },
+    report: {
+      upvoteBtn: 'Support report',
+      upvotes: 'support(s)',
+      types: {
+        lotacao_praia: 'Crowded beach',
+        acidente: 'Accident',
+        blitz: 'Police checkpoint',
+        falta_agua: 'No water supply',
+        falta_luz: 'Power outage',
+        outro: 'Report',
+      },
+    },
+  },
+  smartRouter: {
+    title: '🧭 Side Routes',
+    congestedMsg: 'Center congested — explore incredible alternatives!',
+    crowdedMsg: 'Beaches crowded — find a quieter spot',
   },
 } as const;
 

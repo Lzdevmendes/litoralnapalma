@@ -1,4 +1,4 @@
-import { ScrollView, View, Text } from 'react-native';
+import { Pressable, ScrollView, View, Text } from 'react-native';
 import { useWeather } from '@/hooks/useWeather';
 import { useBeaches } from '@/hooks/useBeaches';
 import { useTraffic } from '@/hooks/useTraffic';
@@ -9,7 +9,11 @@ import { trafficLevelColor } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { C } from '@/lib/design';
 
-export function QuickStats() {
+interface QuickStatsProps {
+  onStatPress?: (section: 'weather' | 'traffic' | 'beaches' | 'health') => void;
+}
+
+export function QuickStats({ onStatPress }: QuickStatsProps) {
   const { city } = useCity();
   const { t } = useLanguage();
   const { data: weather, isLoading: loadingWeather } = useWeather(city);
@@ -47,6 +51,7 @@ export function QuickStats() {
     {
       emoji: '🌡️',
       label: t.quickStats.temperature,
+      section: 'weather' as const,
       value: weather ? `${weather.temperature}°` : '—',
       sub: weather ? `↑ ${weather.feelsLike}°` : '',
       color: '#f59e0b',
@@ -54,6 +59,7 @@ export function QuickStats() {
     {
       emoji: '🚗',
       label: t.quickStats.traffic,
+      section: 'traffic' as const,
       value: worstRoute ? t.traffic.levels[worstRoute.level] : '—',
       sub: worstRoute ? worstRoute.shortName : '',
       color: worstRoute ? trafficLevelColor(worstRoute.level) : C.textMuted,
@@ -61,6 +67,7 @@ export function QuickStats() {
     {
       emoji: '🏖️',
       label: t.quickStats.freeBeaches,
+      section: 'beaches' as const,
       value: beaches ? `${freeBeaches}/${totalBeaches}` : '—',
       sub: beaches ? `${Math.round((freeBeaches / totalBeaches) * 100)}%` : '',
       color: freeBeaches > 0 ? C.success : C.warning,
@@ -68,6 +75,7 @@ export function QuickStats() {
     {
       emoji: '🏥',
       label: t.quickStats.upa,
+      section: 'health' as const,
       value: firstUPA ? t.upa.status[firstUPA.status] : 'N/A',
       sub: firstUPA ? `${firstUPA.waitTime} min` : '',
       color: upaStatusColor,
@@ -80,9 +88,10 @@ export function QuickStats() {
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ gap: 10, paddingHorizontal: 16 }}
     >
-      {stats.map(({ emoji, label, value, sub, color }) => (
-        <View
+      {stats.map(({ emoji, label, value, sub, color, section }) => (
+        <Pressable
           key={label}
+          onPress={() => onStatPress?.(section)}
           style={{
             backgroundColor: '#fff',
             borderRadius: 18,
@@ -109,7 +118,7 @@ export function QuickStats() {
           {sub ? (
             <Text style={{ fontSize: 10, color, fontWeight: '600' }}>{sub}</Text>
           ) : null}
-        </View>
+        </Pressable>
       ))}
     </ScrollView>
   );

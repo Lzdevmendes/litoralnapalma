@@ -100,7 +100,7 @@ export default function SettingsScreen() {
   async function handleSignOut() {
     Alert.alert(
       t.nav.signOut,
-      locale === 'pt' ? 'Deseja encerrar sua sessão?' : 'Sign out of your account?',
+      t.nav.signOutConfirm,
       [
         { text: t.nav.cancel, style: 'cancel' },
         {
@@ -121,13 +121,11 @@ export default function SettingsScreen() {
   function handleDeleteAccount() {
     Alert.alert(
       t.nav.deleteAccount,
-      locale === 'pt'
-        ? 'Esta ação é irreversível. Todos os seus dados serão excluídos permanentemente.'
-        : 'This action is irreversible. All your data will be permanently deleted.',
+      t.nav.deleteConfirm,
       [
         { text: t.nav.cancel, style: 'cancel' },
         {
-          text: locale === 'pt' ? 'Confirmar exclusão' : 'Confirm deletion',
+          text: t.nav.confirmDelete,
           style: 'destructive',
           onPress: () => confirmDeleteAccount(),
         },
@@ -145,7 +143,7 @@ export default function SettingsScreen() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
-      if (!token) throw new Error(locale === 'pt' ? 'Sem sessão ativa' : 'No active session');
+      if (!token) throw new Error(t.nav.noSession);
       const res = await supabase.functions.invoke('delete-account', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -155,7 +153,7 @@ export default function SettingsScreen() {
       router.replace('/auth/login');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      Alert.alert(locale === 'pt' ? 'Erro' : 'Error', msg);
+      Alert.alert(t.nav.genericError, msg);
     } finally {
       setDeleting(false);
     }
@@ -204,7 +202,7 @@ export default function SettingsScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 16, fontWeight: '700', color: C.textPrimary }}>
-                {user?.name ?? (locale === 'pt' ? 'Usuário' : 'User')}
+                {user?.name ?? t.nav.user}
               </Text>
               <Text style={{ fontSize: 13, color: C.textMuted, marginTop: 2 }}>
                 {user?.email ?? user?.phone ?? '—'}

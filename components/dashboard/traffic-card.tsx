@@ -21,6 +21,7 @@ export function TrafficCard() {
   const order = { livre: 0, moderado: 1, lento: 2, parado: 3 } as const;
   const worst = routes.reduce((a, b) => (order[b.level] > order[a.level] ? b : a));
   const worstColor = trafficLevelColor(worst.level);
+  const otherRoutes = routes.filter((route) => route.id !== worst.id);
 
   return (
     <View style={CARD_BASE}>
@@ -42,25 +43,70 @@ export function TrafficCard() {
         </Badge>
       </View>
 
+      <View
+        style={{
+          backgroundColor: `${worstColor}10`,
+          borderRadius: 16,
+          padding: 14,
+          borderWidth: 1,
+          borderColor: `${worstColor}22`,
+          gap: 10,
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+          <View style={{ flex: 1, gap: 3 }}>
+            <Text style={{ fontSize: 12, color: C.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              {t.traffic.mainRoute}
+            </Text>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: C.textPrimary }}>
+              {worst.shortName}
+            </Text>
+            <Text style={{ fontSize: 12, color: C.textSecondary }} numberOfLines={2}>
+              {worst.name}
+            </Text>
+          </View>
+          <View style={{ alignItems: 'flex-end', gap: 4 }}>
+            <Text style={{ fontSize: 24, fontWeight: '900', color: worstColor }}>
+              {worst.travelTime}
+            </Text>
+            <Text style={{ fontSize: 10, color: C.textMuted, fontWeight: '700' }}>min</Text>
+          </View>
+        </View>
+
+        <View style={{ height: 7, backgroundColor: 'rgba(0,0,0,0.08)', borderRadius: 4, overflow: 'hidden' }}>
+          <View style={{ height: '100%', width: `${LEVEL_FILL[worst.level]}%`, backgroundColor: worstColor, borderRadius: 4 }} />
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Text style={{ fontSize: 11, color: C.textSecondary }}>📍 {worst.distance} km</Text>
+          <Text style={{ fontSize: 11, color: C.textSecondary }}>🚦 {t.traffic.levels[worst.level]}</Text>
+          <Text style={{ fontSize: 11, color: C.textMuted, marginLeft: 'auto' }}>
+            {timeAgo(worst.updatedAt, locale)}
+          </Text>
+        </View>
+      </View>
+
       {/* Rotas */}
-      <View style={{ gap: 8 }}>
-        {routes.map((route) => {
+      <View style={{ gap: 7 }}>
+        {otherRoutes.map((route) => {
           const color = trafficLevelColor(route.level);
           const fill = LEVEL_FILL[route.level];
           return (
             <View
               key={route.id}
               style={{
-                backgroundColor: C.primary08,
-                borderRadius: 14,
-                padding: 12,
-                gap: 8,
+                backgroundColor: C.surfaceAlt,
+                borderRadius: 13,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                gap: 7,
               }}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ fontSize: 13, fontWeight: '600', color: C.textPrimary }}>
-                  {route.shortName}
-                </Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: C.textPrimary }}>{route.shortName}</Text>
+                  <Text style={{ fontSize: 10, color: C.textMuted }} numberOfLines={1}>{route.name}</Text>
+                </View>
                 <Badge color={color}>{t.traffic.levels[route.level]}</Badge>
               </View>
 
