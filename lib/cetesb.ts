@@ -21,33 +21,105 @@ const CETESB_URL =
  *                          (que aparece em Ilhabela, São Sebastião e Ubatuba)
  */
 const CETESB_NAME_MAP: Record<string, string> = {
-  // Caraguatatuba
+  // ── Caraguatatuba ────────────────────────────────────────────────────────────
   "MARTIM DE SA": "martim-de-sa",
   INDAIA: "indaia",
   COCANHA: "cocanha",
-  MASSAGUACU: "massaguacu",   // casamento por prefixo: "MASSAGUACU - R. M. CARLOTA"
+  MASSAGUACU: "massaguacu",        // prefixo: "MASSAGUACU - R. M. CARLOTA"
   "PORTO NOVO": "porto-novo",
-  // São Sebastião — "GRANDE" qualificado por município para evitar ambiguidade
-  "SAO SEBASTIAO:GRANDE": "praia-grande-ss",
+  "LAGOA AZUL": "lagoa-azul",
+  ARUAN: "aruan",
+  PALMEIRAS: "palmeiras",
+  MOCOCA: "mococa",
+  "CARAGUATATUBA:CENTRO": "centro-cara",   // qualificado: "CENTRO" é ambíguo
+  "CARAGUATATUBA:PRAINHA": "prainha-cara", // qualificado: "PRAINHA" existe em SS também
+  TABATINGA: "tabatinga",          // prefixo: "TABATINGA - COND. GAIVOTAS" e "TABATINGA - RIO TABATINGA"
+  CAPRICORNIO: "capricornio",
+
+  // ── São Sebastião ────────────────────────────────────────────────────────────
+  "SAO SEBASTIAO:GRANDE": "praia-grande-ss", // qualificado: "GRANDE" é ambíguo
+  "SAO SEBASTIAO:PRAINHA": "prainha-ss",     // qualificado: "PRAINHA" é ambíguo
   BOICUCANGA: "boicucanga",
   CAMBURI: "camburi",
-  MARESIAS: "maresias",       // casa também "MARESIAS - TOTEM" por prefixo
-  JUQUEI: "juquei",           // casa "JUQUEÍ - R. CRISTIANA" e "JUQUEÍ - TRAV. ..." por prefixo
-  BORACEIA: "boraceia",       // casa "BORACEIA - NORTE" e "BORACEIA - RUA CUBATÃO" por prefixo
+  MARESIAS: "maresias",            // prefixo: "MARESIAS - TOTEM"
+  JUQUEI: "juquei",                // prefixo: "JUQUEÍ - R. CRISTIANA" e "JUQUEÍ - TRAV. ..."
+  BORACEIA: "boraceia",            // prefixo: "BORACEIA - NORTE" e "BORACEIA - RUA CUBATÃO"
   "TOQUE-TOQUE PEQUENO": "toque-toque-pequeno",
-  // Ubatuba
+  "TOQUE-TOQUE GRANDE": "toque-toque-grande",
+  ARRASTAO: "arrastao",
+  BALEIA: "baleia",
+  BAREQUECABA: "barequeçaba",   // CETESB: "BAREQUEÇABA" → normalize → "BAREQUECABA"
+  CAMBURIZINHO: "camburizinho",
+  CIGARRAS: "cigarras",
+  DESERTA: "deserta",
+  ENGENHO: "engenho-ss",
+  GUAECA: "guaeca",
+  "JUREIA DO NORTE": "jureia-norte",
+  PAUBA: "pauba",
+  "PONTAL DA CRUZ": "pontal-da-cruz",
+  "PORTO GRANDE": "porto-grande",
+  PRETA: "preta",
+  "PRETA DO NORTE": "preta-do-norte",
+  SANTIAGO: "santiago",
+  SAI: "sai",
+  "SAO FRANCISCO": "sao-francisco",
+  UNA: "una",
+
+  // ── Ubatuba ──────────────────────────────────────────────────────────────────
   ENSEADA: "enseada",
   LAZARO: "lazaro",
   "DOMINGAS DIAS": "domingas-dias",
   PICINGUABA: "picinguaba",
-  FELIX: "felix",             // CETESB: "FÉLIX" → normalize → "FELIX"
+  FELIX: "felix",                  // CETESB: "FÉLIX" → normalize → "FELIX"
   ITAMAMBUCA: "itamambuca",
   "PRAIA DO PRUMIRIM": "prumirim",
   "LAGOA PRUMIRIM": "prumirim",
-  // Ilhabela
+  LAGOINHA: "lagoinha",            // prefixo: "LAGOINHA - AV. E. VELHO" e "LAGOINHA - CAMPING"
+  "PEREQUE-ACU": "perequé-acu",    // CETESB: "PEREQUÊ-AÇU" → normalize → "PEREQUE-ACU"
+  "PEREQUE-MIRIM": "perequê-mirim",
+  TONINHAS: "toninhas",
+  DURA: "dura",
+  FORTALEZA: "fortaleza",
+  "UBATUBA:GRANDE": "grande-ubatuba",  // qualificado: "GRANDE" é ambíguo
+  IPEROIG: "iperoig",
+  IGUATUA: "itaguá",           // CETESB: "ITAGUÁ" → normalize → "IGUATUA"
+  MARANDUBA: "maranduba",
+  PULSO: "pulso",
+  "RIO ITAMAMBUCA": "rio-itamambuca",
+  "SANTA RITA": "santa-rita",
+  SAPE: "sape",                    // CETESB: "SAPÉ" → normalize → "SAPE"
+  SUNUNGA: "sununga",
+  TENORIO: "tenorio",              // CETESB: "TENÓRIO" → normalize → "TENORIO"
+  VERMELHA: "vermelha",
+  "VERMELHA DO NORTE": "vermelha-do-norte",
+  // Ilha Anchieta (sufixo "- ILHA ANCHIETA" — casamento exato após normalize)
+  "PRAIA DAS PALMAS- ILHA ANCHIETA": "anchieta-palmas",
+  "PRAIA DO PRESIDIO- ILHA ANCHIETA": "anchieta-presidio",
+  "PRAIA DO SAPATEIRO- ILHA ANCHIETA": "anchieta-sapateiro",
+  "PRAIA DO SUL- ILHA ANCHIETA": "anchieta-sul",
+  "PRAINHA DE FORA- ILHA ANCHIETA": "anchieta-prainhafora",
+  "PRAINHA DO ENGENHO- ILHA ANCHIETA": "anchieta-engenho",
+  "PRAINHA DO LESTE- ILHA ANCHIETA": "anchieta-leste",
+
+  // ── Ilhabela ─────────────────────────────────────────────────────────────────
   PEREQUE: "perequê",
   CURRAL: "curral",
   VIANA: "viana",
+  PORTINHO: "portinho",
+  "PRAIA DO JULIAO": "juliao",
+  FEITICEIRA: "feiticeira",
+  ARMACAO: "armacao",
+  BARREIROS: "barreiros",          // prefixo: "BARREIROS NORTE" e "BARREIROS SUL"
+  "ENG. D'AGUA": "eng-dagua",      // CETESB: "ENG. D'ÁGUA" → normalize → "ENG. D'AGUA"
+  "ILHABELA:GRANDE": "grande-ilhab", // qualificado: "GRANDE" é ambíguo
+  "ILHA DAS CABRAS": "ilha-cabras",
+  ITAGUACU: "itaguacu",
+  ITAQUANDUBA: "itaquanduba",
+  PINTO: "pinto",
+  "SACO DA CAPELA": "saco-da-capela",
+  SINO: "sino",
+  SIRIUBA: "siriuba",              // CETESB: "SIRIÚBA" → normalize → "SIRIUBA"
+  VELOSO: "veloso",
 };
 
 export function normalize(text: string): string {
