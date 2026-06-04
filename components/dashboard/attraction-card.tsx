@@ -3,6 +3,7 @@ import { View, Text, Pressable, Linking } from 'react-native';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
 import { useAttractions } from '@/hooks/useAttractions';
+import { mapsNavigationUrl } from '@/lib/utils';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
 import type { AttractionType } from '@/data/cities';
@@ -159,7 +160,7 @@ export function AttractionCard() {
 
                   {/* Botão Maps */}
                   <Pressable
-                    onPress={() => Linking.openURL(attraction.mapsUrl)}
+                    onPress={() => Linking.openURL(mapsNavigationUrl(attraction.lat, attraction.lng, attraction.name))}
                     style={({ pressed }) => ({
                       backgroundColor: pressed ? `${color}cc` : color,
                       borderRadius: 12,

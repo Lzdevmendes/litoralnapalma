@@ -3,6 +3,7 @@ import { View, Text, Pressable, Linking } from 'react-native';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { ErrorCard } from '@/components/ui/error-card';
 import { useRestaurants } from '@/hooks/useRestaurants';
+import { mapsNavigationUrl } from '@/lib/utils';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
 import type { Restaurant, RestaurantCategory } from '@/data/cities';
@@ -157,7 +158,7 @@ export function RestaurantCard() {
         {top3.map((r) => (
           <Pressable
             key={r.id}
-            onPress={() => Linking.openURL(r.mapsUrl)}
+            onPress={() => Linking.openURL(mapsNavigationUrl(r.lat, r.lng, r.name))}
             style={({ pressed }) => ({
               backgroundColor: pressed ? 'rgba(234,88,12,0.08)' : 'rgba(255,255,255,0.85)',
               borderRadius: 14,
@@ -306,7 +307,7 @@ export function RestaurantCard() {
             {sorted.map((r, idx) => (
               <Pressable
                 key={r.id}
-                onPress={() => Linking.openURL(r.mapsUrl)}
+                onPress={() => Linking.openURL(mapsNavigationUrl(r.lat, r.lng, r.name))}
                 style={({ pressed }) => ({
                   flexDirection: 'row',
                   alignItems: 'center',

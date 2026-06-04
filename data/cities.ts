@@ -87,6 +87,8 @@ export interface UPAStatic {
   address: string;
   lat: number;
   lng: number;
+  phone?: string;  // número de contato — verificar antes de exibir
+  hours: string;   // ex: '24h', 'Seg–Sex 7h–19h'
 }
 
 export interface HighwayStatic {
@@ -161,8 +163,10 @@ export const CITIES: City[] = [
         city: 'caraguatatuba',
         region: 'centro',
         address: 'Av. Adhemar de Barros, 1289 - Centro, Caraguatatuba',
-        lat: -23.6201,
-        lng: -45.4129,
+        lat: -23.6181,
+        lng: -45.4105,
+        phone: '(12) 3897-6400',
+        hours: '24h',
       },
     ],
     highways: [
@@ -334,6 +338,8 @@ export const CITIES: City[] = [
         address: 'R. João Lino da Silva, 250 - Topolândia, São Sebastião',
         lat: -23.7957,
         lng: -45.4082,
+        phone: '(12) 3892-6600',
+        hours: '24h',
       },
     ],
     highways: [
@@ -507,8 +513,10 @@ export const CITIES: City[] = [
         city: 'ubatuba',
         region: 'centro',
         address: 'R. Dr. Paulo Virgílio Bastos, 93 - Centro, Ubatuba',
-        lat: -23.4336,
-        lng: -45.0838,
+        lat: -23.4332,
+        lng: -45.0740,
+        phone: '(12) 3833-7000',
+        hours: '24h',
       },
     ],
     highways: [
