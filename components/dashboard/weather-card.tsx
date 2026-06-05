@@ -52,7 +52,7 @@ export function WeatherCard() {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <View style={{
           width: 4, height: 14, borderRadius: 2,
-            backgroundColor: cond.color,
+          backgroundColor: cond.color,
         }} />
         <Text style={{ fontSize: 12, fontWeight: '800', color: cond.ink, textTransform: 'uppercase', letterSpacing: 0.6 }}>
           {t.weather.label}

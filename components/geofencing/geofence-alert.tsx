@@ -7,6 +7,7 @@ import { useTraffic } from '@/hooks/useTraffic';
 import { useReports } from '@/hooks/useReports';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useCity } from '@/context/city-context';
+import { useLanguage } from '@/context/language-context';
 import { haversineDistance, formatDistance, occupancyColor, trafficLevelColor } from '@/lib/utils';
 import { sendLocalNotification } from '@/lib/notifications';
 
@@ -22,6 +23,7 @@ interface GeoAlert {
 export function GeofenceAlert() {
   const [alerts, setAlerts] = useState<GeoAlert[]>([]);
   const { city } = useCity();
+  const { locale } = useLanguage();
   const { data: beaches } = useBeaches(city);
   const { data: traffic } = useTraffic(city);
   const { data: reports } = useReports(city);
@@ -105,7 +107,7 @@ export function GeofenceAlert() {
       setAlerts((prev) => [...newAlerts, ...prev].slice(0, 3));
       // Notificação local para cada alerta novo (só dispara se app não estiver em foreground)
       newAlerts.forEach((a) => {
-        sendLocalNotification({ title: a.title, body: a.message, type: a.type });
+        sendLocalNotification({ title: a.title, body: a.message, type: a.type, locale });
       });
       setTimeout(() => {
         setAlerts((prev) => prev.filter((a) => !newAlerts.some((na) => na.id === a.id)));
@@ -140,7 +142,7 @@ export function GeofenceAlert() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       setAlerts((prev) => [...newAlerts, ...prev].slice(0, 3));
       newAlerts.forEach((a) => {
-        sendLocalNotification({ title: a.title, body: a.message, type: a.type });
+        sendLocalNotification({ title: a.title, body: a.message, type: a.type, locale });
       });
       setTimeout(() => {
         setAlerts((prev) => prev.filter((a) => !newAlerts.some((na) => na.id === a.id)));
