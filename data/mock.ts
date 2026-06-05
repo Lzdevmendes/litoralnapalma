@@ -1,10 +1,10 @@
 import { CITIES, DEFAULT_CITY } from './cities';
+import type { SideRoute } from './cities';
 import type {
   TrafficRoute,
   Beach,
   UPA,
   WeatherData,
-  SideRoute,
   Report,
   FerryStatus,
 } from "@/lib/types";

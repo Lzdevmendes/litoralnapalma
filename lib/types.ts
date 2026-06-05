@@ -1,4 +1,4 @@
-export type { City } from "@/data/cities";
+export type { City, SideRoute } from "@/data/cities";
 import type { BeachAmenities } from "@/data/cities";
 export type { BeachAmenities };
 
@@ -62,19 +62,6 @@ export interface WeatherData {
   updatedAt: string;
 }
 
-export interface SideRoute {
-  id: string;
-  name: string;
-  description: string;
-  type: "praia" | "trilha" | "cachoeira" | "cultural";
-  distance: number; // km from center
-  estimatedTime: number; // minutes
-  difficulty?: "fácil" | "moderado" | "difícil";
-  tags: string[];
-  lat: number;
-  lng: number;
-  mapsUrl: string;
-}
 
 export interface FerryStatus {
   waitTimeCars: number;        // minutos

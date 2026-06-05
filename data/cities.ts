@@ -1,6 +1,5 @@
 // Tipos estáticos para configuração de cidade.
 // Os tipos completos com campos dinâmicos (Beach, UPA, TrafficRoute) ficam em lib/types.ts.
-import type { SideRoute } from '@/lib/types';
 
 export type RestaurantCategory = 'frutos_do_mar' | 'pizza' | 'churrasco' | 'variado' | 'cafe' | 'bar';
 
@@ -117,6 +116,20 @@ export interface CityServices {
   trilhasHighlight: string; // destaque curto para a sub-label
   passeiosBarco: PasseioBarco[];
   temBalsa: boolean; // true apenas para Ilhabela e São Sebastião
+}
+
+export interface SideRoute {
+  id: string;
+  name: string;
+  description: string;
+  type: 'praia' | 'trilha' | 'cachoeira' | 'cultural';
+  distance: number;
+  estimatedTime: number;
+  difficulty?: 'fácil' | 'moderado' | 'difícil';
+  tags: string[];
+  lat: number;
+  lng: number;
+  mapsUrl: string;
 }
 
 export interface City {

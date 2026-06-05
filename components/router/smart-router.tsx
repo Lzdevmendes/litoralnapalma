@@ -3,7 +3,7 @@ import { useTraffic } from '@/hooks/useTraffic';
 import { useBeaches } from '@/hooks/useBeaches';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
-import type { SideRoute } from '@/lib/types';
+import type { SideRoute } from '@/data/cities';
 
 const typeConfig: Record<SideRoute['type'], { emoji: string; color: string }> = {
   praia:     { emoji: '🏖️', color: '#0077b6' },
