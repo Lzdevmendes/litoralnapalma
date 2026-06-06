@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { ScrollView, View, Text, RefreshControl } from 'react-native';
+import { ScrollView, View, Text, RefreshControl, ActivityIndicator } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, Redirect } from 'expo-router';
@@ -69,7 +69,12 @@ export default function DashboardScreen() {
   }, []);
 
   // Aguarda sessão Supabase e leitura do AsyncStorage
-  if (isLoading || !onboardingReady) return null;
+  if (isLoading || !onboardingReady) return (
+    <View style={{ flex: 1, backgroundColor: '#0077b6', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
+      <Text style={{ fontSize: 72 }}>🌊</Text>
+      <ActivityIndicator color="rgba(255,255,255,0.9)" size="large" />
+    </View>
+  );
 
   // Não autenticado → login primeiro
   if (!user) return <Redirect href="/auth/login" />;
