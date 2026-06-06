@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { signUpWithEmail, signUpWithPhone, signInWithGoogle } from '@/lib/auth';
 import { PrimaryButton, SocialButton } from '@/components/auth/SocialButton';
+import { useLanguage } from '@/context/language-context';
 
 type Method = 'email' | 'phone';
 
@@ -58,6 +59,7 @@ function Field({ label, value, onChangeText, placeholder, error, keyboardType = 
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [method, setMethod] = useState<Method>('email');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -69,11 +71,11 @@ export default function RegisterScreen() {
   const [error, setError] = useState('');
 
   // Validações
-  const nameError = submitted && name.trim().length < 2 ? 'Informe seu nome completo' : '';
-  const emailError = submitted && method === 'email' && !emailRegex.test(email) ? 'E-mail inválido' : '';
+  const nameError = submitted && name.trim().length < 2 ? t.auth.nameRequired : '';
+  const emailError = submitted && method === 'email' && !emailRegex.test(email) ? t.auth.emailInvalid : '';
   const phoneError = submitted && method === 'phone' && phone.replace(/\D/g, '').length < 10
-    ? 'Informe DDD + número (mínimo 10 dígitos)' : '';
-  const termsError = submitted && !acceptedTerms ? 'Aceite os termos para continuar' : '';
+    ? t.auth.phoneInvalid : '';
+  const termsError = submitted && !acceptedTerms ? t.auth.termsRequired : '';
 
   const isValid =
     name.trim().length >= 2 &&
@@ -96,15 +98,15 @@ export default function RegisterScreen() {
     } catch (err) {
       const msg = err instanceof Error ? err.message.toLowerCase() : '';
       if (msg.includes('rate') || msg.includes('limit') || msg.includes('security')) {
-        setError('Muitas tentativas. Aguarde alguns minutos.');
+        setError(t.auth.tooManyAttempts);
       } else if (msg.includes('already') || msg.includes('exists')) {
-        setError('E-mail já cadastrado. Tente fazer login.');
+        setError(t.auth.emailExists);
       } else if (msg.includes('invalid') || msg.includes('inválido')) {
-        setError(`${method === 'email' ? 'E-mail' : 'Telefone'} inválido.`);
+        setError(t.auth.invalidContact);
       } else if (msg.includes('phone') || msg.includes('sms') || msg.includes('otp')) {
-        setError('Não foi possível enviar o SMS. Tente cadastrar com e-mail.');
+        setError(t.auth.smsError);
       } else {
-        setError('Não foi possível criar a conta. Tente novamente.');
+        setError(t.auth.createError);
       }
     } finally {
       setLoading(false);
@@ -143,10 +145,10 @@ export default function RegisterScreen() {
                 const msg = err instanceof Error ? err.message : '';
                 if (msg === 'LOGIN_CANCELLED') return;
                 if (msg === 'EXPO_GO_NOT_SUPPORTED') {
-                  setError('Login com Google disponível apenas no app instalado — use e-mail ou telefone aqui.');
+                  setError(t.auth.googleExpoGo);
                   return;
                 }
-                setError('Não foi possível entrar com Google. Tente novamente.');
+                setError(t.auth.googleError);
               } finally {
                 setGoogleLoading(false);
               }
@@ -305,9 +307,9 @@ export default function RegisterScreen() {
 
             {/* Link login */}
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 4, marginTop: 8 }}>
-              <Text style={{ fontSize: 14, color: '#64748b' }}>Já tem conta?</Text>
+              <Text style={{ fontSize: 14, color: '#64748b' }}>{t.auth.alreadyHaveAccount}</Text>
               <TouchableOpacity onPress={() => router.replace('/auth/login')}>
-                <Text style={{ fontSize: 14, fontWeight: '700', color: '#0077b6' }}>Entrar</Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: '#0077b6' }}>{t.auth.signIn}</Text>
               </TouchableOpacity>
             </View>
           </View>

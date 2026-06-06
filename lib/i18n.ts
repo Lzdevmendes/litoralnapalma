@@ -212,6 +212,10 @@ const pt = {
     serviceUnavailable: 'Serviço indisponível. Verifique sua conexão.',
     namePlaceholder: 'João da Silva',
     googleSignIn: 'Entrar com Google',
+    nameRequired: 'Informe seu nome completo',
+    termsRequired: 'Aceite os termos para continuar',
+    emailExists: 'E-mail já cadastrado. Tente fazer login.',
+    createError: 'Não foi possível criar a conta. Tente novamente.',
   },
   footer: 'Dados atualizados em tempo real',
   nav: {
@@ -504,6 +508,10 @@ const en = {
     serviceUnavailable: 'Service unavailable. Check your connection.',
     namePlaceholder: 'Jane Smith',
     googleSignIn: 'Sign in with Google',
+    nameRequired: 'Enter your full name',
+    termsRequired: 'Accept the terms to continue',
+    emailExists: 'Email already registered. Try signing in.',
+    createError: 'Could not create account. Please try again.',
   },
   footer: 'Real-time data',
   nav: {
