@@ -4,6 +4,7 @@ import { useLocalSearchParams, router, Stack } from 'expo-router';
 import Constants from 'expo-constants';
 import { CITIES } from '@/data/cities';
 import type { FuelType, GasStation } from '@/data/cities';
+import { useLanguage } from '@/context/language-context';
 import { mapsNavigationUrl } from '@/lib/utils';
 
 // ── react-native-maps (só disponível em dev build) ───────────────────────────
@@ -62,6 +63,7 @@ function formatDate(iso: string): string {
 
 export default function GasStationDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { t } = useLanguage();
 
   // Localiza cidade e posto pelo id
   const found = CITIES.reduce<{ city: (typeof CITIES)[0]; station: GasStation } | null>(
@@ -79,12 +81,12 @@ export default function GasStationDetailScreen() {
         style={{ flex: 1, backgroundColor: '#fff9f0', alignItems: 'center', justifyContent: 'center', gap: 12 }}
       >
         <Text style={{ fontSize: 40 }}>🔍</Text>
-        <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>Posto não encontrado</Text>
+        <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.gas.notFound}</Text>
         <Pressable
           onPress={() => router.back()}
           style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#f97316', borderRadius: 12 }}
         >
-          <Text style={{ color: '#fff', fontWeight: '700' }}>← Voltar</Text>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>{t.nav.back}</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -164,7 +166,7 @@ export default function GasStationDetailScreen() {
           }}
         >
           <Text style={{ fontSize: 13, fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Preços atuais
+            {t.gas.currentPrices}
           </Text>
 
           <View style={{ gap: 8 }}>
@@ -183,10 +185,10 @@ export default function GasStationDetailScreen() {
                 <Text style={{ fontSize: 20 }}>{fuelIcon[fuel.type]}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 13, fontWeight: '600', color: '#1e293b' }}>
-                    {fuelLabel[fuel.type]}
+                    {t.gas.fuelLabels[fuel.type]}
                   </Text>
                   <Text style={{ fontSize: 10, color: '#94a3b8' }}>
-                    Atualizado em {formatDate(fuel.updatedAt)}
+                    {t.gas.updatedOn} {formatDate(fuel.updatedAt)}
                   </Text>
                 </View>
                 <Text style={{ fontSize: 16, fontWeight: '800', color: brandAccent }}>
@@ -210,7 +212,7 @@ export default function GasStationDetailScreen() {
           }}
         >
           <Text style={{ fontSize: 13, fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Localização
+            {t.gas.location}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
             <Text style={{ fontSize: 18 }}>📍</Text>
@@ -235,7 +237,7 @@ export default function GasStationDetailScreen() {
           })}
         >
           <Text style={{ fontSize: 18 }}>🗺️</Text>
-          <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>Como chegar</Text>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>{t.gas.directions}</Text>
         </Pressable>
 
         {/* Mini mapa */}
@@ -288,7 +290,7 @@ export default function GasStationDetailScreen() {
             }}
           >
             <Text style={{ fontSize: 32 }}>🗺️</Text>
-            <Text style={{ fontSize: 12, color: '#f97316', fontWeight: '600' }}>Mapa disponível no dev build</Text>
+            <Text style={{ fontSize: 12, color: '#f97316', fontWeight: '600' }}>{t.gas.mapDevBuild}</Text>
           </View>
         )}
 
@@ -306,7 +308,7 @@ export default function GasStationDetailScreen() {
             }}
           >
             <Text style={{ fontSize: 13, fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              Comparar em {city.name}
+              {t.gas.compareIn} {city.name}
             </Text>
 
             <View style={{ gap: 6 }}>
@@ -348,7 +350,7 @@ export default function GasStationDetailScreen() {
                         </Text>
                         {eth && (
                           <Text style={{ fontSize: 10, color: '#94a3b8' }}>
-                            Etanol {formatPrice(eth.price)}
+                            {t.gas.fuelLabels.etanol} {formatPrice(eth.price)}
                           </Text>
                         )}
                       </View>
@@ -358,7 +360,7 @@ export default function GasStationDetailScreen() {
                             {formatPrice(gas.price)}
                           </Text>
                         )}
-                        <Text style={{ fontSize: 9, color: '#94a3b8' }}>gasolina</Text>
+                        <Text style={{ fontSize: 9, color: '#94a3b8' }}>{t.gas.fuelLabels.gasolina}</Text>
                       </View>
                     </Pressable>
                   );
