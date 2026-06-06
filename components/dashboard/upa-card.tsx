@@ -38,9 +38,7 @@ export function UPACard() {
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: 15, fontWeight: '700', color: C.textPrimary }}>{t.upa.label}</Text>
             <Text style={{ fontSize: 12, color: C.textSecondary, marginTop: 2 }}>
-              {city.name === 'Ilhabela'
-                ? 'Referência: UPA São Sebastião (balsa + 30 min)'
-                : 'Sem UPA nesta cidade'}
+              {city.name === 'Ilhabela' ? t.upa.ilhabelaNote : t.upa.noUpa}
             </Text>
           </View>
         </View>
@@ -117,7 +115,7 @@ export function UPACard() {
                   })}
                 >
                   <Text style={{ fontSize: 12 }}>📍</Text>
-                  <Text style={{ fontSize: 12, fontWeight: '700', color }}>Como chegar</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color }}>{t.upa.directions}</Text>
                 </Pressable>
                 {upa.phone && (
                   <Pressable

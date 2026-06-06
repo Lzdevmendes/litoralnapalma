@@ -47,7 +47,7 @@ export function FerryCard() {
           </View>
           <View>
             <Text style={{ fontSize: 15, fontWeight: '700', color: C.textPrimary }}>{t.ferry.label}</Text>
-            <Text style={{ fontSize: 10, color: C.textMuted }}>São Sebastião ↔ Ilhabela</Text>
+            <Text style={{ fontSize: 10, color: C.textMuted }}>{t.ferry.route}</Text>
           </View>
         </View>
         <Badge color={operatingColor} dot>
