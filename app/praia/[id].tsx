@@ -4,6 +4,7 @@ import { useLocalSearchParams, router, Stack } from 'expo-router';
 import Constants from 'expo-constants';
 import { CITIES } from '@/data/cities';
 import { useBeaches } from '@/hooks/useBeaches';
+import { useLanguage } from '@/context/language-context';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -52,6 +53,7 @@ function formatDate(iso: string) {
 
 export default function BeachDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { t } = useLanguage();
 
   // Localiza cidade e praia estática pelo id
   const found = CITIES.reduce<{ city: (typeof CITIES)[0]; beachStatic: (typeof CITIES)[0]['beaches'][0] } | null>(
@@ -69,9 +71,9 @@ export default function BeachDetailScreen() {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#f0f6fc', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
         <Text style={{ fontSize: 40 }}>🔍</Text>
-        <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>Praia não encontrada</Text>
+        <Text style={{ fontSize: 15, fontWeight: '700', color: '#1e293b' }}>{t.beach.notFound}</Text>
         <Pressable onPress={() => router.back()} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#0077b6', borderRadius: 12 }}>
-          <Text style={{ color: '#fff', fontWeight: '700' }}>← Voltar</Text>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>{t.nav.back}</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -83,9 +85,9 @@ export default function BeachDetailScreen() {
 
   const amenities = beachStatic.amenities;
   const amenityItems = [
-    { label: 'Banheiros', icon: '🚿', ok: amenities.banheiros },
-    { label: 'Quiosques', icon: '🏖️', ok: amenities.quiosques },
-    { label: 'Estacionamento', icon: '🅿️', ok: amenities.estacionamento },
+    { label: t.beach.amenities.banheiros, icon: '🚿', ok: amenities.banheiros },
+    { label: t.beach.amenities.quiosques, icon: '🏖️', ok: amenities.quiosques },
+    { label: t.beach.amenities.estacionamento, icon: '🅿️', ok: amenities.estacionamento },
   ];
 
   return (
@@ -216,7 +218,7 @@ export default function BeachDetailScreen() {
           }}
         >
           <Text style={{ fontSize: 13, fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Estrutura
+            {t.beach.infrastructure}
           </Text>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             {amenityItems.map(({ label, icon, ok }) => (
@@ -238,7 +240,7 @@ export default function BeachDetailScreen() {
                   {label}
                 </Text>
                 <Text style={{ fontSize: 9, color: ok ? '#16a34a' : '#94a3b8' }}>
-                  {ok ? '✓ Disponível' : '✗ Sem estrutura'}
+                  {ok ? t.beach.available : t.beach.unavailable}
                 </Text>
               </View>
             ))}
@@ -260,7 +262,7 @@ export default function BeachDetailScreen() {
           })}
         >
           <Text style={{ fontSize: 18 }}>📍</Text>
-          <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>Como chegar</Text>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>{t.beach.directions}</Text>
         </Pressable>
 
         {/* Mini mapa */}
@@ -312,7 +314,7 @@ export default function BeachDetailScreen() {
             }}
           >
             <Text style={{ fontSize: 32 }}>🗺️</Text>
-            <Text style={{ fontSize: 12, color: '#0077b6', fontWeight: '600' }}>Mapa disponível no dev build</Text>
+            <Text style={{ fontSize: 12, color: '#0077b6', fontWeight: '600' }}>{t.beach.mapDevBuild}</Text>
           </View>
         )}
 
