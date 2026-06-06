@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { sendEmailOTP, sendPhoneOTP, signInWithGoogle } from '@/lib/auth';
 import { SocialButton, PrimaryButton } from '@/components/auth/SocialButton';
+import { useLanguage } from '@/context/language-context';
 
 type Method = 'email' | 'phone';
 
@@ -20,6 +21,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
 
   const [method, setMethod] = useState<Method>('email');
   const [email, setEmail] = useState('');
@@ -34,8 +36,8 @@ export default function LoginScreen() {
   const contact = method === 'email' ? email : phone;
   const isValid = method === 'email' ? isEmailValid : isPhoneValid;
 
-  const emailError = touched && !isEmailValid ? 'E-mail inválido' : '';
-  const phoneError = touched && !isPhoneValid ? 'Informe DDD + número (mínimo 10 dígitos)' : '';
+  const emailError = touched && !isEmailValid ? t.auth.emailInvalid : '';
+  const phoneError = touched && !isPhoneValid ? t.auth.phoneInvalid : '';
   const fieldError = method === 'email' ? emailError : phoneError;
 
   async function handleContinue() {
@@ -50,15 +52,15 @@ export default function LoginScreen() {
     } catch (err) {
       const msg = err instanceof Error ? err.message.toLowerCase() : '';
       if (msg.includes('not found') || msg.includes('no user') || msg.includes('signups not allowed')) {
-        setError('Conta não encontrada. Faça o cadastro primeiro.');
+        setError(t.auth.accountNotFound);
       } else if (msg.includes('rate') || msg.includes('limit') || msg.includes('security')) {
-        setError('Muitas tentativas. Aguarde alguns minutos.');
+        setError(t.auth.tooManyAttempts);
       } else if (msg.includes('invalid') || msg.includes('inválido')) {
-        setError(`${method === 'email' ? 'E-mail' : 'Telefone'} inválido.`);
+        setError(t.auth.invalidContact);
       } else if (msg.includes('phone') || msg.includes('sms') || msg.includes('otp')) {
-        setError('Não foi possível enviar o SMS. Tente entrar com e-mail.');
+        setError(t.auth.smsError);
       } else {
-        setError('Não foi possível enviar o código. Tente novamente.');
+        setError(t.auth.sendError);
       }
     } finally {
       setLoading(false);
@@ -75,13 +77,13 @@ export default function LoginScreen() {
       const msg = err instanceof Error ? err.message : '';
       if (msg === 'LOGIN_CANCELLED') return;
       if (msg === 'EXPO_GO_NOT_SUPPORTED') {
-        setError('Login com Google disponível apenas no app instalado — use e-mail ou telefone aqui.');
+        setError(t.auth.googleExpoGo);
         return;
       }
       if (msg.includes('Supabase') || msg.includes('variáveis')) {
-        setError('Serviço indisponível. Verifique sua conexão e tente novamente.');
+        setError(t.auth.serviceUnavailable);
       } else {
-        setError('Não foi possível entrar com Google. Tente novamente.');
+        setError(t.auth.googleError);
       }
     } finally {
       setGoogleLoading(false);
@@ -116,7 +118,7 @@ export default function LoginScreen() {
           Litoral na Palma
         </Text>
         <Text style={{ fontSize: 15, color: 'rgba(255,255,255,0.78)', fontWeight: '500' }}>
-          Entre na sua conta para continuar
+          {t.auth.signInTagline}
         </Text>
       </View>
 
@@ -135,7 +137,7 @@ export default function LoginScreen() {
           {/* Google */}
           <SocialButton
             emoji="🔵"
-            label="Continuar com Google"
+            label={t.auth.continueWith}
             onPress={handleGoogle}
             loading={googleLoading}
           />
@@ -143,7 +145,7 @@ export default function LoginScreen() {
           {/* Divisor */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 22 }}>
             <View style={{ flex: 1, height: 1, backgroundColor: '#bfdbfe' }} />
-            <Text style={{ fontSize: 13, color: '#94a3b8', fontWeight: '500' }}>ou</Text>
+            <Text style={{ fontSize: 13, color: '#94a3b8', fontWeight: '500' }}>{t.auth.or}</Text>
             <View style={{ flex: 1, height: 1, backgroundColor: '#bfdbfe' }} />
           </View>
 
@@ -219,7 +221,7 @@ export default function LoginScreen() {
 
           {/* Botão continuar */}
           <PrimaryButton
-            label="Continuar"
+            label={t.auth.continue}
             onPress={handleContinue}
             disabled={touched && !isValid}
             loading={loading}
@@ -233,9 +235,9 @@ export default function LoginScreen() {
 
           {/* Link cadastro */}
           <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 28, gap: 4 }}>
-            <Text style={{ fontSize: 14, color: '#64748b' }}>Não tem conta?</Text>
+            <Text style={{ fontSize: 14, color: '#64748b' }}>{t.auth.noAccount}</Text>
             <TouchableOpacity onPress={() => router.push('/auth/register')}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: '#0077b6' }}>Cadastre-se</Text>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: '#0077b6' }}>{t.auth.signUp}</Text>
             </TouchableOpacity>
           </View>
 
