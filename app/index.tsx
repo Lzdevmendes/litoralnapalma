@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { ScrollView, View, Text, RefreshControl } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -41,12 +41,25 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const queryClient = useQueryClient();
   const { consentState, requestConsent, denyConsent } = useGeolocation();
+  const scrollRef = useRef<ScrollView>(null);
+  const sectionOffsets = useRef<Record<string, number>>({});
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await queryClient.invalidateQueries();
     setRefreshing(false);
   }, [queryClient]);
+
+  const registerSection = useCallback((key: string, y: number) => {
+    sectionOffsets.current[key] = y;
+  }, []);
+
+  const scrollToSection = useCallback((key: string) => {
+    const y = sectionOffsets.current[key];
+    if (typeof y === 'number') {
+      scrollRef.current?.scrollTo({ y: Math.max(y - 8, 0), animated: true });
+    }
+  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem(ONBOARDING_KEY).then((v) => {
@@ -76,6 +89,7 @@ export default function DashboardScreen() {
       <GeofenceAlert />
 
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={{ gap: 16, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -88,24 +102,24 @@ export default function DashboardScreen() {
         }
       >
         <View style={{ paddingTop: 16 }}>
-          <QuickStats />
+          <QuickStats onStatPress={scrollToSection} />
         </View>
 
         <View style={{ paddingHorizontal: 16, gap: 16 }}>
           <SmartRouter />
-          <ModeContent mode={mode} />
+          {mode === 'morador' && <ModeContent mode={mode} />}
 
           <View style={{ gap: 6 }}>
             <SectionTitle>{t.sections.map}</SectionTitle>
             <AppMapView />
           </View>
 
-          <View style={{ gap: 6 }}>
+          <View style={{ gap: 6 }} onLayout={(e) => registerSection('weather', e.nativeEvent.layout.y)}>
             <SectionTitle>{t.sections.weather}</SectionTitle>
             <WeatherCard />
           </View>
 
-          <View style={{ gap: 6 }}>
+          <View style={{ gap: 6 }} onLayout={(e) => registerSection('traffic', e.nativeEvent.layout.y)}>
             <SectionTitle>{t.sections.traffic}</SectionTitle>
             <TrafficCard />
           </View>
@@ -127,12 +141,12 @@ export default function DashboardScreen() {
             </View>
           )}
 
-          <View style={{ gap: 6 }}>
+          <View style={{ gap: 6 }} onLayout={(e) => registerSection('beaches', e.nativeEvent.layout.y)}>
             <SectionTitle>{t.sections.beaches}</SectionTitle>
             <BeachCard />
           </View>
 
-          <View style={{ gap: 6 }}>
+          <View style={{ gap: 6 }} onLayout={(e) => registerSection('health', e.nativeEvent.layout.y)}>
             <SectionTitle>{t.sections.health}</SectionTitle>
             <UPACard />
           </View>

@@ -11,7 +11,10 @@ import { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import { router } from 'expo-router';
+import { useUpvoteReport } from '@/hooks/useReports';
+import { useLanguage } from '@/context/language-context';
 import type { Beach, UPA, Report } from '@/lib/types';
+import type { Translations } from '@/lib/i18n';
 import type { City } from '@/data/cities';
 
 interface Props {
@@ -22,7 +25,7 @@ interface Props {
 }
 
 // ── HTML gerado dinamicamente com dados embutidos como JSON ───────────────────
-function buildLeafletHTML(city: City, beaches: Beach[], upas: UPA[], reports: Report[]): string {
+function buildLeafletHTML(city: City, beaches: Beach[], upas: UPA[], reports: Report[], t: Translations): string {
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -42,10 +45,23 @@ html,body{height:100%;background:#cae0f5}
 .lp .leaflet-popup-content{margin:12px 14px;font-size:13px;line-height:1.5}
 .lp .leaflet-popup-tip-container{display:none}
 .leaflet-control-attribution{font-size:9px!important;opacity:.7}
+.legend{position:absolute;left:10px;bottom:10px;z-index:500;background:rgba(255,255,255,.94);
+  border-radius:14px;padding:9px 10px;box-shadow:0 4px 14px rgba(15,23,42,.14);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:11px;color:#334155}
+.legend-row{display:flex;align-items:center;gap:7px;margin:3px 0}
+.dot{width:9px;height:9px;border-radius:50%}
+.popup-btn{margin-top:8px;border:0;border-radius:10px;background:#0077b6;color:#fff;
+  padding:7px 10px;font-weight:700;font-size:12px;width:100%}
 </style>
 </head>
 <body>
 <div id="map"></div>
+<div class="legend">
+  <div class="legend-row"><span class="dot" style="background:#22c55e"></span>${t.map.legend.beachEmpty}</div>
+  <div class="legend-row"><span class="dot" style="background:#f59e0b"></span>${t.map.legend.beachModerate}</div>
+  <div class="legend-row"><span class="dot" style="background:#ef4444"></span>${t.map.legend.beachCrowded}</div>
+  <div class="legend-row"><span style="font-size:13px">🏥</span>${t.map.legend.upa}</div>
+</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 var D={
@@ -57,10 +73,21 @@ var D={
 var OCC={vazia:'#22c55e',moderada:'#f59e0b',lotada:'#ef4444'};
 var UPAC={normal:'#22c55e',alerta:'#f59e0b',critico:'#ef4444'};
 var RPTE={lotacao_praia:'🏖️',acidente:'🚨',blitz:'🚔',falta_agua:'💧',falta_luz:'⚡',outro:'📍'};
+var RPTL={lotacao_praia:'${t.map.report.types.lotacao_praia}',acidente:'${t.map.report.types.acidente}',blitz:'${t.map.report.types.blitz}',falta_agua:'${t.map.report.types.falta_agua}',falta_luz:'${t.map.report.types.falta_luz}',outro:'${t.map.report.types.outro}'};
+var WATERQ={boa:'${t.map.water.boa}',regular:'${t.map.water.regular}',impropia:'${t.map.water.impropia}'};
+var L10N={occupied:'${t.map.occupied}',waterLabel:'${t.map.waterLabel}',wait:'${t.upa.wait}',waiting:'${t.upa.waiting}',upvoteBtn:'${t.map.report.upvoteBtn}',upvotes:'${t.map.report.upvotes}',fallback:'${t.map.report.fallback}'};
 
 function post(t,id){
   if(window.ReactNativeWebView)
     window.ReactNativeWebView.postMessage(JSON.stringify({type:t,id:id}));
+}
+function esc(v){
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
 }
 
 function mk(html,size){
@@ -88,7 +115,7 @@ D.beaches.forEach(function(b){
   var c=OCC[b.occupancy]||'#94a3b8';
   var style='background:'+c+'25;border:2.5px solid '+c+';';
   var pop='<strong>'+b.name+'</strong><br>'+
-    b.occupancyPercent+'% ocupada · Água '+b.waterQuality;
+    b.occupancyPercent+'% '+L10N.occupied+' · '+L10N.waterLabel+' '+(WATERQ[b.waterQuality]||b.waterQuality);
   L.marker([b.lat,b.lng],{icon:mk(style,38)})
     .addTo(map)
     .bindPopup(pop,{className:'lp'})
@@ -100,7 +127,7 @@ D.upas.forEach(function(u){
   var c=UPAC[u.status]||'#94a3b8';
   var style='background:'+c+'25;border:2.5px solid '+c+';border-radius:8px;';
   var pop='<strong>'+u.name+'</strong><br>'+
-    'Espera: <b>'+u.waitTime+' min</b> · '+u.patientsWaiting+' aguardando';
+    L10N.wait+': <b>'+u.waitTime+' min</b> · '+u.patientsWaiting+' '+L10N.waiting;
   L.marker([u.lat,u.lng],{icon:L.divIcon({
     className:'',
     html:'<div style="width:38px;height:38px;border-radius:9px;'+style+'display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)">🏥</div>',
@@ -111,8 +138,11 @@ D.upas.forEach(function(u){
 // Reports da comunidade
 D.reports.forEach(function(r){
   var e=RPTE[r.type]||'📍';
-  var pop='<strong>Reporte</strong><br>'+
-    (r.description||r.type)+' · 👍 '+r.upvotes;
+  var label=RPTL[r.type]||L10N.fallback;
+  var pop='<strong>'+e+' '+label+'</strong><br>'+
+    '<span>'+esc(r.description||label)+'</span><br>'+
+    '<span style="color:#64748b">👍 '+r.upvotes+' '+L10N.upvotes+'</span>'+
+    '<button class="popup-btn" onclick="post(\\'upvote\\',\\''+r.id+'\\')">'+L10N.upvoteBtn+'</button>';
   L.marker([r.lat,r.lng],{icon:L.divIcon({
     className:'',
     html:'<div style="width:32px;height:32px;border-radius:50%;background:rgba(239,68,68,.15);border:2px solid #ef4444;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.2)">'+e+'</div>',
@@ -126,17 +156,29 @@ D.reports.forEach(function(r){
 
 // ── Componente ─────────────────────────────────────────────────────────────────
 export function WebViewMap({ city, beaches = [], upas = [], reports = [] }: Props) {
-  // Regenera apenas quando cidade muda ou a contagem de itens muda (evita flash no refetch)
+  const { mutate: upvote } = useUpvoteReport();
+  const { locale, t } = useLanguage();
+  const signature = useMemo(
+    () => JSON.stringify({
+      b: beaches.map((b) => [b.id, b.occupancy, b.occupancyPercent, b.waterQuality]),
+      u: upas.map((u) => [u.id, u.status, u.waitTime, u.patientsWaiting]),
+      r: reports.map((r) => [r.id, r.type, r.description, r.upvotes, r.expiresAt]),
+    }),
+    [beaches, upas, reports],
+  );
+
+  // Regenera quando dados visíveis mudam, incluindo upvotes, status dinâmicos e idioma.
   const html = useMemo(
-    () => buildLeafletHTML(city, beaches, upas, reports),
+    () => buildLeafletHTML(city, beaches, upas, reports, t),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [city.id, beaches.length, upas.length, reports.length],
+    [city.id, city.zoom, signature, locale],
   );
 
   function handleMessage(e: WebViewMessageEvent) {
     try {
       const msg = JSON.parse(e.nativeEvent.data) as { type: string; id: string };
       if (msg.type === 'beach') router.push(`/praia/${msg.id}`);
+      if (msg.type === 'upvote') upvote(msg.id);
     } catch {
       // mensagem malformada — ignorar
     }
@@ -173,7 +215,7 @@ export function WebViewMap({ city, beaches = [], upas = [], reports = [] }: Prop
           >
             <Text style={{ fontSize: 36 }}>🗺️</Text>
             <Text style={{ fontSize: 13, color: '#64748b', textAlign: 'center' }}>
-              {'Verifique sua conexão\npara carregar o mapa'}
+              {t.map.loadError}
             </Text>
           </View>
         )}

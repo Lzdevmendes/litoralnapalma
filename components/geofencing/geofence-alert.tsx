@@ -7,6 +7,7 @@ import { useTraffic } from '@/hooks/useTraffic';
 import { useReports } from '@/hooks/useReports';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useCity } from '@/context/city-context';
+import { useLanguage } from '@/context/language-context';
 import { haversineDistance, formatDistance, occupancyColor, trafficLevelColor } from '@/lib/utils';
 import { sendLocalNotification } from '@/lib/notifications';
 
@@ -16,11 +17,13 @@ interface GeoAlert {
   message: string;
   color: string;
   emoji: string;
+  type: 'beach' | 'traffic' | 'report' | 'general';
 }
 
 export function GeofenceAlert() {
   const [alerts, setAlerts] = useState<GeoAlert[]>([]);
   const { city } = useCity();
+  const { locale } = useLanguage();
   const { data: beaches } = useBeaches(city);
   const { data: traffic } = useTraffic(city);
   const { data: reports } = useReports(city);
@@ -39,6 +42,7 @@ export function GeofenceAlert() {
       message: 'Alertas em tempo real ativados.',
       color: '#0077b6',
       emoji: '🔔',
+      type: 'general',
     };
     setAlerts([welcome]);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -65,6 +69,7 @@ export function GeofenceAlert() {
             message: `${beach.name} está lotada (${formatDistance(dist)}).`,
             color: occupancyColor('lotada'),
             emoji: '🏖️',
+            type: 'beach',
           });
         }
       } else {
@@ -89,6 +94,7 @@ export function GeofenceAlert() {
               message: `Acidente a ${formatDistance(dist)} de você.`,
               color: '#ef4444',
               emoji: '🚨',
+              type: 'report',
             });
           }
         } else {
@@ -101,7 +107,7 @@ export function GeofenceAlert() {
       setAlerts((prev) => [...newAlerts, ...prev].slice(0, 3));
       // Notificação local para cada alerta novo (só dispara se app não estiver em foreground)
       newAlerts.forEach((a) => {
-        sendLocalNotification({ title: a.title, body: a.message });
+        sendLocalNotification({ title: a.title, body: a.message, type: a.type, locale });
       });
       setTimeout(() => {
         setAlerts((prev) => prev.filter((a) => !newAlerts.some((na) => na.id === a.id)));
@@ -125,6 +131,7 @@ export function GeofenceAlert() {
             message: `${route.shortName} com tráfego ${route.level}.`,
             color: trafficLevelColor(route.level),
             emoji: '🚗',
+            type: 'traffic',
           });
         }
       });
@@ -135,7 +142,7 @@ export function GeofenceAlert() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       setAlerts((prev) => [...newAlerts, ...prev].slice(0, 3));
       newAlerts.forEach((a) => {
-        sendLocalNotification({ title: a.title, body: a.message });
+        sendLocalNotification({ title: a.title, body: a.message, type: a.type, locale });
       });
       setTimeout(() => {
         setAlerts((prev) => prev.filter((a) => !newAlerts.some((na) => na.id === a.id)));
@@ -160,13 +167,13 @@ export function GeofenceAlert() {
         <View
           key={alert.id}
           style={{
-            backgroundColor: 'rgba(255,255,255,0.95)',
-            borderRadius: 16,
+            backgroundColor: '#fff',
+            borderRadius: 18,
             paddingHorizontal: 14,
             paddingVertical: 12,
-            borderLeftWidth: 3,
-            borderLeftColor: alert.color,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+            borderWidth: 1,
+            borderColor: `${alert.color}22`,
+            boxShadow: `0 8px 28px ${alert.color}26`,
             flexDirection: 'row',
             alignItems: 'flex-start',
             gap: 10,
@@ -177,16 +184,21 @@ export function GeofenceAlert() {
               width: 32,
               height: 32,
               borderRadius: 10,
-              backgroundColor: `${alert.color}20`,
+              backgroundColor: `${alert.color}18`,
               alignItems: 'center',
               justifyContent: 'center',
+              borderWidth: 1,
+              borderColor: `${alert.color}28`,
             }}
           >
             <Text style={{ fontSize: 16 }}>{alert.emoji}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 12, fontWeight: '700', color: '#1e293b' }}>{alert.title}</Text>
-            <Text style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{alert.message}</Text>
+            <Text style={{ fontSize: 10, fontWeight: '800', color: alert.color, textTransform: 'uppercase', letterSpacing: 0.6 }}>
+              Litoral na Palma
+            </Text>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: '#1e293b', marginTop: 1 }}>{alert.title}</Text>
+            <Text style={{ fontSize: 11, color: '#64748b', marginTop: 2, lineHeight: 15 }}>{alert.message}</Text>
           </View>
           <Pressable onPress={() => setAlerts((prev) => prev.filter((a) => a.id !== alert.id))}>
             <Text style={{ fontSize: 12, color: '#94a3b8', padding: 4 }}>✕</Text>

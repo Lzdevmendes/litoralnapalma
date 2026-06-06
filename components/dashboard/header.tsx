@@ -7,10 +7,10 @@ import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
 import { useUserMode } from '@/context/user-mode-context';
 import { useAuth } from '@/context/auth-context';
+import { useAvatar } from '@/hooks/useAvatar';
 import { signOut } from '@/lib/auth';
 import { CITIES } from '@/data/cities';
 import { C } from '@/lib/design';
-import type { UserMode } from '@/lib/types';
 
 const ONBOARDING_KEY = '@litoral_na_palma:onboarding_done';
 
@@ -19,8 +19,12 @@ export function Header() {
   const router = useRouter();
   const { city, setCity } = useCity();
   const { locale, setLocale, t } = useLanguage();
-  const { mode, setMode } = useUserMode();
+  const { mode } = useUserMode();
   const { user, setUser } = useAuth();
+  const { avatar } = useAvatar();
+  const initials = user?.name
+    ? user.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
+    : '?';
   const rotation = useRef(new Animated.Value(0)).current;
   const spinRef = useRef<Animated.CompositeAnimation | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -43,7 +47,7 @@ export function Header() {
     setShowUserMenu(false);
     Alert.alert(
       t.nav.signOut,
-      locale === 'pt' ? 'Deseja encerrar sua sessão?' : 'Do you want to sign out?',
+      t.nav.signOutConfirm,
       [
         { text: t.nav.cancel, style: 'cancel' },
         {
@@ -116,50 +120,41 @@ export function Header() {
             onPress={() => setShowUserMenu(true)}
             style={({ pressed }) => ({
               width: 38, height: 38, borderRadius: 19,
-              backgroundColor: pressed ? C.primary20 : C.primary12,
+              backgroundColor: pressed ? C.primary20 : (avatar ? '#f0f9ff' : C.primary12),
               alignItems: 'center', justifyContent: 'center',
               borderWidth: 1.5, borderColor: C.primary20,
             })}
           >
-            <Text style={{ fontSize: 15 }}>👤</Text>
+            {avatar
+              ? <Text style={{ fontSize: 20 }}>{avatar}</Text>
+              : <Text style={{ fontSize: 13, fontWeight: '800', color: C.primary }}>{initials}</Text>
+            }
           </Pressable>
         </View>
       </View>
 
-      {/* ── LINHA 2: modo morador / turista ───────────────── */}
+      {/* ── LINHA 2: modo atual ────────────────────────────── */}
       <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
         <View style={{
           flexDirection: 'row',
-          backgroundColor: C.primary08,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: mode === 'morador' ? C.primary08 : 'rgba(5,150,105,0.08)',
           borderRadius: 16,
-          padding: 4,
-          gap: 3,
+          paddingHorizontal: 12,
+          paddingVertical: 9,
+          borderWidth: 1,
+          borderColor: mode === 'morador' ? C.primary20 : 'rgba(5,150,105,0.18)',
         }}>
-          {(['morador', 'turista'] as UserMode[]).map((m) => {
-            const active = mode === m;
-            return (
-              <Pressable
-                key={m}
-                onPress={() => setMode(m)}
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6,
-                  paddingVertical: 9,
-                  borderRadius: 13,
-                  backgroundColor: active ? C.primary : 'transparent',
-                  boxShadow: active ? '0 2px 8px rgba(0,119,182,0.3)' : undefined,
-                }}
-              >
-                <Text style={{ fontSize: 13 }}>{m === 'morador' ? '🏠' : '✈️'}</Text>
-                <Text style={{ fontSize: 13, fontWeight: '700', color: active ? '#fff' : C.textSecondary }}>
-                  {m === 'morador' ? t.header.resident.replace('🏠 ', '') : t.header.tourist.replace('🧳 ', '')}
-                </Text>
-              </Pressable>
-            );
-          })}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={{ fontSize: 14 }}>{mode === 'morador' ? '🏠' : '✈️'}</Text>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: mode === 'morador' ? C.primary : '#059669' }}>
+              {mode === 'morador' ? t.settings.modeResident.replace('🏠 ', '') : t.settings.modeTourist.replace('✈️ ', '')}
+            </Text>
+          </View>
+          <Text style={{ fontSize: 11, fontWeight: '600', color: C.textMuted }}>
+            {t.header.changeInSettings}
+          </Text>
         </View>
       </View>
 
@@ -203,15 +198,28 @@ export function Header() {
             }}
           >
             {/* Perfil */}
-            <View style={{ paddingHorizontal: 4, paddingBottom: 10, gap: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: C.textPrimary }}>
-                {user?.name ?? (locale === 'pt' ? 'Usuário' : 'User')}
-              </Text>
-              {(user?.email || user?.phone) && (
-                <Text style={{ fontSize: 11, color: C.textMuted }} numberOfLines={1}>
-                  {user.email ?? user.phone}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 4, paddingBottom: 10 }}>
+              <View style={{
+                width: 42, height: 42, borderRadius: 21,
+                backgroundColor: avatar ? '#f0f9ff' : C.primary,
+                alignItems: 'center', justifyContent: 'center',
+                borderWidth: 1.5, borderColor: C.primary20,
+              }}>
+                {avatar
+                  ? <Text style={{ fontSize: 22 }}>{avatar}</Text>
+                  : <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>{initials}</Text>
+                }
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: C.textPrimary }}>
+                  {user?.name ?? t.nav.user}
                 </Text>
-              )}
+                {(user?.email || user?.phone) && (
+                  <Text style={{ fontSize: 11, color: C.textMuted }} numberOfLines={1}>
+                    {user.email ?? user.phone}
+                  </Text>
+                )}
+              </View>
             </View>
 
             <View style={{ height: 1, backgroundColor: C.primary08, marginHorizontal: -4 }} />

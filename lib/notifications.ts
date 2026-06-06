@@ -47,9 +47,21 @@ export async function requestNotificationPermission(): Promise<boolean> {
 interface LocalNotificationOptions {
   title: string;
   body: string;
+  type?: 'beach' | 'traffic' | 'report' | 'general';
+  locale?: 'pt' | 'en';
   data?: Record<string, unknown>;
   delaySeconds?: number;
 }
+
+const NOTIFICATION_TEMPLATE: Record<
+  'beach' | 'traffic' | 'report' | 'general',
+  { prefix: { pt: string; en: string }; category: string }
+> = {
+  beach:   { prefix: { pt: 'Praia',         en: 'Beach'     }, category: 'beach-alert'     },
+  traffic: { prefix: { pt: 'Trânsito',      en: 'Traffic'   }, category: 'traffic-alert'   },
+  report:  { prefix: { pt: 'Comunidade',    en: 'Community' }, category: 'community-report' },
+  general: { prefix: { pt: 'Litoral na Palma', en: 'Litoral na Palma' }, category: 'general' },
+};
 
 /**
  * Envia notificação local imediata (ou com atraso).
@@ -64,11 +76,20 @@ export async function sendLocalNotification(
   if (isForegrounded && !force) return null;
 
   try {
+    const template = NOTIFICATION_TEMPLATE[options.type ?? 'general'];
+    const prefix = template.prefix[options.locale ?? 'pt'];
+    const title = options.title.includes(prefix)
+      ? options.title
+      : `${prefix} · ${options.title}`;
+
     return await Notifications.scheduleNotificationAsync({
       content: {
-        title: options.title,
+        title,
+        subtitle: prefix,
         body: options.body,
-        data: options.data ?? {},
+        data: { ...(options.data ?? {}), type: options.type ?? 'general' },
+        categoryIdentifier: template.category,
+        sound: true,
       },
       trigger: options.delaySeconds
         ? {

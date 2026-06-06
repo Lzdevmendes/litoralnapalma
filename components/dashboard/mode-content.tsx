@@ -9,11 +9,12 @@ export function ModeContent({ mode }: { mode: UserMode }) {
   const { t } = useLanguage();
   const { services } = city;
 
+  if (mode !== 'morador') return null;
+
   const feira = services.feiraLivre[0];
-  const passeio = services.passeiosBarco[0];
 
   interface ServiceItem {
-    emoji: string; label: string; sub: string; color: string; url?: string;
+    emoji: string; label: string; sub: string; color: string; url: string;
   }
 
   const moradorItems: ServiceItem[] = [
@@ -25,6 +26,7 @@ export function ModeContent({ mode }: { mode: UserMode }) {
     {
       emoji: '🛒', label: t.modeContent.fair,
       sub: `${feira?.day ?? ''} ${feira?.hours ?? ''}`, color: C.warning,
+      url: `https://maps.google.com/?q=${encodeURIComponent(`feira livre ${feira?.location ?? city.name} ${city.name} SP`)}`,
     },
     {
       emoji: '🍽️', label: t.modeContent.restaurants, sub: t.modeContent.mapsOpen,
@@ -32,27 +34,6 @@ export function ModeContent({ mode }: { mode: UserMode }) {
       url: `https://maps.google.com/?q=${encodeURIComponent(`restaurantes ${city.name} SP`)}`,
     },
   ];
-
-  const turistaItems: ServiceItem[] = [
-    {
-      emoji: '🥾',
-      label: t.modeContent.trails,
-      sub: `${services.trilhasCount} trails`,
-      color: '#059669',
-    },
-    {
-      emoji: '⚓',
-      label: t.modeContent.boatTours,
-      sub: passeio?.departures ?? '',
-      color: C.primary,
-    },
-    services.temBalsa
-      ? { emoji: '⛴️', label: t.modeContent.ferry, sub: '', color: '#7c3aed' }
-      : { emoji: '🌿', label: t.modeContent.eco, sub: '', color: '#16a34a' },
-  ];
-
-  const items = mode === 'morador' ? moradorItems : turistaItems;
-  const title = mode === 'morador' ? t.modeContent.residentTitle : t.modeContent.touristTitle;
 
   return (
     <View style={{
@@ -67,17 +48,17 @@ export function ModeContent({ mode }: { mode: UserMode }) {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <View style={{
           width: 4, height: 16, borderRadius: 2,
-          backgroundColor: mode === 'morador' ? C.primary : '#059669',
+          backgroundColor: C.primary,
         }} />
-        <Text style={{ fontSize: 14, fontWeight: '700', color: C.textPrimary }}>{title}</Text>
+        <Text style={{ fontSize: 14, fontWeight: '700', color: C.textPrimary }}>{t.modeContent.residentTitle}</Text>
         <Text style={{ fontSize: 11, color: C.textMuted, marginLeft: 'auto' }}>{city.name}</Text>
       </View>
 
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        {items.map((item) => (
+        {moradorItems.map((item) => (
           <Pressable
             key={item.label}
-            onPress={item.url ? () => Linking.openURL(item.url!) : undefined}
+            onPress={() => Linking.openURL(item.url)}
             style={({ pressed }) => ({
               flex: 1,
               backgroundColor: pressed ? `${item.color}14` : `${item.color}08`,
@@ -103,7 +84,7 @@ export function ModeContent({ mode }: { mode: UserMode }) {
               {item.label}
             </Text>
             {item.sub ? (
-              <Text style={{ fontSize: 9, color: item.url ? item.color : C.textMuted, textAlign: 'center' }}>
+              <Text style={{ fontSize: 9, color: item.color, textAlign: 'center' }}>
                 {item.sub}
               </Text>
             ) : null}
