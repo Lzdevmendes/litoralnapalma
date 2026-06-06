@@ -44,13 +44,6 @@ const fuelIcon: Record<FuelType, string> = {
   gnv:      '💨',
 };
 
-const fuelLabel: Record<FuelType, string> = {
-  gasolina: 'Gasolina Comum',
-  etanol:   'Etanol Hidratado',
-  diesel:   'Diesel S-10',
-  gnv:      'GNV (m³)',
-};
-
 function formatPrice(price: number): string {
   return `R$ ${price.toFixed(2).replace('.', ',')}`;
 }

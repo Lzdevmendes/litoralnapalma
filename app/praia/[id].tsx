@@ -34,11 +34,6 @@ if (!isExpoGo) {
 
 // ── utils ────────────────────────────────────────────────────────────────────
 
-const waterLabel: Record<Beach['waterQuality'], string> = {
-  boa: 'Própria',
-  regular: 'Regular',
-  impropia: 'Imprópria',
-};
 const waterColor: Record<Beach['waterQuality'], string> = {
   boa: '#22c55e',
   regular: '#f59e0b',
@@ -158,7 +153,7 @@ export default function BeachDetailScreen() {
             {/* Barra de ocupação */}
             <View style={{ gap: 6 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ fontSize: 12, color: '#64748b' }}>Ocupação atual</Text>
+                <Text style={{ fontSize: 12, color: '#64748b' }}>{t.beach.occupation}</Text>
                 <Text style={{ fontSize: 12, fontWeight: '700', color: occupancyColor(beach.occupancy) }}>
                   {beach.occupancyPercent}%
                 </Text>
@@ -171,13 +166,13 @@ export default function BeachDetailScreen() {
               {[
                 {
                   emoji: '💧',
-                  label: 'Água',
-                  value: waterLabel[beach.waterQuality],
+                  label: t.map.waterLabel,
+                  value: t.beach.water[beach.waterQuality],
                   color: waterColor[beach.waterQuality],
                 },
                 {
                   emoji: '🌊',
-                  label: 'Ondas',
+                  label: 'Ondas', // nome técnico — não traduzir
                   value: `${beach.wavesHeight.toFixed(1)} m`,
                   color: '#0077b6',
                 },

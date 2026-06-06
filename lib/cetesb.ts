@@ -25,30 +25,31 @@ const CETESB_NAME_MAP: Record<string, string> = {
   "MARTIM DE SA": "martim-de-sa",
   INDAIA: "indaia",
   COCANHA: "cocanha",
-  MASSAGUACU: "massaguacu",        // prefixo: "MASSAGUACU - R. M. CARLOTA"
+  MASSAGUACU: "massaguacu", // prefixo: "MASSAGUACU - R. M. CARLOTA"
   "PORTO NOVO": "porto-novo",
   "LAGOA AZUL": "lagoa-azul",
   ARUAN: "aruan",
   PALMEIRAS: "palmeiras",
   MOCOCA: "mococa",
-  "CARAGUATATUBA:CENTRO": "centro-cara",   // qualificado: "CENTRO" é ambíguo
+  "CARAGUATATUBA:CENTRO": "centro-cara", // qualificado: "CENTRO" é ambíguo
   "CARAGUATATUBA:PRAINHA": "prainha-cara", // qualificado: "PRAINHA" existe em SS também
-  TABATINGA: "tabatinga",          // prefixo: "TABATINGA - COND. GAIVOTAS" e "TABATINGA - RIO TABATINGA"
+  TABATINGA: "tabatinga", // prefixo: "TABATINGA - COND. GAIVOTAS" e "TABATINGA - RIO TABATINGA"
   CAPRICORNIO: "capricornio",
 
   // ── São Sebastião ────────────────────────────────────────────────────────────
   "SAO SEBASTIAO:GRANDE": "praia-grande-ss", // qualificado: "GRANDE" é ambíguo
-  "SAO SEBASTIAO:PRAINHA": "prainha-ss",     // qualificado: "PRAINHA" é ambíguo
+  "SAO SEBASTIAO:PRAINHA": "prainha-ss", // qualificado: "PRAINHA" é ambíguo
   BOICUCANGA: "boicucanga",
   CAMBURI: "camburi",
-  MARESIAS: "maresias",            // prefixo: "MARESIAS - TOTEM"
-  JUQUEI: "juquei",                // prefixo: "JUQUEÍ - R. CRISTIANA" e "JUQUEÍ - TRAV. ..."
-  BORACEIA: "boraceia",            // prefixo: "BORACEIA - NORTE" e "BORACEIA - RUA CUBATÃO"
+  MARESIAS: "maresias", // prefixo: "MARESIAS - TOTEM"
+  JUQUEI: "juquei", // prefixo: "JUQUEÍ - R. CRISTIANA" e "JUQUEÍ - TRAV. ..."
+  BORACEIA: "boraceia", // prefixo: "BORACEIA - NORTE" e "BORACEIA - RUA CUBATÃO"
   "TOQUE-TOQUE PEQUENO": "toque-toque-pequeno",
+
   "TOQUE-TOQUE GRANDE": "toque-toque-grande",
   ARRASTAO: "arrastao",
   BALEIA: "baleia",
-  BAREQUECABA: "barequeçaba",   // CETESB: "BAREQUEÇABA" → normalize → "BAREQUECABA"
+  BAREQUECABA: "barequeçaba", // CETESB: "BAREQUEÇABA" → normalize → "BAREQUECABA"
   CAMBURIZINHO: "camburizinho",
   CIGARRAS: "cigarras",
   DESERTA: "deserta",
@@ -70,26 +71,26 @@ const CETESB_NAME_MAP: Record<string, string> = {
   LAZARO: "lazaro",
   "DOMINGAS DIAS": "domingas-dias",
   PICINGUABA: "picinguaba",
-  FELIX: "felix",                  // CETESB: "FÉLIX" → normalize → "FELIX"
+  FELIX: "felix", // CETESB: "FÉLIX" → normalize → "FELIX"
   ITAMAMBUCA: "itamambuca",
   "PRAIA DO PRUMIRIM": "prumirim",
   "LAGOA PRUMIRIM": "prumirim",
-  LAGOINHA: "lagoinha",            // prefixo: "LAGOINHA - AV. E. VELHO" e "LAGOINHA - CAMPING"
-  "PEREQUE-ACU": "perequé-acu",    // CETESB: "PEREQUÊ-AÇU" → normalize → "PEREQUE-ACU"
+  LAGOINHA: "lagoinha", // prefixo: "LAGOINHA - AV. E. VELHO" e "LAGOINHA - CAMPING"
+  "PEREQUE-ACU": "perequé-acu", // CETESB: "PEREQUÊ-AÇU" → normalize → "PEREQUE-ACU"
   "PEREQUE-MIRIM": "perequê-mirim",
   TONINHAS: "toninhas",
   DURA: "dura",
   FORTALEZA: "fortaleza",
-  "UBATUBA:GRANDE": "grande-ubatuba",  // qualificado: "GRANDE" é ambíguo
+  "UBATUBA:GRANDE": "grande-ubatuba", // qualificado: "GRANDE" é ambíguo
   IPEROIG: "iperoig",
-  IGUATUA: "itaguá",           // CETESB: "ITAGUÁ" → normalize → "IGUATUA"
+  IGUATUA: "itaguá", // CETESB: "ITAGUÁ" → normalize → "IGUATUA"
   MARANDUBA: "maranduba",
   PULSO: "pulso",
   "RIO ITAMAMBUCA": "rio-itamambuca",
   "SANTA RITA": "santa-rita",
-  SAPE: "sape",                    // CETESB: "SAPÉ" → normalize → "SAPE"
+  SAPE: "sape", // CETESB: "SAPÉ" → normalize → "SAPE"
   SUNUNGA: "sununga",
-  TENORIO: "tenorio",              // CETESB: "TENÓRIO" → normalize → "TENORIO"
+  TENORIO: "tenorio", // CETESB: "TENÓRIO" → normalize → "TENORIO"
   VERMELHA: "vermelha",
   "VERMELHA DO NORTE": "vermelha-do-norte",
   // Ilha Anchieta (sufixo "- ILHA ANCHIETA" — casamento exato após normalize)
@@ -109,8 +110,8 @@ const CETESB_NAME_MAP: Record<string, string> = {
   "PRAIA DO JULIAO": "juliao",
   FEITICEIRA: "feiticeira",
   ARMACAO: "armacao",
-  BARREIROS: "barreiros",          // prefixo: "BARREIROS NORTE" e "BARREIROS SUL"
-  "ENG. D'AGUA": "eng-dagua",      // CETESB: "ENG. D'ÁGUA" → normalize → "ENG. D'AGUA"
+  BARREIROS: "barreiros", // prefixo: "BARREIROS NORTE" e "BARREIROS SUL"
+  "ENG. D'AGUA": "eng-dagua", // CETESB: "ENG. D'ÁGUA" → normalize → "ENG. D'AGUA"
   "ILHABELA:GRANDE": "grande-ilhab", // qualificado: "GRANDE" é ambíguo
   "ILHA DAS CABRAS": "ilha-cabras",
   ITAGUACU: "itaguacu",
@@ -118,12 +119,14 @@ const CETESB_NAME_MAP: Record<string, string> = {
   PINTO: "pinto",
   "SACO DA CAPELA": "saco-da-capela",
   SINO: "sino",
-  SIRIUBA: "siriuba",              // CETESB: "SIRIÚBA" → normalize → "SIRIUBA"
+  SIRIUBA: "siriuba", // CETESB: "SIRIÚBA" → normalize → "SIRIUBA"
   VELOSO: "veloso",
 };
 
 export function normalize(text: string): string {
-  return text.toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+  if (!text) return "";
+  // ̀-ͯ = Combining Diacritical Marks block (Hermes/V8/JSC compatible)
+  return text.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
 
 export function mapQuality(text: string): "boa" | "regular" | "impropia" {
@@ -199,7 +202,9 @@ export async function fetchCETESBWaterQuality(): Promise<WaterQualityResult[]> {
 
   let res: Response;
   try {
-    res = await fetch(`${CETESB_URL}?${params.toString()}`, { signal: controller.signal });
+    res = await fetch(`${CETESB_URL}?${params.toString()}`, {
+      signal: controller.signal,
+    });
   } catch (err) {
     clearTimeout(timeoutId);
     if (err instanceof Error && err.name === "AbortError") {
@@ -223,7 +228,8 @@ export async function fetchCETESBWaterQuality(): Promise<WaterQualityResult[]> {
   const beachMap = new Map<string, WaterQualityResult>();
 
   for (const feature of json.features) {
-    const { praia, municipio, classificacao_texto, data_amostra_final } = feature.attributes;
+    const { praia, municipio, classificacao_texto, data_amostra_final } =
+      feature.attributes;
     const beachId = findBeachId(municipio, praia);
     if (!beachId) continue;
 
