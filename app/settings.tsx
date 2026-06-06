@@ -8,6 +8,8 @@ import { useAuth } from '@/context/auth-context';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
 import { useUserMode } from '@/context/user-mode-context';
+import { useAvatar } from '@/hooks/useAvatar';
+import { AvatarPicker } from '@/components/ui/AvatarPicker';
 import { signOut } from '@/lib/auth';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { CITIES } from '@/data/cities';
@@ -76,8 +78,10 @@ export default function SettingsScreen() {
   const { city, setCity } = useCity();
   const { locale, setLocale, t } = useLanguage();
   const { mode, setMode } = useUserMode();
+  const { avatar, setAvatar } = useAvatar();
   const [signingOut, setSigningOut] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
 
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -190,15 +194,47 @@ export default function SettingsScreen() {
         contentContainerStyle={{ padding: 16, gap: 6, paddingBottom: 48 }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Avatar picker */}
+        <AvatarPicker
+          visible={avatarPickerOpen}
+          current={avatar}
+          onSelect={setAvatar}
+          onClose={() => setAvatarPickerOpen(false)}
+          labelPt={locale === 'pt'}
+        />
+
         {/* Perfil */}
         <SectionLabel label={t.settings.profile} />
         <Card>
-          <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16, gap: 14 }}>
-            <View style={{
-              width: 54, height: 54, borderRadius: 27,
-              backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Text style={{ fontSize: 20, fontWeight: '800', color: '#fff' }}>{initials}</Text>
+          <Pressable
+            onPress={() => setAvatarPickerOpen(true)}
+            style={({ pressed }) => ({
+              flexDirection: 'row', alignItems: 'center',
+              padding: 16, gap: 14,
+              backgroundColor: pressed ? '#f8fafc' : '#fff',
+            })}
+          >
+            <View style={{ position: 'relative' }}>
+              <View style={{
+                width: 58, height: 58, borderRadius: 29,
+                backgroundColor: avatar ? '#f0f9ff' : C.primary,
+                alignItems: 'center', justifyContent: 'center',
+                borderWidth: avatar ? 2 : 0,
+                borderColor: C.primary20,
+              }}>
+                {avatar
+                  ? <Text style={{ fontSize: 28 }}>{avatar}</Text>
+                  : <Text style={{ fontSize: 20, fontWeight: '800', color: '#fff' }}>{initials}</Text>
+                }
+              </View>
+              <View style={{
+                position: 'absolute', bottom: -2, right: -2,
+                width: 20, height: 20, borderRadius: 10,
+                backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center',
+                borderWidth: 2, borderColor: '#fff',
+              }}>
+                <Text style={{ fontSize: 9 }}>✎</Text>
+              </View>
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 16, fontWeight: '700', color: C.textPrimary }}>
@@ -208,7 +244,10 @@ export default function SettingsScreen() {
                 {user?.email ?? user?.phone ?? '—'}
               </Text>
             </View>
-          </View>
+            <Text style={{ fontSize: 12, color: C.textMuted }}>
+              {locale === 'pt' ? 'Trocar' : 'Change'}
+            </Text>
+          </Pressable>
         </Card>
 
         {/* Preferências */}

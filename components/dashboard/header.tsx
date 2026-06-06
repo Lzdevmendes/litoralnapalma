@@ -7,6 +7,7 @@ import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
 import { useUserMode } from '@/context/user-mode-context';
 import { useAuth } from '@/context/auth-context';
+import { useAvatar } from '@/hooks/useAvatar';
 import { signOut } from '@/lib/auth';
 import { CITIES } from '@/data/cities';
 import { C } from '@/lib/design';
@@ -20,6 +21,10 @@ export function Header() {
   const { locale, setLocale, t } = useLanguage();
   const { mode } = useUserMode();
   const { user, setUser } = useAuth();
+  const { avatar } = useAvatar();
+  const initials = user?.name
+    ? user.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
+    : '?';
   const rotation = useRef(new Animated.Value(0)).current;
   const spinRef = useRef<Animated.CompositeAnimation | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -115,12 +120,15 @@ export function Header() {
             onPress={() => setShowUserMenu(true)}
             style={({ pressed }) => ({
               width: 38, height: 38, borderRadius: 19,
-              backgroundColor: pressed ? C.primary20 : C.primary12,
+              backgroundColor: pressed ? C.primary20 : (avatar ? '#f0f9ff' : C.primary12),
               alignItems: 'center', justifyContent: 'center',
               borderWidth: 1.5, borderColor: C.primary20,
             })}
           >
-            <Text style={{ fontSize: 15 }}>👤</Text>
+            {avatar
+              ? <Text style={{ fontSize: 20 }}>{avatar}</Text>
+              : <Text style={{ fontSize: 13, fontWeight: '800', color: C.primary }}>{initials}</Text>
+            }
           </Pressable>
         </View>
       </View>
@@ -190,15 +198,28 @@ export function Header() {
             }}
           >
             {/* Perfil */}
-            <View style={{ paddingHorizontal: 4, paddingBottom: 10, gap: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: C.textPrimary }}>
-                {user?.name ?? t.nav.user}
-              </Text>
-              {(user?.email || user?.phone) && (
-                <Text style={{ fontSize: 11, color: C.textMuted }} numberOfLines={1}>
-                  {user.email ?? user.phone}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 4, paddingBottom: 10 }}>
+              <View style={{
+                width: 42, height: 42, borderRadius: 21,
+                backgroundColor: avatar ? '#f0f9ff' : C.primary,
+                alignItems: 'center', justifyContent: 'center',
+                borderWidth: 1.5, borderColor: C.primary20,
+              }}>
+                {avatar
+                  ? <Text style={{ fontSize: 22 }}>{avatar}</Text>
+                  : <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>{initials}</Text>
+                }
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: C.textPrimary }}>
+                  {user?.name ?? t.nav.user}
                 </Text>
-              )}
+                {(user?.email || user?.phone) && (
+                  <Text style={{ fontSize: 11, color: C.textMuted }} numberOfLines={1}>
+                    {user.email ?? user.phone}
+                  </Text>
+                )}
+              </View>
             </View>
 
             <View style={{ height: 1, backgroundColor: C.primary08, marginHorizontal: -4 }} />
