@@ -29,8 +29,8 @@ components/
   geofencing/          # GeofenceAlert — alertas por distância GPS
   map/                 # map-view.tsx (nativo ou WebView), webview-map.tsx
   report/              # ReportButton, ReportModal (3 etapas + Leaflet picker)
-  router/              # SmartRouter — sugestão de rotas alternativas
-  ui/                  # Badge, ProgressBar, Skeleton, ErrorCard, ErrorBoundary
+  router/              # SmartRouter — sugestão de rotas por cidade (usa city.sideRoutes)
+  ui/                  # Badge, ProgressBar, Skeleton, ErrorCard, ErrorBoundary, AvatarPicker
 context/
   auth-context.tsx     # AuthUser em SecureStore; escuta onAuthStateChange do Supabase
   city-context.tsx     # Cidade selecionada (AsyncStorage)
@@ -51,6 +51,7 @@ hooks/
   useRestaurants.ts    # estático de cities.ts
   useGeolocation.ts    # expo-location foreground, watchPosition 50m/30s
   useNotifications.ts  # solicita permissão + listener de resposta
+  useAvatar.ts         # avatar emoji do usuário (AsyncStorage), 12 opções temáticas
 lib/
   api.ts               # Orquestra: decide API real vs estimativa para cada serviço
   auth.ts              # OTP email/phone, verifyOTP, signUpWith*, signOut
@@ -64,8 +65,11 @@ lib/
   types.ts             # TrafficRoute, Beach, UPA, Report, FerryStatus, WeatherData, ParkingZone, AuthUser
   utils.ts             # trafficLevelColor, occupancyColor, formatWaitTime, timeAgo, haversine
 data/
-  cities.ts            # CITIES: array estático com praias, UPAs, rodovias, postos, ônibus, parkingZones, etc.
+  cities.ts            # CITIES: array estático — praias, UPAs, rodovias, postos, ônibus, restaurantes, atrações,
+                       #          sideRoutes (SmartRouter). Define também SideRoute interface (não em types.ts)
   mock.ts              # Generators: estimativas dinâmicas para Weather/Traffic/Beaches/UPAs/Ferry/Reports/Parking
+docs/
+  cities/              # Documentação por cidade: coordenadas, fontes de dados, quando atualizar cada campo
 ```
 
 ## Arquitetura API real vs estimativa
@@ -129,6 +133,9 @@ Sem RLS em `reports`: qualquer pessoa pode ler, inserir, atualizar ou deletar to
 - **SafeArea**: `react-native-safe-area-context` — nunca o SafeAreaView do React Native core
 - **Query keys**: `[nomeServiço, city.id]` para dados por cidade; sem cidade para dados globais (ex: `["water-quality"]`)
 - **Hooks React Query**: staleTime e refetchInterval devem estar alinhados — staleTime ≤ refetchInterval
+- **i18n**: toda string visível ao usuário deve estar em `lib/i18n.ts`; usar `useLanguage()` em todos os componentes/telas; nunca `locale === 'pt' ? '...' : '...'` inline para strings de UI
+- **URLs de localização**: usar `mapsNavigationUrl(lat, lng, name)` para botões "Como chegar"; campo `mapsUrl` em `cities.ts` deve usar formato `https://maps.google.com/?q=Nome,+Cidade,+SP&ll=lat,lng` — nunca coordenada crua `?q=lat,lng`
+- **Regex Hermes-safe**: nunca usar combining chars raw em regex (`/[̀-ͯ]/g`); usar escapes explícitos (`/[̀-ͯ]/g`)
 
 ## Hooks de autenticação — fluxo completo
 
@@ -182,10 +189,25 @@ supabase secrets set SEND_SMS_HOOK_SECRET=<copiado acima>
 > **Resend sem domínio:** use `noreply@resend.dev` para testes.
 > **Infobip:** conta gratuita com 60 dias de trial.
 
+## Features implementadas (estado atual — junho 2026)
+
+- **Dashboard**: Weather (visual responsivo ao clima), Traffic (rodovia em destaque), Beaches, UPA, Ferry, Gas, Bus, Restaurant, Attraction, Map (WebView com legenda i18n + upvote inline)
+- **Smart Router**: sugestões por cidade via `city.sideRoutes` (4 locais reais por cidade), clicável
+- **Modo morador/turista**: fixo após onboarding; troca só em Settings
+- **Avatar**: galeria de 12 emojis praiano — persiste em AsyncStorage, exibido no header
+- **Onboarding**: 3 slides animados — 4 cidades cobertas, preview por modo, botão "Próximo"
+- **OTP verify**: animação shake no erro, checkmark verde no sucesso
+- **i18n**: 100% PT/EN em todas as telas e componentes
+- **Localização**: todas as URLs de mapas usam nome + coordenadas como âncora
+- **Reportes**: upvote direto no popup do mapa via bridge WebView→RN
+- **Dados**: 4 cidades — 21+ linhas de ônibus, 6 restaurantes verificados, 4 atrações, preços ANP mar/2026
+
 ## TODOs
 
 - `signInWithGoogle` — requer expo-auth-session + Supabase OAuth
 - `NSLocationAlwaysUsageDescription` em `app.config.ts` — presente mas app só solicita foreground permission; remover para evitar rejeição na App Store
-- Sessão Supabase em `AsyncStorage` — não criptografado; migrar para LargeSecureStore em versão futura
+- Sessão Supabase usa `LargeSecureStore` (tokens) mas `AsyncStorage` para metadados leves — aceitável por ora
 - Edge functions sem validação de HMAC do Hook Secret — adicionar verificação de assinatura
 - API DER-SP (balsa) — nenhuma API pública mapeada ainda
+- Coordenadas de restaurantes e postos são aproximadas — verificar no Google Maps antes de publicar na App Store
+- Linhas de ônibus precisam verificação nos sites EMTU/Litorânea/Pássaro Marron (horários podem ter mudado)
