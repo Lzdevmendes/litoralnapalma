@@ -76,14 +76,25 @@ export function formatDistance(km: number): string {
  * Gera a URL de navegação para o app de mapas nativo da plataforma.
  * iOS → Apple Maps (maps:), Android → Google Maps via geo:, fallback → web.
  */
-export function mapsNavigationUrl(lat: number, lng: number, name: string): string {
+/**
+ * Gera URL de navegação para o Maps nativo da plataforma.
+ * Sempre passe `city` para evitar ambiguidade em nomes curtos
+ * como "Centro", "Prainha" ou "Porto Novo" (existem em várias cidades).
+ */
+export function mapsNavigationUrl(
+  lat: number,
+  lng: number,
+  name: string,
+  city?: string,
+  state = 'SP',
+): string {
+  const label = city ? `${name}, ${city}, ${state}` : name;
   const os = process.env.EXPO_OS;
   if (os === 'ios') {
-    return `maps:?q=${encodeURIComponent(name)}&ll=${lat},${lng}`;
+    return `maps:?q=${encodeURIComponent(label)}&ll=${lat},${lng}`;
   }
   if (os === 'android') {
-    return `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(name)})`;
+    return `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(label)})`;
   }
-  // Web: busca pelo nome com coordenada como âncora — mostra o nome correto no Maps
-  return `https://maps.google.com/?q=${encodeURIComponent(name)}&ll=${lat},${lng}`;
+  return `https://maps.google.com/?q=${encodeURIComponent(label)}&ll=${lat},${lng}`;
 }

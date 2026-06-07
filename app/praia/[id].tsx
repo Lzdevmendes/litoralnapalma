@@ -76,7 +76,7 @@ export default function BeachDetailScreen() {
 
   const { city, beachStatic } = found;
   const beach = beaches?.find((b) => b.id === id);
-  const mapsUrl = mapsNavigationUrl(beachStatic.lat, beachStatic.lng, beachStatic.name);
+  const mapsUrl = mapsNavigationUrl(beachStatic.lat, beachStatic.lng, beachStatic.name, city.name);
 
   const amenities = beachStatic.amenities;
   const amenityItems = [

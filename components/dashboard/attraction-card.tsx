@@ -160,7 +160,7 @@ export function AttractionCard() {
 
                   {/* Botão Maps */}
                   <Pressable
-                    onPress={() => Linking.openURL(mapsNavigationUrl(attraction.lat, attraction.lng, attraction.name))}
+                    onPress={() => Linking.openURL(mapsNavigationUrl(attraction.lat, attraction.lng, attraction.name, city.name))}
                     style={({ pressed }) => ({
                       backgroundColor: pressed ? `${color}cc` : color,
                       borderRadius: 12,

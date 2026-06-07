@@ -107,7 +107,7 @@ export function UPACard() {
 
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Pressable
-                  onPress={() => Linking.openURL(mapsNavigationUrl(upa.lat, upa.lng, upa.name))}
+                  onPress={() => Linking.openURL(mapsNavigationUrl(upa.lat, upa.lng, upa.name, city.name))}
                   style={({ pressed }) => ({
                     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
                     gap: 4, paddingVertical: 8, borderRadius: 10,

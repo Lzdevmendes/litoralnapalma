@@ -87,7 +87,7 @@ export default function GasStationDetailScreen() {
 
   const { city, station } = found;
   const brandAccent = brandColor[station.brand] ?? '#6366f1';
-  const mapsUrl = mapsNavigationUrl(station.lat, station.lng, station.name);
+  const mapsUrl = mapsNavigationUrl(station.lat, station.lng, station.name, city.name);
 
   // Todos os postos da cidade para a listagem completa
   const allStations = city.gasStations;

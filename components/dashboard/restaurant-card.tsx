@@ -158,7 +158,7 @@ export function RestaurantCard() {
         {top3.map((r) => (
           <Pressable
             key={r.id}
-            onPress={() => Linking.openURL(mapsNavigationUrl(r.lat, r.lng, r.name))}
+            onPress={() => Linking.openURL(mapsNavigationUrl(r.lat, r.lng, r.name, city.name))}
             style={({ pressed }) => ({
               backgroundColor: pressed ? 'rgba(234,88,12,0.08)' : 'rgba(255,255,255,0.85)',
               borderRadius: 14,
@@ -307,7 +307,7 @@ export function RestaurantCard() {
             {sorted.map((r, idx) => (
               <Pressable
                 key={r.id}
-                onPress={() => Linking.openURL(mapsNavigationUrl(r.lat, r.lng, r.name))}
+                onPress={() => Linking.openURL(mapsNavigationUrl(r.lat, r.lng, r.name, city.name))}
                 style={({ pressed }) => ({
                   flexDirection: 'row',
                   alignItems: 'center',
