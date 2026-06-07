@@ -84,5 +84,6 @@ export function mapsNavigationUrl(lat: number, lng: number, name: string): strin
   if (os === 'android') {
     return `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(name)})`;
   }
-  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  // Web: busca pelo nome com coordenada como âncora — mostra o nome correto no Maps
+  return `https://maps.google.com/?q=${encodeURIComponent(name)}&ll=${lat},${lng}`;
 }

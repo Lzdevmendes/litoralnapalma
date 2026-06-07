@@ -106,7 +106,7 @@ export const SIDE_ROUTES: SideRoute[] = [
     tags: ["natureza", "aventura", "fresco"],
     lat: -23.5542,
     lng: -45.3198,
-    mapsUrl: "https://maps.google.com/?q=-23.5542,-45.3198",
+    mapsUrl: "https://maps.google.com/?q=Cachoeira+Sete+Quedas,+Caraguatatuba,+SP&ll=-23.5542,-45.3198",
   },
   {
     id: "trilha-jetuba",
@@ -119,7 +119,7 @@ export const SIDE_ROUTES: SideRoute[] = [
     tags: ["natureza", "vista", "fácil"],
     lat: -23.5312,
     lng: -45.3421,
-    mapsUrl: "https://maps.google.com/?q=-23.5312,-45.3421",
+    mapsUrl: "https://maps.google.com/?q=Trilha+do+Jetuba,+Caraguatatuba,+SP&ll=-23.5312,-45.3421",
   },
   {
     id: "praia-juquei",
@@ -131,7 +131,7 @@ export const SIDE_ROUTES: SideRoute[] = [
     tags: ["praia", "tranquilo", "natureza"],
     lat: -23.7712,
     lng: -45.4891,
-    mapsUrl: "https://maps.google.com/?q=-23.7712,-45.4891",
+    mapsUrl: "https://maps.google.com/?q=Praia+do+Juqueí,+São+Sebastião,+SP&ll=-23.7712,-45.4891",
   },
   {
     id: "lagoa-azul",
@@ -143,7 +143,7 @@ export const SIDE_ROUTES: SideRoute[] = [
     tags: ["água doce", "paddle", "relaxante"],
     lat: -23.5891,
     lng: -45.4012,
-    mapsUrl: "https://maps.google.com/?q=-23.5891,-45.4012",
+    mapsUrl: "https://maps.google.com/?q=Lagoa+Azul,+Caraguatatuba,+SP&ll=-23.5891,-45.4012",
   },
 ];
 
