@@ -78,8 +78,12 @@ export function formatDistance(km: number): string {
  */
 /**
  * Gera URL de navegação para o Maps nativo da plataforma.
- * Sempre passe `city` para evitar ambiguidade em nomes curtos
- * como "Centro", "Prainha" ou "Porto Novo" (existem em várias cidades).
+ * Coordenadas são SEMPRE primárias — garantem posição exata independente de nome.
+ * O `name` + `city` aparecem apenas como rótulo do pin, não como busca.
+ *
+ * iOS:     ll= ANTES de q= → abre nas coordenadas exatas; q= é só o rótulo
+ * Android: geo:lat,lng     → coordenada exata; nome entre parênteses como rótulo
+ * Web:     ?q=lat,lng&z=17 → pin direto nas coordenadas, zoom de rua
  */
 export function mapsNavigationUrl(
   lat: number,
@@ -91,10 +95,13 @@ export function mapsNavigationUrl(
   const label = city ? `${name}, ${city}, ${state}` : name;
   const os = process.env.EXPO_OS;
   if (os === 'ios') {
-    return `maps:?q=${encodeURIComponent(label)}&ll=${lat},${lng}`;
+    // ll= ANTES de q= → Apple Maps abre exatamente nas coordenadas e exibe `label` como rótulo
+    return `maps:?ll=${lat},${lng}&q=${encodeURIComponent(label)}`;
   }
   if (os === 'android') {
+    // geo: coordenada exata; nome entre parênteses é rótulo do pin no Google Maps
     return `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(label)})`;
   }
-  return `https://maps.google.com/?q=${encodeURIComponent(label)}&ll=${lat},${lng}`;
+  // Web: pin nas coordenadas exatas com zoom 17 (nível de rua/praia)
+  return `https://maps.google.com/?q=${lat},${lng}&z=17`;
 }
