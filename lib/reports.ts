@@ -1,10 +1,14 @@
 /**
  * Operações de CRUD para reports da comunidade usando Supabase.
- * Upvote sem autenticação via fingerprint do device (UUID criptográfico em AsyncStorage).
  *
- * Nota de segurança: a deduplicação client-side é uma camada de conveniência.
- * Para prevenção robusta de duplo-voto, adicione uma unique constraint no Supabase:
- *   ALTER TABLE report_upvotes ADD CONSTRAINT uq_device_report UNIQUE (device_id, report_id);
+ * 🔴 Nota de segurança (gap confirmado — ver AGENTS.md): `hasUpvoted`/`markUpvoted` abaixo são a
+ * ÚNICA proteção contra duplo-voto hoje — puramente client-side via AsyncStorage, bypassável
+ * reinstalando o app. A tabela `report_upvotes` já existe no banco com a infraestrutura correta
+ * (PK composta `(report_id, user_id)`, RLS, FK para `auth.users`), mas a RPC que `upvoteReport`
+ * chama (`increment_report_upvote`) não a usa — só incrementa `reports.upvotes` sem checar
+ * `user_id` nem inserir linha de dedupe. A correção não é adicionar constraint nova: é trocar a
+ * RPC por uma que valide `auth.uid()` e faça `insert into report_upvotes ... on conflict do nothing`
+ * antes de incrementar — usando a infraestrutura que já está pronta no banco.
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';

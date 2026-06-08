@@ -1,6 +1,8 @@
 /**
  * Cliente Supabase configurado para React Native.
- * Usa AsyncStorage como adapter de sessão (obrigatório em RN).
+ * Usa LargeSecureStore (chunking sobre expo-secure-store) como adapter de sessão —
+ * mantém a sessão inteira (tokens de acesso/refresh) em armazenamento criptografado
+ * (Keychain/Keystore), contornando o limite de ~2KB por chave do SecureStore.
  *
  * Variáveis de ambiente necessárias:
  *   EXPO_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
