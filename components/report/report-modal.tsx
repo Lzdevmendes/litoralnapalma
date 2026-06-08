@@ -110,7 +110,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
   const [mapError, setMapError]       = useState(false);
   const [rateLimitMsg, setRateLimitMsg] = useState('');
 
-  const { mutate: submit, isPending, isSuccess } = useSubmitReport();
+  const { mutate: submit, isPending, isSuccess, isError } = useSubmitReport();
 
   const pickerHTML = useMemo(
     () => buildPickerHTML({ lat: city.center.lat, lng: city.center.lng }, location?.lat, location?.lng),
@@ -440,6 +440,11 @@ export function ReportModal({ visible, onClose, city }: Props) {
             {rateLimitMsg ? (
               <Text style={{ fontSize: 12, color: '#f59e0b', textAlign: 'center', marginTop: 4 }}>
                 ⏳ {rateLimitMsg}
+              </Text>
+            ) : null}
+            {isError ? (
+              <Text style={{ fontSize: 12, color: '#ef4444', textAlign: 'center', marginTop: 4 }}>
+                ⚠️ Não foi possível enviar o reporte. Verifique sua conexão e tente novamente.
               </Text>
             ) : null}
           </ScrollView>

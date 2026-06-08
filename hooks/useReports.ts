@@ -27,6 +27,9 @@ export function useSubmitReport() {
     onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["reports", vars.city] });
     },
+    onError: (error) => {
+      console.error('[useSubmitReport]', error);
+    },
   });
 }
 
