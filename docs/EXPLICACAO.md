@@ -25,7 +25,7 @@
 |---|---|---|
 | Clima | OpenWeatherMap API | Mock com dados aleatórios realistas |
 | Trânsito | Google Routes API | Mock com níveis aleatórios ponderados |
-| Balneabilidade | CETESB ArcGIS (pública) | Erro silencioso — sem fallback |
+| Balneabilidade | CETESB ArcGIS (pública) | Lança erro explícito → tela de erro (não há fallback mock) |
 | Reports | Supabase (banco real) | Mock em memória (lista hardcoded) |
 | Balsa | **Sempre mock** | — (TODO) |
 | Praias, UPA, Ônibus, Postos | **Sempre mock** | — (fonte real não integrada) |
@@ -52,6 +52,9 @@ app/auth/register.tsx → cadastro (nome + email/telefone)
 app/auth/verify.tsx   → inserção do código OTP
 app/praia/[id].tsx    → detalhe de praia (rota dinâmica)
 app/posto/[id].tsx    → detalhe de posto (rota dinâmica)
+app/settings.tsx      → preferências (cidade, idioma, modo, conta)
+app/legal/terms.tsx   → termos de uso
+app/legal/privacy.tsx → política de privacidade
 ```
 
 ### TanStack React Query
@@ -81,9 +84,22 @@ app/posto/[id].tsx    → detalhe de posto (rota dinâmica)
 - **Database:** tabela `reports` (ocorrências comunitárias) + tabela `report_upvotes`
 - **Edge Functions:** `send-auth-email` e `send-auth-sms` são funções Deno que recebem Auth Hooks do Supabase e chamam Resend/Infobip para enviar OTP
 
+**Por que RLS (Row Level Security) é fundamental aqui:** o `anon key` do Supabase é embarcado no app —
+qualquer pessoa pode extraí-lo do bundle e chamar a API REST diretamente, sem passar pelo app. RLS é a
+única coisa que impede isso de virar "qualquer um lê/escreve/apaga qualquer linha de qualquer tabela".
+No Litoral na Palma, RLS está ativo em `profiles`, `reports` e `report_upvotes` — quem só lê reports não
+precisa estar logado, mas só usuário autenticado pode publicar um, e só o autor pode apagar o próprio.
+Sem essa camada, a tabela de reports comunitários (acidentes, blitz, lotação) seria gravável por
+qualquer terceiro com a anon key — não há "modo sem RLS seguro" para uma tabela exposta via `EXPO_PUBLIC_*`.
+
 **Modo sem Supabase:** todas as funções de auth e reports têm um branch `if (!isSupabaseConfigured)` que retorna mock com delay artificial — OTP `000000` é aceito, usuário criado localmente.
 
-**Sessão:** Supabase persiste tokens JWT em `AsyncStorage` (adapter obrigatório para React Native). O `AuthContext` guarda o perfil do usuário (`AuthUser`) em `SecureStore` como cache rápido de UI.
+**Sessão:** `lib/supabase.ts` usa `LargeSecureStore` (`lib/large-secure-store.ts`) — um adapter que faz *chunking*
+sobre `expo-secure-store` para contornar o limite de ~2KB por chave do SecureStore — como `storage` do
+cliente Supabase. Ou seja, **a sessão inteira (tokens de acesso e refresh) fica em armazenamento
+criptografado** (Keychain no iOS, Keystore no Android), não em `AsyncStorage`. O `AuthContext` guarda
+em `SecureStore` (via o mesmo adapter) o `AuthUser` como cache rápido de UI; `AsyncStorage` fica reservado
+para dados não sensíveis (preferência de cidade, idioma, modo, device id anônimo, cache de consentimento LGPD).
 
 ### react-native-maps + Leaflet/WebView
 
@@ -122,13 +138,23 @@ O **modal de reporte** usa sempre Leaflet/WebView para o picker de localização
 
 ### expo-secure-store
 
-**Por que existe:** Armazenamento criptografado para dados sensíveis — no caso, o perfil do usuário autenticado (`AuthUser` serializado) como cache de UI. Em iOS usa Keychain, no Android usa Android Keystore.
+**Por que existe:** Armazenamento criptografado para dados sensíveis (Keychain no iOS, Android Keystore no Android) —
+no caso, a sessão completa do Supabase (tokens de acesso e refresh) e o perfil do usuário autenticado (`AuthUser`).
+
+**O obstáculo:** o SecureStore tem um limite de ~2KB por chave, e uma sessão Supabase serializada
+(tokens JWT + metadados) costuma passar disso. **`lib/large-secure-store.ts`** resolve isso dividindo
+o valor em pedaços (`chunking`) menores que o limite, gravando cada um como uma chave separada e
+remontando na leitura — é esse adapter (`LargeSecureStore`) que `lib/supabase.ts` injeta como `storage`
+do cliente Supabase.
 
 **Separação de responsabilidades:**
-- `SecureStore` → `AuthUser` (nome, email/telefone, ID) — cache de UI
-- `AsyncStorage` → sessão Supabase (tokens JWT), preferências de cidade, idioma, modo
+- `SecureStore` (via `LargeSecureStore`) → sessão Supabase inteira (tokens de acesso/refresh) **e** `AuthUser` — tudo que é sensível
+- `AsyncStorage` → preferências não sensíveis: cidade, idioma, modo morador/turista, device id anônimo (upvote), cache do consentimento de localização
 
-> ⚠️ **Nota de segurança:** Os tokens JWT do Supabase ficam em `AsyncStorage` (não criptografado). Em dispositivos rooteados, isso é um risco. A solução ideal é usar um wrapper `LargeSecureStore` que divide os dados em chunks de < 2KB para o SecureStore.
+> Versões anteriores deste documento descreviam os tokens como armazenados em `AsyncStorage` sem
+> criptografia — **isso não corresponde ao código atual**: `lib/supabase.ts` usa `LargeSecureStore`
+> para a sessão inteira. Se você está revisando segurança de armazenamento, este já é o padrão
+> recomendado pelo próprio Supabase para Expo/React Native — não há ação pendente aqui.
 
 ### i18n custom
 

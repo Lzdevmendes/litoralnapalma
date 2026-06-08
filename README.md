@@ -11,7 +11,6 @@ App de informações em tempo real para o **Litoral Norte de São Paulo** — Ca
 - ⛴️ **Balsa** — status São Sebastião ↔ Ilhabela
 - ⛽ **Postos** — preços de combustível por cidade
 - 🚌 **Ônibus** — horários com próxima partida calculada em tempo real
-- 🅿️ **Zona Azul** — vagas de estacionamento disponíveis por zona regulamentada
 - 🗺️ **Mapa ao Vivo** — marcadores de praias, UPAs e reportes da comunidade
 - 📢 **Reportes** — envie ocorrências (acidentes, blitz, lotação) geolocalizadas
 - 🧭 **Smart Router** — sugestão de alternativas quando há congestionamento
@@ -37,12 +36,12 @@ App de informações em tempo real para o **Litoral Norte de São Paulo** — Ca
 
 ## Cidades cobertas
 
-| Cidade        | Praias | UPA               | Balsa | Zonas de Estacionamento | Restaurantes | Atrações |
-| ------------- | ------ | ----------------- | ----- | ----------------------- | ------------ | -------- |
-| Caraguatatuba | 5      | 1                 | Não   | 3                       | 6            | 4        |
-| São Sebastião | 9      | 1                 | Sim   | 3                       | 6            | 4        |
-| Ubatuba       | 11     | 1                 | Não   | 3                       | 6            | 4        |
-| Ilhabela      | 8      | — (referência SS) | Sim   | 2                       | 6            | 4        |
+| Cidade        | Praias | UPA               | Balsa | Restaurantes | Atrações |
+| ------------- | ------ | ----------------- | ----- | ------------ | -------- |
+| Caraguatatuba | 5      | 1                 | Não   | 6            | 4        |
+| São Sebastião | 9      | 1                 | Sim   | 6            | 4        |
+| Ubatuba       | 11     | 1                 | Não   | 6            | 4        |
+| Ilhabela      | 8      | — (referência SS) | Sim   | 6            | 4        |
 
 ## Rodar localmente
 
@@ -97,35 +96,30 @@ cp .env.example .env.local
 6. **Restrinja a chave** por bundle ID (`com.yourapp.litoralnapalma`) para evitar uso indevido
 
 > Sem chave Google: mapa usa Leaflet/WebView (funciona no Expo Go), trânsito usa estimativa por hora do dia.
-
-#### 4. Zona Azul (estacionamento — contrato municipal)
-
-1. Solicite acesso à API junto à prefeitura da cidade ou operadora contratada
-2. Obtenha a URL base da API e a chave de acesso
-3. Preencha:
-   - `EXPO_PUBLIC_ZONA_AZUL_API_KEY` → chave da API
-   - `EXPO_PUBLIC_ZONA_AZUL_API_BASE` → URL base (ex: `https://api.zonaazul.sp.gov.br/v1`)
-
-> Sem chave: ocupação das vagas é estimada automaticamente com base no horário (pico 10h–18h mostra mais vagas ocupadas).
+>
+> ⚠️ A `EXPO_PUBLIC_GOOGLE_ROUTES_KEY` é lida e usada **diretamente no bundle JS** (`lib/traffic.ts`) —
+> ao contrário da chave de Maps SDK (amarrada a bundle ID/SHA1 pelo próprio Google), uma REST API
+> autenticada só por chave não tem mecanismo de restrição eficaz para clientes mobile. Quem extrair
+> a chave do bundle pode usá-la fora do app e consumir sua cota. O caminho recomendado é proxiar
+> a chamada por uma Edge Function do Supabase (mesmo padrão já usado em `send-auth-email`/`send-auth-sms`),
+> mantendo a chave só no servidor.
 
 ### Tabela de variáveis
 
-| Variável                         | Serviço           | Obrigatória?      | Sem ela                       |
-| -------------------------------- | ----------------- | ----------------- | ----------------------------- |
-| `EXPO_PUBLIC_SUPABASE_URL`       | Supabase          | Não               | Auth fake, reports em memória |
-| `EXPO_PUBLIC_SUPABASE_ANON_KEY`  | Supabase          | Não (par com URL) | —                             |
-| `EXPO_PUBLIC_OPENWEATHER_KEY`    | OpenWeatherMap    | Não               | Clima estimado                |
-| `EXPO_PUBLIC_GOOGLE_MAPS_KEY`    | Google Maps SDK   | Não               | Mapa usa Leaflet/WebView      |
-| `EXPO_PUBLIC_GOOGLE_ROUTES_KEY`  | Google Routes API | Não               | Trânsito estimado             |
-| `EXPO_PUBLIC_ZONA_AZUL_API_KEY`  | API municipal     | Não               | Vagas estimadas por horário   |
-| `EXPO_PUBLIC_ZONA_AZUL_API_BASE` | API municipal     | Não (par com KEY) | —                             |
+| Variável                        | Serviço           | Obrigatória?      | Sem ela                       |
+| ------------------------------- | ----------------- | ----------------- | ----------------------------- |
+| `EXPO_PUBLIC_SUPABASE_URL`      | Supabase          | Não               | Auth fake, reports em memória |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase          | Não (par com URL) | —                             |
+| `EXPO_PUBLIC_OPENWEATHER_KEY`   | OpenWeatherMap    | Não               | Clima estimado                |
+| `EXPO_PUBLIC_GOOGLE_MAPS_KEY`   | Google Maps SDK   | Não               | Mapa usa Leaflet/WebView      |
+| `EXPO_PUBLIC_GOOGLE_ROUTES_KEY` | Google Routes API | Não               | Trânsito estimado             |
 
 > ⚠️ Todas as `EXPO_PUBLIC_*` ficam visíveis no bundle do app. Restrinja chaves Google por bundle ID/SHA1 no GCP Console e mantenha RLS ativo no Supabase.
 
 ## Testes
 
 ```bash
-pnpm test           # Jest — 97 testes
+pnpm test           # Jest — 110 testes
 npx tsc --noEmit    # Type check
 ```
 
@@ -147,17 +141,30 @@ Consulte [AGENTS.md](AGENTS.md) para instruções de configuração dos hooks e 
 
 ## RLS (Row Level Security) — obrigatório no Supabase
 
-O `anon key` é embarcado no app e visível a qualquer pessoa. RLS garante que ninguém possa apagar ou modificar dados de outras pessoas via REST direto.
+O `anon key` é embarcado no app e visível a qualquer pessoa. RLS garante que ninguém possa ler, inserir, alterar
+ou apagar dados de outras pessoas via REST direto. As policies abaixo são as que estão **de fato ativas** no
+projeto (conferidas diretamente no banco — não são um exemplo ilustrativo); a migration correspondente está em
+`supabase/migrations/001_reports.sql`.
 
 ```sql
--- reports: leitura pública filtrada por cidade, escrita anon permitida
-ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "select_by_city" ON reports FOR SELECT USING (true);
-CREATE POLICY "insert_anon"    ON reports FOR INSERT WITH CHECK (true);
+-- reports: RLS ativo. Leitura pública (não filtra por cidade — o filtro de cidade é
+-- aplicado pelo cliente via .eq('city', cityId), não pela policy). Apenas usuário
+-- autenticado pode inserir; só o dono pode apagar; não existe policy de UPDATE
+-- (reports são efetivamente imutáveis via API).
+alter table reports enable row level security;
+create policy "reports: public read" on reports for select using (expires_at > now());
+create policy "reports: auth insert" on reports for insert with check (auth.role() = 'authenticated');
+create policy "reports: owner delete" on reports for delete using (auth.uid() = user_id);
 
--- report_upvotes: impede duplo-voto por device
-ALTER TABLE report_upvotes ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "select_all"   ON report_upvotes FOR SELECT USING (true);
-CREATE POLICY "insert_anon"  ON report_upvotes FOR INSERT WITH CHECK (true);
-ALTER TABLE report_upvotes ADD CONSTRAINT unique_device_report UNIQUE (device_id, report_id);
+-- report_upvotes: RLS ativo, dedupe por usuário autenticado via PK composta (report_id, user_id).
+alter table report_upvotes enable row level security;
+create policy "upvotes: auth insert" on report_upvotes for insert with check (auth.uid() = user_id);
+create policy "upvotes: owner delete" on report_upvotes for delete using (auth.uid() = user_id);
 ```
+
+> ⚠️ **Gap conhecido:** a tabela `report_upvotes` e suas policies estão prontas para impedir duplo-voto por
+> usuário autenticado, mas a função que o app realmente chama para votar — `increment_report_upvote` — não
+> usa essa tabela; ela só incrementa `reports.upvotes` direto, sem checar `user_id` nem inserir linha de
+> dedupe. Como a RPC é `SECURITY DEFINER` e executável por `anon`/`authenticated`, qualquer chamada repetida
+> via REST infla o contador sem limite. Ver `AGENTS.md` → seção de auditoria/TODOs para o plano de correção
+> (trocar a RPC por uma que valide `auth.uid()` e faça `insert ... on conflict do nothing` em `report_upvotes`).

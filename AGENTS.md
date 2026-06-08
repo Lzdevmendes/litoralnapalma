@@ -25,12 +25,12 @@ app/
   praia/[id].tsx       # Detalhe de praia
   posto/[id].tsx       # Detalhe de posto
 components/
-  dashboard/           # Cards: weather, traffic, beach, upa, ferry, gas, bus, parking, restaurant, attraction
+  dashboard/           # Cards: weather, traffic, beach, upa, ferry, gas, bus, restaurant, attraction
   geofencing/          # GeofenceAlert — alertas por distância GPS
   map/                 # map-view.tsx (nativo ou WebView), webview-map.tsx
   report/              # ReportButton, ReportModal (3 etapas + Leaflet picker)
   router/              # SmartRouter — sugestão de rotas por cidade (usa city.sideRoutes)
-  ui/                  # Badge, ProgressBar, Skeleton, ErrorCard, ErrorBoundary, AvatarPicker
+  ui/                  # Badge, ProgressBar, Skeleton, ErrorCard, ErrorBoundary, EmptyState, FavoriteButton, LocationConsent, AvatarPicker
 context/
   auth-context.tsx     # AuthUser em SecureStore; escuta onAuthStateChange do Supabase
   city-context.tsx     # Cidade selecionada (AsyncStorage)
@@ -46,30 +46,33 @@ hooks/
   useGasStations.ts    # estático de cities.ts, staleTime 6h
   useBusLines.ts       # estático + computeTimes() dinâmico, refetch 1min
   useReports.ts        # Supabase ou estimativa, refetch 60s
-  useParkingZones.ts   # API Zona Azul ou estimativa por horário, refetch 2min
+  useFavorites.ts      # favoritos do usuário (AsyncStorage)
   useAttractions.ts    # estático de cities.ts
   useRestaurants.ts    # estático de cities.ts
-  useGeolocation.ts    # expo-location foreground, watchPosition 50m/30s
+  useGeolocation.ts    # expo-location foreground, watchPosition 50m/30s, pré-consentimento LGPD
   useNotifications.ts  # solicita permissão + listener de resposta
   useAvatar.ts         # avatar emoji do usuário (AsyncStorage), 12 opções temáticas
 lib/
   api.ts               # Orquestra: decide API real vs estimativa para cada serviço
-  auth.ts              # OTP email/phone, verifyOTP, signUpWith*, signOut
+  auth.ts              # OTP email/phone, verifyOTP, signUpWith*, signOut, signInWithGoogle
   cetesb.ts            # Fetch CETESB ArcGIS → mapeia para beachId interno
+  design.ts            # Tokens de design (C/S/R/CARD_BASE) usados via inline styles em ~10 componentes
   i18n.ts              # Dicionário PT/EN (as const), tipo Translations
+  large-secure-store.ts# Adapter chunked sobre expo-secure-store (contorna limite ~2KB/chave)
   notifications.ts     # sendLocalNotification, requestNotificationPermission
+  report-rate-limit.ts # Cooldown client-side (AsyncStorage) entre reportes — camada de conveniência, não anti-abuso real
   reports.ts           # CRUD Supabase: fetchReports, submitReport, upvoteReport
-  supabase.ts          # createClient com AsyncStorage como session adapter
+  supabase.ts          # createClient com LargeSecureStore (SecureStore) como session adapter
   traffic.ts           # Google Routes API → TrafficLevel
-  zonaazul.ts          # API Zona Azul → ParkingZone[] (fallback por horário)
-  types.ts             # TrafficRoute, Beach, UPA, Report, FerryStatus, WeatherData, ParkingZone, AuthUser
-  utils.ts             # trafficLevelColor, occupancyColor, formatWaitTime, timeAgo, haversine
+  types.ts             # TrafficRoute, Beach, UPA, Report, FerryStatus, WeatherData, AuthUser
+  utils.ts             # trafficLevelColor, occupancyColor, formatWaitTime, timeAgo, haversine, mapsNavigationUrl
 data/
   cities.ts            # CITIES: array estático — praias, UPAs, rodovias, postos, ônibus, restaurantes, atrações,
                        #          sideRoutes (SmartRouter). Define também SideRoute interface (não em types.ts)
-  mock.ts              # Generators: estimativas dinâmicas para Weather/Traffic/Beaches/UPAs/Ferry/Reports/Parking
+  mock.ts              # Generators: estimativas dinâmicas para Weather/Traffic/Beaches/UPAs/Ferry/Reports
 docs/
   cities/              # Documentação por cidade: coordenadas, fontes de dados, quando atualizar cada campo
+  EXPLICACAO.md        # Explicação didática: o que o app entrega, jornadas de usuário, papel de cada peça técnica
 ```
 
 ## Arquitetura API real vs estimativa
@@ -82,25 +85,18 @@ Trânsito       | EXPO_PUBLIC_GOOGLE_ROUTES_KEY            | estimativa ponderad
 Reports        | EXPO_PUBLIC_SUPABASE_URL + KEY           | memória local (sessão)
 Balneabilidade | API pública CETESB (sem chave)           | Lança erro → error state
 Auth OTP       | EXPO_PUBLIC_SUPABASE_URL + KEY           | DEV_OTP='000000' aceito
-Zona Azul      | EXPO_PUBLIC_ZONA_AZUL_API_KEY + BASE     | estimativa por hora do dia
 Balsa          | (sem API pública disponível)             | estimativa por hora/dia
 Praias dinâm.  | (sem API pública disponível)             | estimativa de ocupação
 UPA dinâmica   | (sem API pública disponível)             | estimativa de tempo de espera
 ```
 
-**Fronteira real↔estimativa em `lib/api.ts`** — ponto único de decisão para a maioria dos serviços. `lib/cetesb.ts`, `lib/traffic.ts` e `lib/zonaazul.ts` têm a decisão internamente.
+> ⚠️ **"Zona Azul" não é uma feature do app** — não existe `lib/zonaazul.ts`, `useParkingZones`,
+> `ParkingZone` nem `EXPO_PUBLIC_ZONA_AZUL_API_KEY` no código (confirmado por grep no repo inteiro e
+> no histórico do git). Versões antigas deste arquivo e do `README.md` documentavam essa seção como
+> se existisse — foi removida na auditoria de 2026-06 por descrever uma feature nunca implementada.
+> Se for implementá-la de fato, esta seção deve voltar junto com o código.
 
-## Zona Azul — integração
-
-`lib/zonaazul.ts` gerencia a ocupação das vagas regulamentadas:
-- **Com `EXPO_PUBLIC_ZONA_AZUL_API_KEY`**: consome API municipal (contrato com prefeitura), mescla dados dinâmicos (`availableSpots`, `updatedAt`) com dados estáticos de `cities.ts`
-- **Sem chave**: `getMockParkingZones()` em `data/mock.ts` estima disponibilidade com base na hora do dia (pico 10h–18h = 75% das vagas ocupadas; fora de pico = 35%)
-
-Zonas cadastradas por cidade em `data/cities.ts → City.parkingZones`:
-- Caraguatatuba: 3 zonas (170 vagas total)
-- São Sebastião: 3 zonas (210 vagas total)
-- Ubatuba: 3 zonas (180 vagas total)
-- Ilhabela: 2 zonas (130 vagas total)
+**Fronteira real↔estimativa em `lib/api.ts`** — ponto único de decisão para a maioria dos serviços. `lib/cetesb.ts` e `lib/traffic.ts` têm a decisão internamente.
 
 ## Mapa WebView (Expo Go)
 
@@ -113,15 +109,49 @@ Dois componentes usam Leaflet via CDN (`unpkg.com`) em uma WebView:
 - `allowFileAccess` + `allowUniversalAccessFromFileURLs` — compatibilidade Android/iOS
 - SRI (`integrity`/`crossorigin`) **removido intencionalmente** — CORS/SRI bloqueiam recursos externos com null origin no WebView nativo
 
-## Supabase — segurança (RLS obrigatório)
+## Supabase — segurança (RLS obrigatório, tolerância zero)
 
 O Supabase `anon key` é embarcado no app (EXPO_PUBLIC_*) e visível a qualquer um. Isso é esperado pelo design do Supabase, **mas exige RLS ativo em todas as tabelas**.
 
-Tabelas existentes:
-- `reports` — deve ter RLS: SELECT filtrado por cidade, INSERT permitido a qualquer anon, UPDATE/DELETE negado a anon
-- `report_upvotes` — deve ter `UNIQUE (device_id, report_id)` para impedir duplo-voto server-side
+**Estado real das policies (conferido diretamente no projeto via Supabase MCP — não é aspiracional):**
 
-Sem RLS em `reports`: qualquer pessoa pode ler, inserir, atualizar ou deletar todos os reportes via API REST direta.
+`profiles` (`rls_enabled: true`): SELECT/INSERT/UPDATE restritos a `auth.uid() = id` (cada um só vê/edita o próprio perfil).
+
+`reports` (`rls_enabled: true`):
+- `reports: public read` → SELECT com `expires_at > now()` — **sem filtro de cidade na policy**; o filtro
+  por `city` é só uma cláusula `.eq()` que `lib/reports.ts:fetchReportsFromSupabase` aplica no cliente.
+  Qualquer um pode ler reports de todas as cidades (não é vazamento de dado sensível, mas o texto antigo
+  deste arquivo dizia "SELECT filtrado por cidade" — **isso nunca foi verdade na policy**).
+- `reports: auth insert` → INSERT requer `auth.role() = 'authenticated'` — **anon não consegue inserir**.
+  Isso só não quebra o fluxo porque `app/index.tsx:80` já redireciona usuários não-autenticados para
+  `/auth/login` antes de qualquer tela com `ReportButton`.
+- `reports: owner delete` → DELETE requer `auth.uid() = user_id`.
+- **Não existe policy de UPDATE** — reports são efetivamente imutáveis via API (by design ou esquecimento — ❓ a confirmar com quem desenhou o schema).
+
+`report_upvotes` (`rls_enabled: true`, PK composta `(report_id, user_id)`, FK para `auth.users`):
+- `upvotes: auth insert` → `auth.uid() = user_id`; `upvotes: owner delete` → `auth.uid() = user_id`.
+- **Esta tabela está com 0 linhas e nunca é usada** — ver gap crítico abaixo.
+
+🔴 **Gap crítico confirmado (lido o source das functions direto no Postgres):** a única RPC que o app
+chama para votar é `increment_report_upvote(report_id uuid)`:
+```sql
+update public.reports set upvotes = upvotes + 1 where id = report_id and expires_at > now();
+```
+Ela **não toca em `report_upvotes`** — não checa `user_id`, não insere linha de dedupe, não tem limite.
+É `SECURITY DEFINER` e o advisor de segurança do Supabase confirma que é executável por `anon` E
+`authenticated` via `/rest/v1/rpc/increment_report_upvote`. Ou seja: **qualquer pessoa, autenticada ou
+não, pode inflar o contador de upvotes de qualquer report ao infinito chamando a REST API direto** — a
+infraestrutura de dedupe (`report_upvotes` + triggers `handle_upvote_insert`/`handle_upvote_delete` +
+RLS) existe no schema mas está completamente desconectada do caminho de execução real. A única
+"proteção" hoje é client-side (`hasUpvoted`/`markUpvoted` em `lib/reports.ts`, via AsyncStorage) —
+bypassável reinstalando o app ou chamando a REST API diretamente.
+
+**Correção recomendada:** trocar `increment_report_upvote` por uma function que valide `auth.uid()`,
+faça `insert into report_upvotes (report_id, user_id) values (...) on conflict do nothing` e só
+incremente `reports.upvotes` se a linha foi inserida — usando a infraestrutura que já está pronta
+no banco.
+
+Sem RLS em `reports`: qualquer pessoa poderia ler, inserir, atualizar ou deletar todos os reportes via API REST direta — esse cenário **não se aplica aqui** (RLS está ativo e correto na superfície), mas o gap de upvote acima tem o mesmo efeito prático sobre a integridade dos dados da comunidade.
 
 ## Convenções
 
@@ -143,7 +173,9 @@ Sem RLS em `reports`: qualquer pessoa pode ler, inserir, atualizar ou deletar to
 Cadastro:  signUpWithEmail/Phone(name, contact) → OTP enviado → verifyOTP → AuthUser
 Login:     sendEmailOTP/sendPhoneOTP(contact)   → OTP enviado → verifyOTP → AuthUser
 Dev:       qualquer OTP, DEV_OTP='000000' aceito em verifyOTP
-Google:    signInWithGoogle() → não implementado em produção (requer expo-auth-session)
+Google:    signInWithGoogle() → implementado em lib/auth.ts:183-212 (expo-web-browser +
+           signInWithOAuth + exchangeCodeForSession, com guarda isExpoGo). ❓ a confirmar:
+           se já foi testado ponta-a-ponta em produção — não há teste cobrindo o fluxo OAuth.
 ```
 
 `AuthContext` persiste `AuthUser` em SecureStore e escuta `onAuthStateChange` do Supabase para sincronizar tokens.
@@ -154,9 +186,14 @@ Google:    signInWithGoogle() → não implementado em produção (requer expo-a
 pnpm start              # Expo Go (mapa via Leaflet/WebView, sem react-native-maps)
 npx expo run:android    # Dev build com react-native-maps (requer Android SDK)
 npx expo run:ios        # Dev build com react-native-maps (requer Xcode)
-pnpm test               # Jest — 97 testes (lib + hooks)
+pnpm test               # Jest — 110 testes (lib + hooks)
 npx tsc --noEmit        # Type check
 ```
+
+> `pnpm web` / `expo start --web` está **quebrado** — `react-native-web` não está em `dependencies`
+> (só `react-native-webview`, que é outra coisa). O script existe em `package.json` mas falha
+> imediatamente com `CommandError`. Web não é uma plataforma documentada/suportada no README; ou
+> remova o script + `web` de `platforms`, ou instale `react-native-web@^0.21`.
 
 ## Edge Functions (Supabase)
 
@@ -197,17 +234,51 @@ supabase secrets set SEND_SMS_HOOK_SECRET=<copiado acima>
 - **Avatar**: galeria de 12 emojis praiano — persiste em AsyncStorage, exibido no header
 - **Onboarding**: 3 slides animados — 4 cidades cobertas, preview por modo, botão "Próximo"
 - **OTP verify**: animação shake no erro, checkmark verde no sucesso
-- **i18n**: 100% PT/EN em todas as telas e componentes
-- **Localização**: todas as URLs de mapas usam nome + coordenadas como âncora
+- **i18n**: dicionário `lib/i18n.ts` cobre a maior parte do dashboard e telas principais — **mas não é 100%**;
+  ver gaps conhecidos na seção TODOs (`report-modal`, `location-consent`, `geofence-alert`, `legal/*`, `onboarding`, `map-view`)
+- **Localização**: todas as URLs de mapas usam `mapsNavigationUrl()` com coordenadas exatas como âncora primária
+  (corrigido o esquema `maps://` no iOS — `maps:` sem barras fazia o Apple Maps buscar a string ao invés de fixar o pino)
 - **Reportes**: upvote direto no popup do mapa via bridge WebView→RN
 - **Dados**: 4 cidades — 21+ linhas de ônibus, 6 restaurantes verificados, 4 atrações, preços ANP mar/2026
 
 ## TODOs
 
-- `signInWithGoogle` — requer expo-auth-session + Supabase OAuth
-- `NSLocationAlwaysUsageDescription` em `app.config.ts` — presente mas app só solicita foreground permission; remover para evitar rejeição na App Store
-- Sessão Supabase usa `LargeSecureStore` (tokens) mas `AsyncStorage` para metadados leves — aceitável por ora
-- Edge functions sem validação de HMAC do Hook Secret — adicionar verificação de assinatura
-- API DER-SP (balsa) — nenhuma API pública mapeada ainda
-- Coordenadas de restaurantes e postos são aproximadas — verificar no Google Maps antes de publicar na App Store
-- Linhas de ônibus precisam verificação nos sites EMTU/Litorânea/Pássaro Marron (horários podem ter mudado)
+> Lista revisada na auditoria de 2026-06 — itens já resolvidos foram removidos (ver histórico do arquivo
+> se precisar do contexto antigo) e novos achados (verificados em código e/ou direto no banco) foram
+> adicionados com severidade.
+
+**Estrutural — prioridade alta:**
+- 🔴 `increment_report_upvote` não usa `report_upvotes`/RLS — qualquer chamada REST repetida infla o
+  contador de upvotes sem limite (anon ou autenticado). Ver detalhamento e correção sugerida na seção
+  "Supabase — segurança" acima.
+- ~~🔴 `useSubmitReport` não trata erro~~ — ✅ **resolvido**: `onError` loga `[useSubmitReport]` no
+  hook e `ReportModal` agora exibe `isError` como mensagem de falha (`⚠️ Não foi possível enviar o
+  reporte...`), com retry liberado (botão não fica desabilitado em estado de erro).
+- 🟡 `EXPO_PUBLIC_GOOGLE_ROUTES_KEY` é usada direto no bundle JS (`lib/traffic.ts`) sem mecanismo de
+  restrição eficaz para REST API chamada de cliente mobile — considerar proxy via Edge Function
+  (mesmo padrão de `send-auth-email`/`send-auth-sms`).
+- 🟡 `lib/report-rate-limit.ts` é cooldown puramente client-side (AsyncStorage) — bypassável
+  reinstalando/chamando a API direto; falta camada server-side.
+
+**i18n — gaps confirmados (contradiz a meta de 100% PT/EN):**
+- 🔴 100% hardcoded em PT, sem `useLanguage`: `components/ui/location-consent.tsx` (modal de
+  consentimento LGPD inteiro), `components/report/report-modal.tsx` (quase toda a UI — `stepTitle`,
+  labels, placeholders, mensagens de erro de GPS, texto do botão de envio), `app/legal/{terms,privacy}.tsx` (títulos).
+- 🟡 `useLanguage` importado mas strings ainda hardcoded: `components/geofencing/geofence-alert.tsx`
+  (títulos/corpos das notificações locais — `'Bem-vindo...'`, `'Praia Lotada Próxima'`, `'Acidente
+  Próximo'`, `'Trânsito Intenso'`), `app/onboarding.tsx` (usa `labelPt`/`labelEn` próprios em vez do
+  dicionário central), `app/settings.tsx:248` (`locale === 'pt' ? 'Trocar' : 'Change'` — viola a
+  convenção deste arquivo), `components/map/map-view.tsx` (legenda hardcoded, enquanto `webview-map.tsx`
+  usa `t.map.legend.*` corretamente para o mesmo elemento).
+
+**Outros:**
+- `pnpm web` quebrado — ver nota em "Rodar localmente".
+- ❓ a confirmar: `signInWithGoogle` testado ponta-a-ponta — código existe e parece completo (`lib/auth.ts:183-212`).
+- ❓ a confirmar: restrições de aplicativo (bundle ID/SHA-1) configuradas no GCP Console para `EXPO_PUBLIC_GOOGLE_MAPS_KEY`.
+- Edge functions sem validação de HMAC do Hook Secret — adicionar verificação de assinatura.
+- API DER-SP (balsa) — nenhuma API pública mapeada ainda; `getMockFerry()` é a única fonte hoje.
+- Coordenadas de restaurantes e postos são aproximadas — verificar no Google Maps antes de publicar na App Store.
+- Linhas de ônibus precisam verificação nos sites EMTU/Litorânea/Pássaro Marron (horários podem ter mudado).
+- `search_path` mutável nas functions `SECURITY DEFINER` (`handle_new_user`, `handle_upvote_insert/delete`,
+  `increment_report_upvote`) — adicionar `SET search_path = public` (warning do linter do Supabase, baixo risco).
+- Proteção de senha vazada (HaveIBeenPwned) desabilitada no Supabase Auth — baixo impacto (app usa OTP), mas fácil de ligar.
