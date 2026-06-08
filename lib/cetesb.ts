@@ -52,6 +52,7 @@ const CETESB_NAME_MAP: Record<string, string> = {
   BAREQUECABA: "barequeçaba", // CETESB: "BAREQUEÇABA" → normalize → "BAREQUECABA"
   CAMBURIZINHO: "camburizinho",
   CIGARRAS: "cigarras",
+
   DESERTA: "deserta",
   ENGENHO: "engenho-ss",
   GUAECA: "guaeca",
@@ -126,7 +127,11 @@ const CETESB_NAME_MAP: Record<string, string> = {
 export function normalize(text: string): string {
   if (!text) return "";
   // ̀-ͯ = Combining Diacritical Marks block (Hermes/V8/JSC compatible)
-  return text.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  return text
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
 }
 
 export function mapQuality(text: string): "boa" | "regular" | "impropia" {
