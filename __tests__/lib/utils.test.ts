@@ -5,6 +5,7 @@ import {
   timeAgo,
   haversineDistance,
   formatDistance,
+  mapsNavigationUrl,
 } from '@/lib/utils';
 
 // ── trafficLevelColor ────────────────────────────────────────────────────────
@@ -143,5 +144,29 @@ describe('formatDistance', () => {
     expect(formatDistance(1)).toBe('1.0km');
     expect(formatDistance(2.5)).toBe('2.5km');
     expect(formatDistance(10)).toBe('10.0km');
+  });
+});
+
+// ── mapsNavigationUrl ────────────────────────────────────────────────────────
+// `process.env.EXPO_OS` is inlined at transform time by babel-preset-expo (jest
+// runs the iOS branch), so these tests cover the iOS URL — the one reported as
+// opening a nonsensical location.
+
+describe('mapsNavigationUrl', () => {
+  it('uses the maps:// scheme (with slashes) — "maps:" alone is not Apple Maps’ registered scheme and makes it search a garbled string instead of pinning the coordinate', () => {
+    const url = mapsNavigationUrl(-23.5621, -45.3291, 'Massaguaçu', 'Caraguatatuba');
+    expect(url.startsWith('maps://?')).toBe(true);
+  });
+
+  it('puts the exact coordinates in ll= and the human label only in q=', () => {
+    const url = mapsNavigationUrl(-23.5621, -45.3291, 'Massaguaçu', 'Caraguatatuba');
+    expect(url).toBe(
+      `maps://?ll=-23.5621,-45.3291&q=${encodeURIComponent('Massaguaçu, Caraguatatuba, SP')}`
+    );
+  });
+
+  it('uses the bare name as label when no city is provided', () => {
+    const url = mapsNavigationUrl(-23.5621, -45.3291, 'Massaguaçu');
+    expect(url).toBe(`maps://?ll=-23.5621,-45.3291&q=${encodeURIComponent('Massaguaçu')}`);
   });
 });

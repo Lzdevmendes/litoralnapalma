@@ -73,16 +73,15 @@ export function formatDistance(km: number): string {
 }
 
 /**
- * Gera a URL de navegação para o app de mapas nativo da plataforma.
- * iOS → Apple Maps (maps:), Android → Google Maps via geo:, fallback → web.
- */
-/**
  * Gera URL de navegação para o Maps nativo da plataforma.
  * Coordenadas são SEMPRE primárias — garantem posição exata independente de nome.
  * O `name` + `city` aparecem apenas como rótulo do pin, não como busca.
  *
- * iOS:     ll= ANTES de q= → abre nas coordenadas exatas; q= é só o rótulo
- * Android: geo:lat,lng     → coordenada exata; nome entre parênteses como rótulo
+ * iOS:     maps://?ll=lat,lng&q=rótulo → abre nas coordenadas exatas; q= é só o rótulo do pin
+ *          (atenção: `maps:` SEM as `//` não é o esquema registrado pelo Apple Maps —
+ *          o iOS repassa a query inteira como string opaca e o app busca por ela, caindo
+ *          em local aleatório/sem sentido)
+ * Android: geo:lat,lng?q=lat,lng(rótulo) → coordenada exata; nome entre parênteses como rótulo
  * Web:     ?q=lat,lng&z=17 → pin direto nas coordenadas, zoom de rua
  */
 export function mapsNavigationUrl(
@@ -95,8 +94,9 @@ export function mapsNavigationUrl(
   const label = city ? `${name}, ${city}, ${state}` : name;
   const os = process.env.EXPO_OS;
   if (os === 'ios') {
-    // ll= ANTES de q= → Apple Maps abre exatamente nas coordenadas e exibe `label` como rótulo
-    return `maps:?ll=${lat},${lng}&q=${encodeURIComponent(label)}`;
+    // maps:// (com barras) é o esquema registrado pelo Apple Maps — abre exatamente
+    // nas coordenadas de `ll` e exibe `label` apenas como rótulo do pin
+    return `maps://?ll=${lat},${lng}&q=${encodeURIComponent(label)}`;
   }
   if (os === 'android') {
     // geo: coordenada exata; nome entre parênteses é rótulo do pin no Google Maps
