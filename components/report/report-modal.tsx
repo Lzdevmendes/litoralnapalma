@@ -109,6 +109,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
   const [gpsError, setGpsError]       = useState('');
   const [mapError, setMapError]       = useState(false);
   const [rateLimitMsg, setRateLimitMsg] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const { mutate: submit, isPending, isSuccess, isError } = useSubmitReport();
 
@@ -121,6 +122,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
   function handleClose() {
     setStep(1); setSelected(null); setDescription('');
     setLocation(null); setLocMode(null); setGpsError('');
+    setAgreedToTerms(false);
     onClose();
   }
 
@@ -414,6 +416,38 @@ export function ReportModal({ visible, onClose, city }: Props) {
               }}
             />
 
+            {/* Termo de Veracidade */}
+            <TouchableOpacity
+              onPress={() => { setAgreedToTerms(!agreedToTerms); Haptics.selectionAsync(); }}
+              activeOpacity={0.7}
+              style={{
+                flexDirection: 'row', alignItems: 'flex-start', gap: 12,
+                backgroundColor: agreedToTerms ? '#f0f9ff' : '#fff',
+                borderRadius: 14, padding: 14,
+                borderWidth: 1.5,
+                borderColor: agreedToTerms ? '#0077b6' : '#e2e8f0',
+              }}
+            >
+              <View style={{
+                width: 22, height: 22, borderRadius: 6, borderWidth: 2,
+                borderColor: agreedToTerms ? '#0077b6' : '#cbd5e1',
+                backgroundColor: agreedToTerms ? '#0077b6' : '#fff',
+                alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1,
+              }}>
+                {agreedToTerms && (
+                  <Text style={{ color: '#fff', fontSize: 11, fontWeight: '900', lineHeight: 14 }}>✓</Text>
+                )}
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: '#1e293b', marginBottom: 3 }}>
+                  Termo de Responsabilidade
+                </Text>
+                <Text style={{ fontSize: 12, color: '#64748b', lineHeight: 17 }}>
+                  Confirmo que esta informação é verdadeira. Sei que ela será visível para todos os usuários do app e que reportes falsos ou maliciosos podem resultar no bloqueio da minha conta.
+                </Text>
+              </View>
+            </TouchableOpacity>
+
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity
                 onPress={() => setStep(2)}
@@ -423,11 +457,12 @@ export function ReportModal({ visible, onClose, city }: Props) {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSubmit}
-                disabled={!selected || isPending || isSuccess}
+                disabled={!selected || isPending || isSuccess || !agreedToTerms}
                 style={{
-                  flex: 2, backgroundColor: !selected || isPending || isSuccess ? '#94a3b8' : '#0077b6',
+                  flex: 2,
+                  backgroundColor: !selected || isPending || isSuccess || !agreedToTerms ? '#94a3b8' : '#0077b6',
                   borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center',
-                  boxShadow: selected && !isPending && !isSuccess ? '0 4px 16px rgba(0,119,182,0.3)' : undefined,
+                  boxShadow: selected && !isPending && !isSuccess && agreedToTerms ? '0 4px 16px rgba(0,119,182,0.3)' : undefined,
                 }}
               >
                 {isPending
