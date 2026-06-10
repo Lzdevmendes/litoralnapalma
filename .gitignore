@@ -35,5 +35,11 @@ yarn-error.log*
 *.pem
 *.tsbuildinfo
 
+# Supabase temp files
+supabase/.temp/
+
+# EAS credentials (never commit)
+google-service-account.json
+
 # temp IDE files
 *.oOce*

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidade — Litoral na Palma</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+    header {
+      background: #0077b6;
+      color: #fff;
+      padding: 24px 20px 20px;
+      text-align: center;
+    }
+    header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+    header p  { font-size: 0.8rem; opacity: 0.85; }
+    main { max-width: 720px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    .badge {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 28px;
+    }
+    .badge strong { color: #166534; display: block; margin-bottom: 4px; }
+    .badge p  { font-size: 0.85rem; color: #15803d; }
+    .badge small { display: block; margin-top: 6px; font-size: 0.75rem; color: #4ade80; }
+
+    section { margin-bottom: 24px; }
+    section h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+    section p {
+      font-size: 0.875rem;
+      color: #475569;
+      white-space: pre-line;
+    }
+
+    .contact {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 28px;
+    }
+    .contact strong { color: #1e40af; display: block; margin-bottom: 8px; }
+    .contact a { color: #3b82f6; font-size: 0.875rem; }
+    .contact small { display: block; margin-top: 6px; font-size: 0.75rem; color: #60a5fa; }
+
+    footer {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 16px;
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔒 Política de Privacidade</h1>
+    <p>Litoral na Palma · LGPD — Lei 13.709/2018</p>
+  </header>
+
+  <main>
+    <div class="badge">
+      <strong>🛡️ Seus Dados Estão Protegidos</strong>
+      <p>Esta política está em conformidade com a LGPD (Lei Geral de Proteção de Dados — Lei 13.709/2018).</p>
+      <small>Última atualização: 02 de junho de 2026</small>
+    </div>
+
+    <section>
+      <h2>1. Controlador dos Dados</h2>
+      <p>Litoral na Palma é o controlador dos dados pessoais coletados por este aplicativo, nos termos da Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018). Contato do DPO (Encarregado de Dados): privacidade@litoralnapalma.com.br</p>
+    </section>
+
+    <section>
+      <h2>2. Dados Coletados</h2>
+      <p>Coletamos os seguintes dados pessoais:
+
+• Nome: fornecido no cadastro, usado para identificação no app.
+• E-mail ou telefone: fornecido no cadastro, usado para autenticação via OTP.
+• Localização GPS (foreground): coletada apenas quando o app está aberto e em uso, com sua permissão explícita. Usada para alertas de praias e reportes próximos.
+• Identificador de dispositivo (device_id): UUID aleatório gerado no primeiro uso, usado para deduplicar votos em reportes. Não identifica você pessoalmente.
+• Conteúdo de reportes: tipo de ocorrência, descrição e coordenadas geográficas que você envia voluntariamente.</p>
+    </section>
+
+    <section>
+      <h2>3. Finalidade do Tratamento</h2>
+      <p>Tratamos seus dados para:
+
+• Autenticação e manutenção da sua conta.
+• Exibir alertas geofencing personalizados quando você está próximo de praias lotadas ou acidentes reportados.
+• Publicar reportes comunitários visíveis a outros usuários da mesma cidade.
+• Prevenir abuso (deduplicação de votos via device_id).
+• Análise de erros técnicos para melhoria do serviço.</p>
+    </section>
+
+    <section>
+      <h2>4. Base Legal (LGPD)</h2>
+      <p>Tratamos seus dados com base nos seguintes fundamentos (Art. 7° da LGPD):
+
+• Consentimento (Art. 7°, I): localização GPS — você pode revogar a qualquer momento nas configurações do sistema.
+• Execução de contrato (Art. 7°, V): e-mail/telefone para autenticação.
+• Legítimo interesse (Art. 7°, IX): device_id para integridade do sistema de votos.
+• Consentimento do titular: reportes comunitários publicados voluntariamente.</p>
+    </section>
+
+    <section>
+      <h2>5. Localização GPS — Detalhes</h2>
+      <p>Sua localização é coletada SOMENTE enquanto o app está em uso (foreground). Nunca coletamos localização em segundo plano.
+
+A localização é processada localmente no dispositivo para calcular distâncias e exibir alertas. Ela NÃO é enviada para nossos servidores nem armazenada de forma persistente.
+
+Você pode revogar a permissão de localização a qualquer momento em Configurações do Sistema → Privacidade → Localização → Litoral na Palma.</p>
+    </section>
+
+    <section>
+      <h2>6. Compartilhamento de Dados</h2>
+      <p>Compartilhamos dados com os seguintes operadores (prestadores de serviço):
+
+• Supabase Inc. (EUA): banco de dados e autenticação. Dados protegidos por acordo de DPA conforme GDPR/LGPD.
+• Resend Inc. (EUA): envio de e-mails de verificação OTP.
+• Infobip Ltd. (Croácia): envio de SMS de verificação OTP.
+
+NÃO vendemos, alugamos ou compartilhamos seus dados com terceiros para fins de marketing.
+
+Reportes comunitários são visíveis publicamente a outros usuários do app na mesma cidade, conforme a natureza do serviço.</p>
+    </section>
+
+    <section>
+      <h2>7. Retenção de Dados</h2>
+      <p>• Reportes: expiram automaticamente em 24 horas após a criação.
+• Dados de conta (nome, e-mail/telefone): mantidos enquanto a conta estiver ativa.
+• Logs de autenticação: 90 dias, conforme política da Supabase.
+• device_id: mantido localmente no dispositivo enquanto o app estiver instalado.
+
+Após exclusão da conta, os dados pessoais são removidos em até 30 dias, exceto quando retidos por obrigação legal.</p>
+    </section>
+
+    <section>
+      <h2>8. Seus Direitos (LGPD, Art. 18)</h2>
+      <p>Você tem os seguintes direitos sobre seus dados:
+
+• Confirmação e acesso: saber quais dados temos sobre você.
+• Correção: atualizar dados incompletos ou desatualizados.
+• Anonimização, bloqueio ou eliminação: de dados desnecessários ou tratados em desconformidade.
+• Portabilidade: receber seus dados em formato estruturado.
+• Eliminação: excluir seus dados e conta (App → Configurações → Excluir conta).
+• Informação sobre compartilhamento: saber com quem seus dados são compartilhados.
+• Revogação do consentimento: a qualquer momento, sem prejudicar tratamentos anteriores.
+
+Para exercer seus direitos: privacidade@litoralnapalma.com.br</p>
+    </section>
+
+    <section>
+      <h2>9. Segurança</h2>
+      <p>Adotamos medidas técnicas e organizacionais para proteger seus dados:
+
+• Tokens de sessão armazenados em armazenamento seguro e criptografado do dispositivo (Keychain/Keystore).
+• Comunicação com servidores via HTTPS/TLS.
+• Acesso ao banco restrito por políticas de Row Level Security (RLS).
+• OTP de uso único com expiração de 10 minutos.</p>
+    </section>
+
+    <section>
+      <h2>10. Transferência Internacional</h2>
+      <p>Nossos operadores (Supabase, Resend, Infobip) estão fora do Brasil. As transferências ocorrem com base em cláusulas contratuais padrão (DPA) que garantem nível de proteção equivalente ao exigido pela LGPD, conforme Art. 33 da Lei 13.709/2018.</p>
+    </section>
+
+    <section>
+      <h2>11. Cookies e Rastreamento</h2>
+      <p>O App NÃO utiliza cookies de terceiros para rastreamento ou publicidade. Utilizamos apenas armazenamento local (AsyncStorage e SecureStore) para funcionalidade essencial do app.</p>
+    </section>
+
+    <section>
+      <h2>12. Menores de Idade</h2>
+      <p>Não coletamos intencionalmente dados de crianças menores de 13 anos. Se soubermos que coletamos dados de uma criança, excluiremos imediatamente. Pais podem contatar privacidade@litoralnapalma.com.br.</p>
+    </section>
+
+    <section>
+      <h2>13. Alterações desta Política</h2>
+      <p>Podemos atualizar esta Política periodicamente. Notificaremos sobre mudanças significativas via notificação no app ou email cadastrado, com no mínimo 15 dias de antecedência.</p>
+    </section>
+
+    <section>
+      <h2>14. Autoridade de Proteção de Dados</h2>
+      <p>Você pode registrar reclamações junto à ANPD (Autoridade Nacional de Proteção de Dados): <a href="https://www.anpd.gov.br" target="_blank" rel="noopener">anpd.gov.br</a></p>
+    </section>
+
+    <div class="contact">
+      <strong>✉️ Fale com nosso DPO</strong>
+      <a href="mailto:privacidade@litoralnapalma.com.br">privacidade@litoralnapalma.com.br</a>
+      <small>Respondemos em até 15 dias úteis, conforme Art. 18 da LGPD.</small>
+    </div>
+
+    <footer>
+      <p>© 2026 Litoral na Palma — São Paulo, Brasil</p>
+    </footer>
+  </main>
+</body>
+</html>
