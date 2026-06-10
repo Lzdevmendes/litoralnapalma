@@ -877,7 +877,7 @@ export const CITIES: City[] = [
       { id: 'itaquanduba',     name: 'Itaquanduba',           waterQuality: 'boa',      lat: -23.7997, lng: -45.3651, amenities: { banheiros: false, quiosques: false, estacionamento: false } },
       { id: 'curral',          name: 'Praia do Curral',       waterQuality: 'boa',      lat: -23.8237, lng: -45.3681, amenities: { banheiros: true,  quiosques: true,  estacionamento: false } },
       { id: 'veloso',          name: 'Veloso',                waterQuality: 'boa',      lat: -23.8240, lng: -45.3250, amenities: { banheiros: false, quiosques: true,  estacionamento: false } },
-      { id: 'viana',           name: 'Praia de Viana',        waterQuality: 'boa',      lat: -23.8453, lng: -45.3801, amenities: { banheiros: false, quiosques: false, estacionamento: false } },
+      { id: 'viana',           name: 'Praia de Viana',        waterQuality: 'boa',      lat: -23.7547, lng: -45.3497, amenities: { banheiros: false, quiosques: false, estacionamento: false } },
       { id: 'grande-ilhab',    name: 'Grande (Ilhabela)',     waterQuality: 'boa',      lat: -23.8578, lng: -45.4164, amenities: { banheiros: false, quiosques: true,  estacionamento: false } },
     ],
     upas: [
