@@ -3,7 +3,7 @@
  * Usa require() condicional para NÃO carregar expo-notifications no Expo Go,
  * eliminando o ERROR "Android Push notifications removed from Expo Go SDK 53+".
  */
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 const isExpoGo =
@@ -26,6 +26,24 @@ if (!isExpoGo) {
         shouldShowList: true,
       }),
     });
+
+    // Android 8+ requer canais registrados — sem canal a notificação não aparece
+    if (Platform.OS === 'android') {
+      const imp = Notifications.AndroidImportance;
+      [
+        { id: 'beach-alert',      name: 'Alertas de Praia',       importance: imp?.HIGH    ?? 4, color: '#0077b6' },
+        { id: 'traffic-alert',    name: 'Alertas de Trânsito',    importance: imp?.HIGH    ?? 4, color: '#f59e0b' },
+        { id: 'community-report', name: 'Reportes da Comunidade', importance: imp?.DEFAULT ?? 3, color: '#ef4444' },
+        { id: 'general',          name: 'Litoral na Palma',       importance: imp?.DEFAULT ?? 3, color: '#0077b6' },
+      ].forEach(({ id, name, importance, color }) => {
+        Notifications.setNotificationChannelAsync(id, {
+          name,
+          importance,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: color,
+        }).catch(() => {});
+      });
+    }
   } catch {
     // não disponível nesse ambiente
   }
@@ -90,6 +108,9 @@ export async function sendLocalNotification(
         data: { ...(options.data ?? {}), type: options.type ?? 'general' },
         categoryIdentifier: template.category,
         sound: true,
+        // Android 8+: channelId deve referenciar um canal registrado acima
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(Platform.OS === 'android' ? { channelId: template.category } : {}) as any,
       },
       trigger: options.delaySeconds
         ? {
