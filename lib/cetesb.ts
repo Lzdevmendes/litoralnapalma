@@ -52,7 +52,6 @@ const CETESB_NAME_MAP: Record<string, string> = {
   BAREQUECABA: "barequeçaba", // CETESB: "BAREQUEÇABA" → normalize → "BAREQUECABA"
   CAMBURIZINHO: "camburizinho",
   CIGARRAS: "cigarras",
-
   DESERTA: "deserta",
   ENGENHO: "engenho-ss",
   GUAECA: "guaeca",

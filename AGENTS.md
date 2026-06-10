@@ -30,7 +30,7 @@ components/
   map/                 # map-view.tsx (nativo ou WebView), webview-map.tsx
   report/              # ReportButton, ReportModal (3 etapas + Leaflet picker)
   router/              # SmartRouter — sugestão de rotas por cidade (usa city.sideRoutes)
-  ui/                  # Badge, ProgressBar, Skeleton, ErrorCard, ErrorBoundary, EmptyState, FavoriteButton, LocationConsent, AvatarPicker
+  ui/                  # Badge, ProgressBar, Skeleton, ErrorCard, ErrorBoundary, LocationConsent, AvatarPicker
 context/
   auth-context.tsx     # AuthUser em SecureStore; escuta onAuthStateChange do Supabase
   city-context.tsx     # Cidade selecionada (AsyncStorage)
@@ -40,13 +40,12 @@ hooks/
   useWeather.ts        # OWM API ou estimativa, refetch 5min
   useTraffic.ts        # Google Routes API ou estimativa, refetch 5min
   useBeaches.ts        # estimativa dinâmica, refetch 3min
-  useWaterQuality.ts   # CETESB ArcGIS (pública), staleTime 24h
+  useWaterQuality.ts   # CETESB ArcGIS (pública), staleTime 24h, refetchInterval 24h
   useUPA.ts            # estimativa, refetch 3min
   useFerry.ts          # estimativa, refetch 10min
   useGasStations.ts    # estático de cities.ts, staleTime 6h
   useBusLines.ts       # estático + computeTimes() dinâmico, refetch 1min
   useReports.ts        # Supabase ou estimativa, refetch 60s
-  useFavorites.ts      # favoritos do usuário (AsyncStorage)
   useAttractions.ts    # estático de cities.ts
   useRestaurants.ts    # estático de cities.ts
   useGeolocation.ts    # expo-location foreground, watchPosition 50m/30s, pré-consentimento LGPD
@@ -100,9 +99,10 @@ UPA dinâmica   | (sem API pública disponível)             | estimativa de tem
 
 ## Mapa WebView (Expo Go)
 
-Dois componentes usam Leaflet via CDN (`unpkg.com`) em uma WebView:
+Três componentes usam Leaflet via CDN (`unpkg.com`) em uma WebView:
 - `components/map/webview-map.tsx` — mapa principal do dashboard
 - `components/report/report-modal.tsx` — picker de localização na etapa 2 do reporte
+- `app/praia/[id].tsx` — mini-mapa na tela de detalhe de praia (`beachMiniMapHtml()`, circleMarker colorido por ocupação)
 
 **Configuração obrigatória em ambos (qualquer WebView com HTML inline + recursos externos):**
 - `source={{ html, baseUrl: 'https://unpkg.com' }}` — define a origin; sem isso o carregamento de CSS/JS externos falha com null origin
@@ -190,10 +190,8 @@ pnpm test               # Jest — 110 testes (lib + hooks)
 npx tsc --noEmit        # Type check
 ```
 
-> `pnpm web` / `expo start --web` está **quebrado** — `react-native-web` não está em `dependencies`
-> (só `react-native-webview`, que é outra coisa). O script existe em `package.json` mas falha
-> imediatamente com `CommandError`. Web não é uma plataforma documentada/suportada no README; ou
-> remova o script + `web` de `platforms`, ou instale `react-native-web@^0.21`.
+> Web **não é uma plataforma suportada** — `react-native-web` não está em `dependencies`. O script
+> `pnpm web` e a seção `web:` do `app.config.ts` foram **removidos** na limpeza de 2026-06.
 
 ## Edge Functions (Supabase)
 
@@ -229,17 +227,23 @@ supabase secrets set SEND_SMS_HOOK_SECRET=<copiado acima>
 ## Features implementadas (estado atual — junho 2026)
 
 - **Dashboard**: Weather (visual responsivo ao clima), Traffic (rodovia em destaque), Beaches, UPA, Ferry, Gas, Bus, Restaurant, Attraction, Map (WebView com legenda i18n + upvote inline)
+- **Detalhe de praia** (`praia/[id].tsx`): mini-mapa Leaflet (WebView, funciona no Expo Go), dados CETESB
+  mesclados via `useMemo` (`waterQuality` + `collectedAt`), barra de ocupação, infraestrutura, botão Como Chegar
 - **Smart Router**: sugestões por cidade via `city.sideRoutes` (4 locais reais por cidade), clicável
 - **Modo morador/turista**: fixo após onboarding; troca só em Settings
 - **Avatar**: galeria de 12 emojis praiano — persiste em AsyncStorage, exibido no header
 - **Onboarding**: 3 slides animados — 4 cidades cobertas, preview por modo, botão "Próximo"
 - **OTP verify**: animação shake no erro, checkmark verde no sucesso
+- **Notificações Android**: 4 canais registrados em `lib/notifications.ts` (`beach-alert`, `traffic-alert`,
+  `community-report`, `general`) — obrigatório Android 8+; `channelId` incluído no conteúdo da notificação
 - **i18n**: dicionário `lib/i18n.ts` cobre a maior parte do dashboard e telas principais — **mas não é 100%**;
   ver gaps conhecidos na seção TODOs (`report-modal`, `location-consent`, `geofence-alert`, `legal/*`, `onboarding`, `map-view`)
 - **Localização**: todas as URLs de mapas usam `mapsNavigationUrl()` com coordenadas exatas como âncora primária
   (corrigido o esquema `maps://` no iOS — `maps:` sem barras fazia o Apple Maps buscar a string ao invés de fixar o pino)
 - **Reportes**: upvote direto no popup do mapa via bridge WebView→RN
-- **Dados**: 4 cidades — 21+ linhas de ônibus, 6 restaurantes verificados, 4 atrações, preços ANP mar/2026
+- **Dados**: 4 cidades — UPAs verificadas via fontes oficiais (prefeitura, Santa Casa), 21+ linhas de ônibus,
+  6 restaurantes verificados, 4 atrações, preços ANP mar/2026
+- **CETESB**: `refetchInterval: 24h` ativo — dados de balneabilidade se atualizam diariamente enquanto o app está aberto
 
 ## TODOs
 
@@ -251,9 +255,11 @@ supabase secrets set SEND_SMS_HOOK_SECRET=<copiado acima>
 - 🔴 `increment_report_upvote` não usa `report_upvotes`/RLS — qualquer chamada REST repetida infla o
   contador de upvotes sem limite (anon ou autenticado). Ver detalhamento e correção sugerida na seção
   "Supabase — segurança" acima.
-- ~~🔴 `useSubmitReport` não trata erro~~ — ✅ **resolvido**: `onError` loga `[useSubmitReport]` no
-  hook e `ReportModal` agora exibe `isError` como mensagem de falha (`⚠️ Não foi possível enviar o
-  reporte...`), com retry liberado (botão não fica desabilitado em estado de erro).
+- ~~🔴 `useSubmitReport` não trata erro~~ — ✅ `onError` loga no hook; `ReportModal` exibe falha com retry liberado.
+- ~~🟡 Notificações Android sem canal~~ — ✅ 4 canais registrados em `lib/notifications.ts`; `channelId` no conteúdo.
+- ~~🟡 CETESB `refetchInterval: false`~~ — ✅ corrigido para `24h`; dados se atualizam diariamente.
+- ~~🟡 Mapa ausente em `praia/[id].tsx`~~ — ✅ WebView Leaflet adicionado; CETESB mesclado via `useMemo`.
+- ~~🟡 Dados de UPAs incorretos~~ — ✅ Caraguatatuba (3 UPAs), São Sebastião, Ubatuba verificados em fontes oficiais.
 - 🟡 `EXPO_PUBLIC_GOOGLE_ROUTES_KEY` é usada direto no bundle JS (`lib/traffic.ts`) sem mecanismo de
   restrição eficaz para REST API chamada de cliente mobile — considerar proxy via Edge Function
   (mesmo padrão de `send-auth-email`/`send-auth-sms`).
@@ -272,7 +278,6 @@ supabase secrets set SEND_SMS_HOOK_SECRET=<copiado acima>
   usa `t.map.legend.*` corretamente para o mesmo elemento).
 
 **Outros:**
-- `pnpm web` quebrado — ver nota em "Rodar localmente".
 - ❓ a confirmar: `signInWithGoogle` testado ponta-a-ponta — código existe e parece completo (`lib/auth.ts:183-212`).
 - ❓ a confirmar: restrições de aplicativo (bundle ID/SHA-1) configuradas no GCP Console para `EXPO_PUBLIC_GOOGLE_MAPS_KEY`.
 - Edge functions sem validação de HMAC do Hook Secret — adicionar verificação de assinatura.

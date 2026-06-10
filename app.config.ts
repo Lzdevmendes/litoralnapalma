@@ -34,10 +34,7 @@ const config: ExpoConfig = {
     },
     permissions: ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
   },
-  web: {
-    bundler: "metro",
-    favicon: "./assets/favicon.png",
-  },
+
   plugins: [
     "expo-router",
     "expo-location",
