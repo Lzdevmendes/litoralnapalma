@@ -106,6 +106,7 @@ export async function submitReportToSupabase(data: {
       lat: data.lat,
       lng: data.lng,
       city: data.city,
+      agreed_to_terms: true,
     })
     .select()
     .single();
@@ -121,13 +122,16 @@ export async function submitReportToSupabase(data: {
 export async function upvoteReport(reportId: string): Promise<void> {
   if (!supabase) throw new Error('Supabase não configurado');
 
+  // Camada client-side de conveniência (evita round-trip desnecessário)
   const already = await hasUpvoted(reportId);
   if (already) throw new Error('Você já votou neste reporte');
 
-  const { error } = await supabase.rpc('increment_report_upvote', {
+  // RPC retorna true se o voto foi registrado, false se já existia no banco
+  const { data: voted, error } = await supabase.rpc('increment_report_upvote', {
     report_id: reportId,
   });
   if (error) throw error;
+  if (voted === false) throw new Error('Você já votou neste reporte');
 
   await markUpvoted(reportId);
 }
