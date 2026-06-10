@@ -157,7 +157,7 @@ export const CITIES: City[] = [
     center: { lat: -23.6201, lng: -45.4129 },
     zoom: 12,
     beaches: [
-      { id: 'massaguacu',    name: 'Massaguaçu',          waterQuality: 'boa',     lat: -23.5621, lng: -45.3291, amenities: { banheiros: true,  quiosques: false, estacionamento: true  } },
+      { id: 'massaguacu',    name: 'Massaguaçu',          waterQuality: 'boa',     lat: -23.5904, lng: -45.3349, amenities: { banheiros: true,  quiosques: false, estacionamento: true  } },
       { id: 'lagoa-azul',    name: 'Lagoa Azul',          waterQuality: 'boa',     lat: -23.5650, lng: -45.3320, amenities: { banheiros: false, quiosques: false, estacionamento: true  } },
       { id: 'aruan',         name: 'Aruan',               waterQuality: 'boa',     lat: -23.5830, lng: -45.3600, amenities: { banheiros: false, quiosques: false, estacionamento: true  } },
       { id: 'martim-de-sa',  name: 'Martim de Sá',        waterQuality: 'boa',     lat: -23.5936, lng: -45.3698, amenities: { banheiros: true,  quiosques: true,  estacionamento: true  } },
@@ -435,12 +435,12 @@ export const CITIES: City[] = [
     upas: [
       {
         id: 'upa-sao-sebastiao',
-        name: 'Pronto-Socorro Municipal de São Sebastião',
+        name: 'Hospital de Clínicas de São Sebastião (Pronto-Socorro)',
         city: 'sao-sebastiao',
         region: 'centro',
-        address: 'R. Capitão Luiz Soares, 570 - Centro, São Sebastião',
-        lat: -23.8097,
-        lng: -45.4075,
+        address: 'R. Capitão Luiz Soares, 550 - Centro, São Sebastião',
+        lat: -23.8040,
+        lng: -45.4025,
         phone: '(12) 3892-1308',
         hours: '24h',
       },
