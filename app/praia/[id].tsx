@@ -51,7 +51,7 @@ function beachMiniMapHtml(lat: number, lng: number, name: string, color: string)
   <div id="map"></div>
   <script>
     var map=L.map('map',{zoomControl:false,attributionControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false}).setView([${lat},${lng}],15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}).addTo(map);
     L.circleMarker([${lat},${lng}],{radius:14,fillColor:'${color}',color:'#fff',weight:3,fillOpacity:0.9}).addTo(map).bindPopup('${safeName}').openPopup();
   <\/script>
 </body>

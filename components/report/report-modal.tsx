@@ -68,8 +68,8 @@ html,body,#map{height:100%;width:100%}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 var map=L.map('map',{zoomControl:false}).setView([${center.lat},${center.lng}],14);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  attribution:'© OpenStreetMap',maxZoom:19
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+  attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:20
 }).addTo(map);
 L.control.zoom({position:'bottomright'}).addTo(map);
 

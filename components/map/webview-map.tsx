@@ -37,21 +37,24 @@ function buildLeafletHTML(city: City, beaches: Beach[], upas: UPA[], reports: Re
 html,body{height:100%;background:#cae0f5}
 #map{height:100vh;width:100%}
 .lp .leaflet-popup-content-wrapper{
-  border-radius:14px;
-  box-shadow:0 4px 20px rgba(0,0,0,.18);
+  border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,77,102,.22);
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  padding:0;overflow:hidden
+  padding:0;overflow:hidden;border:1px solid rgba(0,119,182,.12)
 }
-.lp .leaflet-popup-content{margin:12px 14px;font-size:13px;line-height:1.5}
+.lp .leaflet-popup-content{margin:14px 16px;font-size:13px;line-height:1.6;color:#1e293b}
 .lp .leaflet-popup-tip-container{display:none}
-.leaflet-control-attribution{font-size:9px!important;opacity:.7}
-.legend{position:absolute;left:10px;bottom:10px;z-index:500;background:rgba(255,255,255,.94);
-  border-radius:14px;padding:9px 10px;box-shadow:0 4px 14px rgba(15,23,42,.14);
+.leaflet-control-attribution{font-size:9px!important;opacity:.6;background:rgba(255,255,255,.7)!important;border-radius:6px!important}
+.legend{position:absolute;left:10px;bottom:10px;z-index:500;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+  border-radius:16px;padding:10px 12px;
+  box-shadow:0 4px 20px rgba(0,77,102,.18);border:1px solid rgba(0,119,182,.1);
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:11px;color:#334155}
 .legend-row{display:flex;align-items:center;gap:7px;margin:3px 0}
-.dot{width:9px;height:9px;border-radius:50%}
-.popup-btn{margin-top:8px;border:0;border-radius:10px;background:#0077b6;color:#fff;
-  padding:7px 10px;font-weight:700;font-size:12px;width:100%}
+.dot{width:9px;height:9px;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.popup-btn{margin-top:8px;border:0;border-radius:10px;
+  background:linear-gradient(135deg,#0077b6,#023e8a);color:#fff;
+  padding:8px 10px;font-weight:700;font-size:12px;width:100%;cursor:pointer}
 </style>
 </head>
 <body>
@@ -103,9 +106,10 @@ function mk(html,size){
 var map=L.map('map',{zoomControl:false})
   .setView([D.city.lat,D.city.lng],D.city.zoom);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',
-  maxZoom:19
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+  attribution:'© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
+  subdomains:'abcd',
+  maxZoom:20
 }).addTo(map);
 
 L.control.zoom({position:'bottomright'}).addTo(map);
