@@ -158,9 +158,9 @@ export function GeofenceAlert() {
         position: 'absolute',
         top: insets.top + 72,
         right: 12,
+        width: 280,
         zIndex: 100,
         gap: 8,
-        maxWidth: 280,
       }}
     >
       {alerts.map((alert) => (
