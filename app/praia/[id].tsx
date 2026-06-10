@@ -1,9 +1,12 @@
+import { useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, Linking } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import Constants from 'expo-constants';
 import { CITIES } from '@/data/cities';
 import { useBeaches } from '@/hooks/useBeaches';
+import { useWaterQuality } from '@/hooks/useWaterQuality';
 import { useLanguage } from '@/context/language-context';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +37,27 @@ if (!isExpoGo) {
 
 // ── utils ────────────────────────────────────────────────────────────────────
 
+function beachMiniMapHtml(lat: number, lng: number, name: string, color: string): string {
+  const safeName = name.replace(/'/g, "\\'");
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+  <style>*{margin:0;padding:0}html,body,#map{width:100%;height:100%;background:#e8f4f8}</style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    var map=L.map('map',{zoomControl:false,attributionControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false}).setView([${lat},${lng}],15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.circleMarker([${lat},${lng}],{radius:14,fillColor:'${color}',color:'#fff',weight:3,fillOpacity:0.9}).addTo(map).bindPopup('${safeName}').openPopup();
+  <\/script>
+</body>
+</html>`;
+}
+
 const waterColor: Record<Beach['waterQuality'], string> = {
   boa: '#22c55e',
   regular: '#f59e0b',
@@ -61,6 +85,15 @@ export default function BeachDetailScreen() {
   );
 
   const { data: beaches, isLoading } = useBeaches(found?.city);
+  const { data: waterQuality } = useWaterQuality();
+
+  // Mescla dados CETESB na praia atual (qualidade real + data da coleta)
+  const beach = useMemo(() => {
+    const raw = beaches?.find((b) => b.id === id);
+    if (!raw || !waterQuality) return raw;
+    const wq = waterQuality.find((w) => w.beachId === id);
+    return wq ? { ...raw, waterQuality: wq.quality, collectedAt: wq.collectedAt } : raw;
+  }, [beaches, waterQuality, id]);
 
   if (!found) {
     return (
@@ -75,7 +108,6 @@ export default function BeachDetailScreen() {
   }
 
   const { city, beachStatic } = found;
-  const beach = beaches?.find((b) => b.id === id);
   const mapsUrl = mapsNavigationUrl(beachStatic.lat, beachStatic.lng, beachStatic.name, city.name);
 
   const amenities = beachStatic.amenities;
@@ -296,20 +328,23 @@ export default function BeachDetailScreen() {
             </MapView>
           </View>
         ) : (
-          <View
-            style={{
-              height: 140,
-              borderRadius: 20,
-              backgroundColor: '#e8f4f8',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              borderWidth: 1,
-              borderColor: 'rgba(0,119,182,0.15)',
-            }}
-          >
-            <Text style={{ fontSize: 32 }}>🗺️</Text>
-            <Text style={{ fontSize: 12, color: '#0077b6', fontWeight: '600' }}>{t.beach.mapDevBuild}</Text>
+          // Expo Go: mini-mapa Leaflet via WebView (sem react-native-maps)
+          <View style={{ borderRadius: 20, overflow: 'hidden', height: 200, boxShadow: '0 2px 16px rgba(0,119,182,0.12)' }}>
+            <WebView
+              source={{
+                html: beachMiniMapHtml(
+                  beachStatic.lat,
+                  beachStatic.lng,
+                  beachStatic.name,
+                  occupancyColor(beach?.occupancy ?? 'vazia'),
+                ),
+                baseUrl: 'https://unpkg.com',
+              }}
+              style={{ flex: 1 }}
+              scrollEnabled={false}
+              allowFileAccess
+              allowUniversalAccessFromFileURLs
+            />
           </View>
         )}
 
