@@ -13,26 +13,13 @@ create table if not exists reports (
   expires_at  timestamptz not null default (now() + interval '24 hours')
 );
 
--- Índices para filtros comuns
 create index if not exists reports_city_idx       on reports (city);
 create index if not exists reports_expires_at_idx on reports (expires_at);
 
--- Habilita Row Level Security
 alter table reports enable row level security;
 
--- Leitura pública de reports não expirados
 create policy "reports_select" on reports
   for select using (expires_at > now());
 
--- Inserção pública (qualquer usuário pode reportar)
 create policy "reports_insert" on reports
   for insert with check (true);
-
--- Função atômica para incrementar upvotes
-create or replace function increment_report_upvote(report_id uuid)
-returns void
-language sql
-security definer
-as $$
-  update reports set upvotes = upvotes + 1 where id = report_id;
-$$;
