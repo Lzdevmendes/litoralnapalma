@@ -145,14 +145,12 @@ export default function SettingsScreen() {
     }
     setDeleting(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      if (!token) throw new Error(t.nav.noSession);
-      const res = await supabase.functions.invoke('delete-account', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.error) throw res.error;
-      await supabase.auth.signOut();
+      // Usa RPC delete_user() — SECURITY DEFINER, só deleta auth.uid() corrente
+      const { error } = await supabase.rpc('delete_user');
+      if (error) throw error;
+
+      // Limpa sessão local imediatamente após exclusão server-side
+      await supabase.auth.signOut({ scope: 'local' });
       await setUser(null);
       router.replace('/auth/login');
     } catch (err) {
