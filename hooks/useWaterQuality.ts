@@ -12,8 +12,9 @@ export function useWaterQuality() {
     queryFn: fetchCETESBWaterQuality,
     staleTime: 24 * 60 * 60 * 1000, // 24h
     retry: 1,
-    // não re-buscar automaticamente — dado é semanal
-    refetchInterval: false,
+    // CETESB publica semanalmente (5ª-feira), mas refresca diariamente
+    // para capturar atualizações fora do ciclo regular e mantê-las frescas
+    refetchInterval: 24 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 }
