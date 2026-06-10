@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { ScrollView, View, Text, RefreshControl, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, Pressable, RefreshControl, ActivityIndicator } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, Redirect } from 'expo-router';
@@ -24,6 +24,7 @@ import { SmartRouter } from '@/components/router/smart-router';
 import { ReportButton } from '@/components/report/report-button';
 import { GeofenceAlert } from '@/components/geofencing/geofence-alert';
 import { LocationConsent } from '@/components/ui/location-consent';
+import { useNewReportsOnStartup } from '@/hooks/useNewReportsOnStartup';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useLanguage } from '@/context/language-context';
 
@@ -41,6 +42,7 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const queryClient = useQueryClient();
   const { consentState, requestConsent, denyConsent } = useGeolocation();
+  const { count: newReportsCount, dismiss: dismissNewReports } = useNewReportsOnStartup(city);
   const scrollRef = useRef<ScrollView>(null);
   const sectionOffsets = useRef<Record<string, number>>({});
 
@@ -92,6 +94,32 @@ export default function DashboardScreen() {
       />
       <Header />
       <GeofenceAlert />
+
+      {/* Banner de novos reports desde a última abertura */}
+      {newReportsCount > 0 && (
+        <View style={{
+          marginHorizontal: 16, marginTop: 8, borderRadius: 14,
+          backgroundColor: '#fff7ed',
+          borderWidth: 1, borderColor: '#fed7aa',
+          flexDirection: 'row', alignItems: 'center', gap: 10,
+          paddingHorizontal: 14, paddingVertical: 12,
+        }}>
+          <Text style={{ fontSize: 20 }}>📢</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 13, fontWeight: '700', color: '#92400e' }}>
+              {newReportsCount === 1
+                ? '1 novo reporte na sua cidade'
+                : `${newReportsCount} novos reportes na sua cidade`}
+            </Text>
+            <Text style={{ fontSize: 11, color: '#b45309', marginTop: 1 }}>
+              Veja o mapa para detalhes
+            </Text>
+          </View>
+          <Pressable onPress={dismissNewReports} hitSlop={12}>
+            <Text style={{ fontSize: 16, color: '#d97706' }}>✕</Text>
+          </Pressable>
+        </View>
+      )}
 
       <ScrollView
         ref={scrollRef}
