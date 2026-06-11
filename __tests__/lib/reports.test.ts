@@ -240,6 +240,7 @@ describe('submitReportToSupabase', () => {
       lat: -23.6,
       lng: -45.3,
       city: 'ubatuba',
+      agreed_to_terms: true,
     });
     expect(result).toEqual({
       id: 'report-new',
