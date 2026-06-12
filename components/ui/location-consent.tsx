@@ -1,5 +1,6 @@
 import { View, Text, Pressable, Modal } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { useLanguage } from '@/context/language-context';
 
 interface LocationConsentProps {
   visible: boolean;
@@ -8,6 +9,8 @@ interface LocationConsentProps {
 }
 
 export function LocationConsent({ visible, onAllow, onDeny }: LocationConsentProps) {
+  const { t } = useLanguage();
+
   function handleAllow() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onAllow();
@@ -16,6 +19,13 @@ export function LocationConsent({ visible, onAllow, onDeny }: LocationConsentPro
   function handleDeny() {
     onDeny();
   }
+
+  const benefits = [
+    { icon: '🏖️', text: t.locationConsent.benefit1 },
+    { icon: '🚨', text: t.locationConsent.benefit2 },
+    { icon: '🔒', text: t.locationConsent.benefit3 },
+    { icon: '📵', text: t.locationConsent.benefit4 },
+  ];
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -54,24 +64,19 @@ export function LocationConsent({ visible, onAllow, onDeny }: LocationConsentPro
               <Text style={{ fontSize: 36 }}>📍</Text>
             </View>
             <Text style={{ fontSize: 20, fontWeight: '800', color: '#1e293b', textAlign: 'center' }}>
-              Usar minha localização?
+              {t.locationConsent.title}
             </Text>
           </View>
 
           {/* Explanation */}
           <Text style={{ fontSize: 14, color: '#475569', lineHeight: 22, textAlign: 'center' }}>
-            Usamos sua localização para alertar sobre praias lotadas e acidentes próximos a você (raio de até 5km).
+            {t.locationConsent.description}
           </Text>
 
           {/* Benefits */}
           <View style={{ gap: 10 }}>
-            {[
-              { icon: '🏖️', text: 'Avisos de praia lotada perto de você' },
-              { icon: '🚨', text: 'Alertas de acidentes e blitz próximos' },
-              { icon: '🔒', text: 'Nunca compartilhamos sua localização' },
-              { icon: '📵', text: 'Nunca coletamos em segundo plano' },
-            ].map(({ icon, text }) => (
-              <View key={text} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            {benefits.map(({ icon, text }) => (
+              <View key={icon} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <Text style={{ fontSize: 16 }}>{icon}</Text>
                 <Text style={{ fontSize: 13, color: '#374151', flex: 1, lineHeight: 18 }}>{text}</Text>
               </View>
@@ -91,7 +96,7 @@ export function LocationConsent({ visible, onAllow, onDeny }: LocationConsentPro
               })}
             >
               <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>
-                📍 Permitir localização
+                {t.locationConsent.allow}
               </Text>
             </Pressable>
 
@@ -105,13 +110,13 @@ export function LocationConsent({ visible, onAllow, onDeny }: LocationConsentPro
               })}
             >
               <Text style={{ fontSize: 14, fontWeight: '600', color: '#64748b' }}>
-                Agora não
+                {t.locationConsent.deny}
               </Text>
             </Pressable>
           </View>
 
           <Text style={{ fontSize: 11, color: '#94a3b8', textAlign: 'center', lineHeight: 16 }}>
-            Você pode alterar esta permissão a qualquer momento em Configurações do sistema.
+            {t.locationConsent.footer}
           </Text>
         </View>
       </View>
