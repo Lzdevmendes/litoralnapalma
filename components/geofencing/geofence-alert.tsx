@@ -23,7 +23,7 @@ interface GeoAlert {
 export function GeofenceAlert() {
   const [alerts, setAlerts] = useState<GeoAlert[]>([]);
   const { city } = useCity();
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const { data: beaches } = useBeaches(city);
   const { data: traffic } = useTraffic(city);
   const { data: reports } = useReports(city);
@@ -38,8 +38,8 @@ export function GeofenceAlert() {
   useEffect(() => {
     const welcome: GeoAlert = {
       id: 'welcome',
-      title: 'Bem-vindo ao Litoral na Palma! 🌊',
-      message: 'Alertas em tempo real ativados.',
+      title: t.geofence.welcomeTitle,
+      message: t.geofence.welcomeMsg,
       color: '#0077b6',
       emoji: '🔔',
       type: 'general',
@@ -47,6 +47,7 @@ export function GeofenceAlert() {
     setAlerts([welcome]);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setTimeout(() => setAlerts((prev) => prev.filter((a) => a.id !== 'welcome')), 5000);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Alertas baseados em distância real do usuário
@@ -65,8 +66,8 @@ export function GeofenceAlert() {
           shownRef.current.add(alertId);
           newAlerts.push({
             id: alertId,
-            title: 'Praia Lotada Próxima',
-            message: `${beach.name} está lotada (${formatDistance(dist)}).`,
+            title: t.geofence.beachTitle,
+            message: `${beach.name} ${t.geofence.beachMsg} (${formatDistance(dist)}).`,
             color: occupancyColor('lotada'),
             emoji: '🏖️',
             type: 'beach',
@@ -90,8 +91,8 @@ export function GeofenceAlert() {
             shownRef.current.add(alertId);
             newAlerts.push({
               id: alertId,
-              title: 'Acidente Próximo',
-              message: `Acidente a ${formatDistance(dist)} de você.`,
+              title: t.geofence.accidentTitle,
+              message: `${t.geofence.accidentMsg} ${formatDistance(dist)} ${t.geofence.accidentFrom}`,
               color: '#ef4444',
               emoji: '🚨',
               type: 'report',
@@ -127,8 +128,8 @@ export function GeofenceAlert() {
         if (prev && order[route.level] > order[prev.level] && order[route.level] >= 2) {
           newAlerts.push({
             id: `traffic-${route.id}-${Date.now()}`,
-            title: 'Trânsito Intenso',
-            message: `${route.shortName} com tráfego ${route.level}.`,
+            title: t.geofence.trafficTitle,
+            message: `${route.shortName} ${t.geofence.trafficMsg} ${t.traffic.levels[route.level]}.`,
             color: trafficLevelColor(route.level),
             emoji: '🚗',
             type: 'traffic',
