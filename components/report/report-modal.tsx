@@ -20,6 +20,7 @@ import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
 import * as Location from 'expo-location';
 import { useSubmitReport } from '@/hooks/useReports';
+import { useLanguage } from '@/context/language-context';
 import { canSubmitReport, recordReportSubmission, formatCooldown } from '@/lib/report-rate-limit';
 import type { City } from '@/data/cities';
 import type { ReportType } from '@/lib/types';
@@ -32,20 +33,11 @@ interface Props {
 
 interface LatLng { lat: number; lng: number }
 
-const REPORT_TYPES: { type: ReportType; emoji: string; label: string }[] = [
-  { type: 'lotacao_praia', emoji: '🏖️', label: 'Praia Lotada' },
-  { type: 'acidente',      emoji: '🚨', label: 'Acidente' },
-  { type: 'blitz',         emoji: '🚔', label: 'Blitz' },
-  { type: 'falta_agua',    emoji: '💧', label: 'Falta d\'água' },
-  { type: 'falta_luz',     emoji: '⚡', label: 'Falta de luz' },
-  { type: 'outro',         emoji: '📍', label: 'Outro' },
-];
-
 // Tipos que fazem sentido abrir no Waze para navegação de referência
 const WAZE_TYPES: ReportType[] = ['acidente', 'blitz'];
 
 /** Mini-mapa Leaflet para seleção de pin — retorna coordenadas via postMessage */
-function buildPickerHTML(center: LatLng, pinLat?: number, pinLng?: number): string {
+function buildPickerHTML(center: LatLng, tapHint: string, pinnedHint: string, pinLat?: number, pinLng?: number): string {
   const hasPinStr = pinLat != null && pinLng != null ? 'true' : 'false';
   const pinLatStr = pinLat ?? center.lat;
   const pinLngStr = pinLng ?? center.lng;
@@ -64,7 +56,7 @@ html,body,#map{height:100%;width:100%}
 </head>
 <body>
 <div id="map"></div>
-<div id="hint">Toque para marcar a localização</div>
+<div id="hint">${tapHint}</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 var map=L.map('map',{zoomControl:false}).setView([${center.lat},${center.lng}],14);
@@ -84,14 +76,14 @@ var hasPin=${hasPinStr};
 if(hasPin){
   marker=L.marker([${pinLatStr},${pinLngStr}],{icon:pinIcon}).addTo(map);
   map.setView([${pinLatStr},${pinLngStr}],15);
-  document.getElementById('hint').textContent='Arraste ou toque para reposicionar';
+  document.getElementById('hint').textContent='${pinnedHint}';
 }
 
 map.on('click',function(e){
   var lat=e.latlng.lat, lng=e.latlng.lng;
   if(marker) map.removeLayer(marker);
   marker=L.marker([lat,lng],{icon:pinIcon}).addTo(map);
-  document.getElementById('hint').textContent='📍 Localização marcada';
+  document.getElementById('hint').textContent='📍 ${pinnedHint}';
   if(window.ReactNativeWebView)
     window.ReactNativeWebView.postMessage(JSON.stringify({lat:lat,lng:lng}));
 });
@@ -100,6 +92,17 @@ map.on('click',function(e){
 }
 
 export function ReportModal({ visible, onClose, city }: Props) {
+  const { t } = useLanguage();
+
+  const REPORT_TYPES: { type: ReportType; emoji: string; label: string }[] = [
+    { type: 'lotacao_praia', emoji: '🏖️', label: t.map.report.types.lotacao_praia },
+    { type: 'acidente',      emoji: '🚨', label: t.map.report.types.acidente },
+    { type: 'blitz',         emoji: '🚔', label: t.map.report.types.blitz },
+    { type: 'falta_agua',    emoji: '💧', label: t.map.report.types.falta_agua },
+    { type: 'falta_luz',     emoji: '⚡', label: t.map.report.types.falta_luz },
+    { type: 'outro',         emoji: '📍', label: t.map.report.types.outro },
+  ];
+
   const [step, setStep]               = useState<1 | 2 | 3>(1);
   const [selected, setSelected]       = useState<ReportType | null>(null);
   const [description, setDescription] = useState('');
@@ -113,8 +116,19 @@ export function ReportModal({ visible, onClose, city }: Props) {
 
   const { mutate: submit, isPending, isSuccess, isError } = useSubmitReport();
 
+  const stepTitles = [t.report.stepType, t.report.stepLocation, t.report.stepDetails];
+
+  const tapHint = t.report.step2Label;
+  const pinnedHint = t.report.gpsUsing;
+
   const pickerHTML = useMemo(
-    () => buildPickerHTML({ lat: city.center.lat, lng: city.center.lng }, location?.lat, location?.lng),
+    () => buildPickerHTML(
+      { lat: city.center.lat, lng: city.center.lng },
+      tapHint,
+      pinnedHint,
+      location?.lat,
+      location?.lng,
+    ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [city.id, locMode],
   );
@@ -130,12 +144,12 @@ export function ReportModal({ visible, onClose, city }: Props) {
     setGpsLoading(true); setGpsError('');
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') { setGpsError('Permissão negada. Ative a localização nas configurações.'); return; }
+      if (status !== 'granted') { setGpsError(t.report.gpsErrorDenied); return; }
       const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
       setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
       setLocMode('gps');
     } catch {
-      setGpsError('Não foi possível obter sua localização.');
+      setGpsError(t.report.gpsErrorFail);
     } finally {
       setGpsLoading(false);
     }
@@ -157,7 +171,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
     if (!selected) return;
     const { allowed, remainingMs } = await canSubmitReport();
     if (!allowed) {
-      setRateLimitMsg(`Aguarde ${formatCooldown(remainingMs)} antes de enviar outro reporte.`);
+      setRateLimitMsg(`${t.report.rateLimitWait} ${formatCooldown(remainingMs)} ${t.report.rateLimitBefore}`);
       return;
     }
     setRateLimitMsg('');
@@ -181,8 +195,6 @@ export function ReportModal({ visible, onClose, city }: Props) {
     );
   }
 
-  const stepTitle = ['Tipo', 'Localização', 'Detalhes'];
-
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
       <View style={{ flex: 1, backgroundColor: '#f8fafc' }}>
@@ -193,9 +205,9 @@ export function ReportModal({ visible, onClose, city }: Props) {
           padding: 20, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.06)',
         }}>
           <View>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: '#1e293b' }}>📢 Novo Reporte</Text>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: '#1e293b' }}>{t.report.title}</Text>
             <Text style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>
-              Etapa {step} de 3 — {stepTitle[step - 1]}
+              {t.report.stepOf} {step} {t.report.stepOf3} {stepTitles[step - 1]}
             </Text>
           </View>
           <Pressable onPress={handleClose} hitSlop={12}>
@@ -217,7 +229,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
         {step === 1 && (
           <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
             <Text style={{ fontSize: 13, fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              O que você quer reportar?
+              {t.report.step1Label}
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {REPORT_TYPES.map(({ type, emoji, label }) => (
@@ -250,7 +262,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
                 boxShadow: selected ? '0 4px 16px rgba(0,119,182,0.3)' : undefined,
               }}
             >
-              <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>Próximo →</Text>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>{t.report.next}</Text>
             </TouchableOpacity>
           </ScrollView>
         )}
@@ -260,7 +272,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
           <View style={{ flex: 1 }}>
             <View style={{ padding: 20, gap: 12 }}>
               <Text style={{ fontSize: 13, fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                Onde aconteceu?
+                {t.report.step2Label}
               </Text>
 
               {/* GPS button */}
@@ -281,7 +293,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
                   : <Text style={{ fontSize: 20 }}>{locMode === 'gps' ? '✅' : '📡'}</Text>}
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 14, fontWeight: '700', color: '#1e293b' }}>
-                    {locMode === 'gps' ? 'Usando minha localização' : 'Usar minha localização'}
+                    {locMode === 'gps' ? t.report.gpsUsing : t.report.gpsUse}
                   </Text>
                   {locMode === 'gps' && location && (
                     <Text style={{ fontSize: 11, color: '#64748b', marginTop: 1 }}>
@@ -294,7 +306,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
 
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={{ flex: 1, height: 1, backgroundColor: '#e2e8f0' }} />
-                <Text style={{ fontSize: 12, color: '#94a3b8' }}>ou marque no mapa</Text>
+                <Text style={{ fontSize: 12, color: '#94a3b8' }}>{t.report.orMap}</Text>
                 <View style={{ flex: 1, height: 1, backgroundColor: '#e2e8f0' }} />
               </View>
             </View>
@@ -304,9 +316,9 @@ export function ReportModal({ visible, onClose, city }: Props) {
               {mapError ? (
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#f8fafc' }}>
                   <Text style={{ fontSize: 32 }}>🗺️</Text>
-                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#1e293b' }}>Mapa indisponível</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#1e293b' }}>{t.report.mapUnavailable}</Text>
                   <Text style={{ fontSize: 12, color: '#64748b', textAlign: 'center', paddingHorizontal: 24 }}>
-                    Sem conexão com internet. Use o GPS ou pule esta etapa.
+                    {t.report.mapNoConnection}
                   </Text>
                 </View>
               ) : (
@@ -328,7 +340,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
             <View style={{ padding: 16, gap: 10 }}>
               {locMode === 'map' && location && (
                 <Text style={{ fontSize: 12, color: '#0077b6', textAlign: 'center', fontWeight: '600' }}>
-                  📍 Pin em {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
+                  {t.report.pinAt} {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
                 </Text>
               )}
               <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -336,7 +348,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
                   onPress={() => setStep(1)}
                   style={{ flex: 1, backgroundColor: '#f1f5f9', borderRadius: 14, paddingVertical: 14, alignItems: 'center' }}
                 >
-                  <Text style={{ fontSize: 14, fontWeight: '600', color: '#64748b' }}>← Voltar</Text>
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: '#64748b' }}>{t.report.back}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setStep(3)}
@@ -346,7 +358,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
                   }}
                 >
                   <Text style={{ fontSize: 14, fontWeight: '700', color: '#fff' }}>
-                    {location ? 'Próximo →' : 'Pular (centro da cidade)'}
+                    {location ? t.report.next : t.report.skip}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -373,7 +385,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
                 <Text style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
                   {location
                     ? `📍 ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`
-                    : `🏙️ Centro de ${city.name}`}
+                    : `${t.report.cityCenter} ${city.name}`}
                 </Text>
               </View>
             </View>
@@ -390,20 +402,20 @@ export function ReportModal({ visible, onClose, city }: Props) {
               >
                 <Text style={{ fontSize: 24 }}>🗺️</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#1a6e3c' }}>Abrir no Waze</Text>
-                  <Text style={{ fontSize: 11, color: '#4ade80' }}>Ver a área no Waze para contexto</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#1a6e3c' }}>{t.report.wazeLabel}</Text>
+                  <Text style={{ fontSize: 11, color: '#4ade80' }}>{t.report.wazeSub}</Text>
                 </View>
                 <Text style={{ fontSize: 18, color: '#33cc66' }}>›</Text>
               </TouchableOpacity>
             )}
 
             <Text style={{ fontSize: 13, fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              Descrição (opcional)
+              {t.report.step3Label}
             </Text>
             <TextInput
               value={description}
-              onChangeText={(t) => setDescription(t.slice(0, 280))}
-              placeholder="Ex: Acidente na Rio-Santos, km 178..."
+              onChangeText={(text) => setDescription(text.slice(0, 280))}
+              placeholder={t.report.placeholder}
               maxLength={280}
               placeholderTextColor="#94a3b8"
               multiline
@@ -416,7 +428,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
               }}
             />
 
-            {/* Termo de Veracidade */}
+            {/* Termo de Responsabilidade */}
             <TouchableOpacity
               onPress={() => { setAgreedToTerms(!agreedToTerms); Haptics.selectionAsync(); }}
               activeOpacity={0.7}
@@ -440,10 +452,10 @@ export function ReportModal({ visible, onClose, city }: Props) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 13, fontWeight: '700', color: '#1e293b', marginBottom: 3 }}>
-                  Termo de Responsabilidade
+                  {t.report.termTitle}
                 </Text>
                 <Text style={{ fontSize: 12, color: '#64748b', lineHeight: 17 }}>
-                  Confirmo que esta informação é verdadeira. Sei que ela será visível para todos os usuários do app e que reportes falsos ou maliciosos podem resultar no bloqueio da minha conta.
+                  {t.report.termText}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -453,7 +465,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
                 onPress={() => setStep(2)}
                 style={{ flex: 1, backgroundColor: '#f1f5f9', borderRadius: 14, paddingVertical: 16, alignItems: 'center' }}
               >
-                <Text style={{ fontSize: 14, fontWeight: '600', color: '#64748b' }}>← Voltar</Text>
+                <Text style={{ fontSize: 14, fontWeight: '600', color: '#64748b' }}>{t.report.back}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSubmit}
@@ -468,7 +480,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
                 {isPending
                   ? <ActivityIndicator color="#fff" />
                   : <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>
-                      {isSuccess ? '✅ Enviado!' : '📤 Enviar Reporte'}
+                      {isSuccess ? t.report.sent : t.report.send}
                     </Text>}
               </TouchableOpacity>
             </View>
@@ -479,7 +491,7 @@ export function ReportModal({ visible, onClose, city }: Props) {
             ) : null}
             {isError ? (
               <Text style={{ fontSize: 12, color: '#ef4444', textAlign: 'center', marginTop: 4 }}>
-                ⚠️ Não foi possível enviar o reporte. Verifique sua conexão e tente novamente.
+                {t.report.sendError}
               </Text>
             ) : null}
           </ScrollView>
