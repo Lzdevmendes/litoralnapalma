@@ -130,26 +130,11 @@ O Supabase `anon key` é embarcado no app (EXPO_PUBLIC_*) e visível a qualquer 
 
 `report_upvotes` (`rls_enabled: true`, PK composta `(report_id, user_id)`, FK para `auth.users`):
 - `upvotes: auth insert` → `auth.uid() = user_id`; `upvotes: owner delete` → `auth.uid() = user_id`.
-- **Esta tabela está com 0 linhas e nunca é usada** — ver gap crítico abaixo.
 
-🔴 **Gap crítico confirmado (lido o source das functions direto no Postgres):** a única RPC que o app
-chama para votar é `increment_report_upvote(report_id uuid)`:
-```sql
-update public.reports set upvotes = upvotes + 1 where id = report_id and expires_at > now();
-```
-Ela **não toca em `report_upvotes`** — não checa `user_id`, não insere linha de dedupe, não tem limite.
-É `SECURITY DEFINER` e o advisor de segurança do Supabase confirma que é executável por `anon` E
-`authenticated` via `/rest/v1/rpc/increment_report_upvote`. Ou seja: **qualquer pessoa, autenticada ou
-não, pode inflar o contador de upvotes de qualquer report ao infinito chamando a REST API direto** — a
-infraestrutura de dedupe (`report_upvotes` + triggers `handle_upvote_insert`/`handle_upvote_delete` +
-RLS) existe no schema mas está completamente desconectada do caminho de execução real. A única
-"proteção" hoje é client-side (`hasUpvoted`/`markUpvoted` em `lib/reports.ts`, via AsyncStorage) —
-bypassável reinstalando o app ou chamando a REST API diretamente.
-
-**Correção recomendada:** trocar `increment_report_upvote` por uma function que valide `auth.uid()`,
-faça `insert into report_upvotes (report_id, user_id) values (...) on conflict do nothing` e só
-incremente `reports.upvotes` se a linha foi inserida — usando a infraestrutura que já está pronta
-no banco.
+✅ **Gap de upvote corrigido** (migration `20260610215000` aplicada e verificada no Postgres):
+`increment_report_upvote` agora valida `auth.uid()`, faz `insert into report_upvotes ... on conflict do nothing`,
+só incrementa `reports.upvotes` se a linha foi inserida (rows_affected > 0), e retorna boolean.
+`execute` revogado de `anon` — apenas `authenticated` pode chamar. `SET search_path = public` incluído.
 
 Sem RLS em `reports`: qualquer pessoa poderia ler, inserir, atualizar ou deletar todos os reportes via API REST direta — esse cenário **não se aplica aqui** (RLS está ativo e correto na superfície), mas o gap de upvote acima tem o mesmo efeito prático sobre a integridade dos dados da comunidade.
 
@@ -236,8 +221,8 @@ supabase secrets set SEND_SMS_HOOK_SECRET=<copiado acima>
 - **OTP verify**: animação shake no erro, checkmark verde no sucesso
 - **Notificações Android**: 4 canais registrados em `lib/notifications.ts` (`beach-alert`, `traffic-alert`,
   `community-report`, `general`) — obrigatório Android 8+; `channelId` incluído no conteúdo da notificação
-- **i18n**: dicionário `lib/i18n.ts` cobre a maior parte do dashboard e telas principais — **mas não é 100%**;
-  ver gaps conhecidos na seção TODOs (`report-modal`, `location-consent`, `geofence-alert`, `legal/*`, `onboarding`, `map-view`)
+- **i18n**: dicionário `lib/i18n.ts` cobre dashboard, auth, reportes, consentimento e alertas de geofence.
+  Gap restante: `app/legal/{terms,privacy}.tsx` (só PT — aceitável para publicação inicial) e `app/onboarding.tsx` (usa `labelPt`/`labelEn` próprios)
 - **Localização**: todas as URLs de mapas usam `mapsNavigationUrl()` com coordenadas exatas como âncora primária
   (corrigido o esquema `maps://` no iOS — `maps:` sem barras fazia o Apple Maps buscar a string ao invés de fixar o pino)
 - **Reportes**: upvote direto no popup do mapa via bridge WebView→RN
@@ -252,9 +237,7 @@ supabase secrets set SEND_SMS_HOOK_SECRET=<copiado acima>
 > adicionados com severidade.
 
 **Estrutural — prioridade alta:**
-- 🔴 `increment_report_upvote` não usa `report_upvotes`/RLS — qualquer chamada REST repetida infla o
-  contador de upvotes sem limite (anon ou autenticado). Ver detalhamento e correção sugerida na seção
-  "Supabase — segurança" acima.
+- ~~🔴 `increment_report_upvote` não usava `report_upvotes`/RLS~~ — ✅ corrigido em `20260610215000`; verificado no Postgres (2026-06-12).
 - ~~🔴 `useSubmitReport` não trata erro~~ — ✅ `onError` loga no hook; `ReportModal` exibe falha com retry liberado.
 - ~~🟡 Notificações Android sem canal~~ — ✅ 4 canais registrados em `lib/notifications.ts`; `channelId` no conteúdo.
 - ~~🟡 CETESB `refetchInterval: false`~~ — ✅ corrigido para `24h`; dados se atualizam diariamente.
@@ -266,24 +249,22 @@ supabase secrets set SEND_SMS_HOOK_SECRET=<copiado acima>
 - 🟡 `lib/report-rate-limit.ts` é cooldown puramente client-side (AsyncStorage) — bypassável
   reinstalando/chamando a API direto; falta camada server-side.
 
-**i18n — gaps confirmados (contradiz a meta de 100% PT/EN):**
-- 🔴 100% hardcoded em PT, sem `useLanguage`: `components/ui/location-consent.tsx` (modal de
-  consentimento LGPD inteiro), `components/report/report-modal.tsx` (quase toda a UI — `stepTitle`,
-  labels, placeholders, mensagens de erro de GPS, texto do botão de envio), `app/legal/{terms,privacy}.tsx` (títulos).
-- 🟡 `useLanguage` importado mas strings ainda hardcoded: `components/geofencing/geofence-alert.tsx`
-  (títulos/corpos das notificações locais — `'Bem-vindo...'`, `'Praia Lotada Próxima'`, `'Acidente
-  Próximo'`, `'Trânsito Intenso'`), `app/onboarding.tsx` (usa `labelPt`/`labelEn` próprios em vez do
-  dicionário central), `app/settings.tsx:248` (`locale === 'pt' ? 'Trocar' : 'Change'` — viola a
-  convenção deste arquivo), `components/map/map-view.tsx` (legenda hardcoded, enquanto `webview-map.tsx`
-  usa `t.map.legend.*` corretamente para o mesmo elemento).
+**i18n — estado após 2026-06-12:**
+- ~~🔴 `location-consent.tsx` hardcoded em PT~~ — ✅ usa `t.locationConsent.*`
+- ~~🔴 `report-modal.tsx` hardcoded em PT~~ — ✅ usa `t.report.*` e `t.map.report.types.*`
+- ~~🟡 `geofence-alert.tsx` strings hardcoded~~ — ✅ usa `t.geofence.*` e `t.traffic.levels`
+- ~~🟡 `map-view.tsx` legenda hardcoded~~ — ✅ usa `t.beach.occupancy.*`
+- ~~🟡 `settings.tsx:246` inline ternário~~ — ✅ usa `t.settings.change`
+- ~~🟡 `verify.tsx` ternários inline~~ — ✅ usa `t.verify.*` e `t.nav.back`
+- 🟡 `app/onboarding.tsx` — usa `labelPt`/`labelEn` próprios em vez do dicionário central (aceitável para publicação)
+- 🟡 `app/legal/{terms,privacy}.tsx` — apenas PT (aceitável: texto legal raramente é lido em EN por turistas)
 
 **Outros:**
 - ❓ a confirmar: `signInWithGoogle` testado ponta-a-ponta — código existe e parece completo (`lib/auth.ts:183-212`).
 - ❓ a confirmar: restrições de aplicativo (bundle ID/SHA-1) configuradas no GCP Console para `EXPO_PUBLIC_GOOGLE_MAPS_KEY`.
-- Edge functions sem validação de HMAC do Hook Secret — adicionar verificação de assinatura.
+- ~~Edge functions sem validação de HMAC~~ — ✅ `verifyHookSignature` implementado em `send-auth-email` e `send-auth-sms`.
 - API DER-SP (balsa) — nenhuma API pública mapeada ainda; `getMockFerry()` é a única fonte hoje.
 - Coordenadas de restaurantes e postos são aproximadas — verificar no Google Maps antes de publicar na App Store.
 - Linhas de ônibus precisam verificação nos sites EMTU/Litorânea/Pássaro Marron (horários podem ter mudado).
-- `search_path` mutável nas functions `SECURITY DEFINER` (`handle_new_user`, `handle_upvote_insert/delete`,
-  `increment_report_upvote`) — adicionar `SET search_path = public` (warning do linter do Supabase, baixo risco).
+- ~~`search_path` mutável em `increment_report_upvote`~~ — ✅ `SET search_path = public` incluído na migration `20260610215000`. Ainda pendente: `handle_new_user`, `handle_upvote_insert/delete` (baixo risco).
 - Proteção de senha vazada (HaveIBeenPwned) desabilitada no Supabase Auth — baixo impacto (app usa OTP), mas fácil de ligar.
