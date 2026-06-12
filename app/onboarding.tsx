@@ -15,21 +15,13 @@ const ONBOARDING_KEY = '@litoral_na_palma:onboarding_done';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const beachVideo = require('../assets/videos/beach.mp4');
 
-// Tints de cor por slide — aplicados como overlay translúcido sobre o vídeo
 const SLIDE_TINTS = [
-  'rgba(0,60,100,0.55)',   // azul oceano
-  'rgba(0,80,110,0.52)',   // azul profundo
-  'rgba(2,30,80,0.60)',    // azul marinho
+  'rgba(0,60,100,0.55)',
+  'rgba(0,80,110,0.52)',
+  'rgba(2,30,80,0.60)',
 ] as const;
 
 const SLIDE_COLORS = ['#0077b6', '#0096c7', '#023e8a'] as const;
-
-const FEATURES = [
-  { emoji: '🏖️', labelPt: 'Praias',    labelEn: 'Beaches',  descPt: 'Lotação e qualidade da água',   descEn: 'Occupancy & water quality' },
-  { emoji: '🚗', labelPt: 'Trânsito',  labelEn: 'Traffic',  descPt: 'Tempo real nas rodovias',       descEn: 'Live highway updates' },
-  { emoji: '🏥', labelPt: 'Saúde',     labelEn: 'Health',   descPt: 'Espera nas UPAs da região',     descEn: 'Urgent care wait times' },
-  { emoji: '🌤️', labelPt: 'Clima',     labelEn: 'Weather',  descPt: 'Temperatura e condições',       descEn: 'Temperature & conditions' },
-] as const;
 
 const CITIES = [
   { name: 'Caraguatatuba', emoji: '🌊' },
@@ -38,45 +30,39 @@ const CITIES = [
   { name: 'Ilhabela',      emoji: '🏝️' },
 ] as const;
 
-const MODE_OPTIONS: {
-  mode: UserMode;
-  emoji: string;
-  titlePt: string; titleEn: string;
-  descPt: string;  descEn: string;
-  previewPt: string[]; previewEn: string[];
-}[] = [
-  {
-    mode: 'morador',
-    emoji: '🏠',
-    titlePt: 'Morador',         titleEn: 'Resident',
-    descPt: 'Moro aqui e uso o app no dia a dia',
-    descEn: 'I live here and use the app daily',
-    previewPt: ['Feira livre, farmácias e serviços', 'Ônibus e trânsito local', 'Alertas de proximidade'],
-    previewEn: ['Farmer\'s market, pharmacies & services', 'Local buses & traffic', 'Geofence alerts'],
-  },
-  {
-    mode: 'turista',
-    emoji: '✈️',
-    titlePt: 'Turista',         titleEn: 'Tourist',
-    descPt: 'Estou visitando o litoral norte',
-    descEn: 'I\'m visiting the North Coast',
-    previewPt: ['Atrações, trilhas e cachoeiras', 'Restaurantes e passeios de barco', 'Roteiros alternativos'],
-    previewEn: ['Attractions, trails & waterfalls', 'Restaurants & boat tours', 'Side routes & hidden spots'],
-  },
-];
-
 export default function OnboardingScreen() {
   const { setMode } = useUserMode();
-  const { locale } = useLanguage();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const [selectedMode, setSelectedMode] = useState<UserMode>('morador');
   const scrollRef = useRef<ScrollView>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  const pt = locale === 'pt';
+  const FEATURES = [
+    { emoji: '🏖️', label: t.onboarding.beachLabel,   desc: t.onboarding.beachDesc },
+    { emoji: '🚗', label: t.onboarding.trafficLabel, desc: t.onboarding.trafficDesc },
+    { emoji: '🏥', label: t.onboarding.healthLabel,  desc: t.onboarding.healthDesc },
+    { emoji: '🌤️', label: t.onboarding.weatherLabel, desc: t.onboarding.weatherDesc },
+  ];
 
-  // Tint animado entre slides (overlay de cor sobre o vídeo)
+  const MODE_OPTIONS: { mode: UserMode; emoji: string; title: string; desc: string; preview: string[] }[] = [
+    {
+      mode: 'morador',
+      emoji: '🏠',
+      title: t.onboarding.residentTitle,
+      desc: t.onboarding.residentDesc,
+      preview: [t.onboarding.residentPreview1, t.onboarding.residentPreview2, t.onboarding.residentPreview3],
+    },
+    {
+      mode: 'turista',
+      emoji: '✈️',
+      title: t.onboarding.touristTitle,
+      desc: t.onboarding.touristDesc,
+      preview: [t.onboarding.touristPreview1, t.onboarding.touristPreview2, t.onboarding.touristPreview3],
+    },
+  ];
+
   const tintColor = scrollX.interpolate({
     inputRange: [0, width, width * 2],
     outputRange: [SLIDE_TINTS[0], SLIDE_TINTS[1], SLIDE_TINTS[2]],
@@ -144,7 +130,7 @@ export default function OnboardingScreen() {
           }}
         >
           <Text style={{ fontSize: 14, fontWeight: '600', color: '#fff' }}>
-            {pt ? 'Pular' : 'Skip'}
+            {t.onboarding.skip}
           </Text>
         </Pressable>
       </Animated.View>
@@ -177,7 +163,7 @@ export default function OnboardingScreen() {
             textAlign: 'center', lineHeight: 44, letterSpacing: -0.8,
             textShadowColor: 'rgba(0,0,0,0.4)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8,
           }}>
-            {pt ? 'Bem-vindo ao\nLitoral na Palma' : 'Welcome to\nLitoral na Palma'}
+            {t.onboarding.welcome}
           </Text>
 
           <Text style={{
@@ -185,15 +171,13 @@ export default function OnboardingScreen() {
             textAlign: 'center', marginTop: 16, lineHeight: 25,
             textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4,
           }}>
-            {pt
-              ? 'Tudo sobre praias, trânsito e serviços\ndo litoral norte de São Paulo.'
-              : 'Beaches, traffic & local services\non the North Coast of São Paulo.'}
+            {t.onboarding.welcomeDesc}
           </Text>
 
           {/* 4 cidades */}
           <View style={{ marginTop: 32, gap: 8, alignItems: 'center' }}>
             <Text style={{ fontSize: 11, fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 1.2 }}>
-              {pt ? '4 cidades cobertas' : '4 cities covered'}
+              {t.onboarding.citiesLabel}
             </Text>
             <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
               {CITIES.map((c) => (
@@ -211,7 +195,7 @@ export default function OnboardingScreen() {
           </View>
 
           <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 44 }}>
-            {pt ? 'Deslize para continuar →' : 'Swipe to continue →'}
+            {t.onboarding.swipe}
           </Text>
         </View>
 
@@ -227,32 +211,28 @@ export default function OnboardingScreen() {
             textAlign: 'center', lineHeight: 42, letterSpacing: -0.8,
             textShadowColor: 'rgba(0,0,0,0.4)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8,
           }}>
-            {pt ? 'Tudo em\num só lugar' : 'Everything\nin one place'}
+            {t.onboarding.featuresTitle}
           </Text>
 
           <Text style={{
             fontSize: 15, color: 'rgba(255,255,255,0.82)',
             textAlign: 'center', marginTop: 12, marginBottom: 28, lineHeight: 24,
           }}>
-            {pt
-              ? 'Sempre informado sobre o que\nimporta no litoral norte.'
-              : 'Always up to date on what\nmatters on the North Coast.'}
+            {t.onboarding.featuresDesc}
           </Text>
 
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, width: width - 48 }}>
             {FEATURES.map((f) => (
-              <View key={f.labelPt} style={{
+              <View key={f.label} style={{
                 width: (width - 48 - 12) / 2,
                 backgroundColor: 'rgba(255,255,255,0.12)',
                 borderRadius: 20, padding: 18, alignItems: 'center', gap: 8,
                 borderWidth: 1, borderColor: 'rgba(255,255,255,0.16)',
               }}>
                 <Text style={{ fontSize: 38 }}>{f.emoji}</Text>
-                <Text style={{ fontSize: 14, fontWeight: '700', color: '#fff' }}>
-                  {pt ? f.labelPt : f.labelEn}
-                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: '#fff' }}>{f.label}</Text>
                 <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.72)', textAlign: 'center', lineHeight: 17 }}>
-                  {pt ? f.descPt : f.descEn}
+                  {f.desc}
                 </Text>
               </View>
             ))}
@@ -269,22 +249,19 @@ export default function OnboardingScreen() {
             textAlign: 'center', lineHeight: 42, letterSpacing: -0.8, marginBottom: 10,
             textShadowColor: 'rgba(0,0,0,0.4)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8,
           }}>
-            {pt ? 'Como você usa\no litoral?' : 'How do you use\nthe coast?'}
+            {t.onboarding.modeTitle}
           </Text>
 
           <Text style={{
             fontSize: 15, color: 'rgba(255,255,255,0.82)',
             textAlign: 'center', lineHeight: 24, marginBottom: 28,
           }}>
-            {pt
-              ? 'Escolha seu perfil — pode mudar\nnas configurações quando quiser.'
-              : 'Pick your profile — you can change\nit anytime in Settings.'}
+            {t.onboarding.modeDesc}
           </Text>
 
           <View style={{ gap: 14 }}>
-            {MODE_OPTIONS.map(({ mode, emoji, titlePt, titleEn, descPt, descEn, previewPt, previewEn }) => {
+            {MODE_OPTIONS.map(({ mode, emoji, title, desc, preview }) => {
               const active = selectedMode === mode;
-              const preview = pt ? previewPt : previewEn;
               return (
                 <Pressable
                   key={mode}
@@ -308,12 +285,8 @@ export default function OnboardingScreen() {
                       <Text style={{ fontSize: 28 }}>{emoji}</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 19, fontWeight: '800', color: '#fff' }}>
-                        {pt ? titlePt : titleEn}
-                      </Text>
-                      <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.68)', marginTop: 2 }}>
-                        {pt ? descPt : descEn}
-                      </Text>
+                      <Text style={{ fontSize: 19, fontWeight: '800', color: '#fff' }}>{title}</Text>
+                      <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.68)', marginTop: 2 }}>{desc}</Text>
                     </View>
                     {active && (
                       <View style={{
@@ -344,7 +317,6 @@ export default function OnboardingScreen() {
 
       {/* ── Controles inferiores com blur ─────────────────────────────── */}
       <View style={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 20 }}>
-        {/* Linha de blur delimitando conteúdo → controles */}
         <BlurView
           intensity={20}
           tint="dark"
@@ -382,9 +354,7 @@ export default function OnboardingScreen() {
           })}
         >
           <Text style={{ fontSize: 16, fontWeight: '800', color: SLIDE_COLORS[2] }}>
-            {step < 2
-              ? (pt ? 'Próximo →' : 'Next →')
-              : (pt ? '🚀  Começar' : '🚀  Get started')}
+            {step < 2 ? t.onboarding.next : t.onboarding.start}
           </Text>
         </Pressable>
       </View>
