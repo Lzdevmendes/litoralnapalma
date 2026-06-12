@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, Stack } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/context/auth-context';
 import { useCity } from '@/context/city-context';
 import { useLanguage } from '@/context/language-context';
@@ -14,6 +15,8 @@ import { signOut } from '@/lib/auth';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { CITIES } from '@/data/cities';
 import { C, R } from '@/lib/design';
+
+const ONBOARDING_KEY = '@litoral_na_palma:onboarding_done';
 
 function SectionLabel({ label }: { label: string }) {
   return (
@@ -139,6 +142,7 @@ export default function SettingsScreen() {
 
   async function confirmDeleteAccount() {
     if (!isSupabaseConfigured || !supabase) {
+      await AsyncStorage.removeItem(ONBOARDING_KEY);
       await setUser(null);
       router.replace('/auth/login');
       return;
@@ -149,8 +153,9 @@ export default function SettingsScreen() {
       const { error } = await supabase.rpc('delete_user');
       if (error) throw error;
 
-      // Limpa sessão local imediatamente após exclusão server-side
+      // Limpa sessão local e onboarding — próximo cadastro verá o onboarding obrigatório
       await supabase.auth.signOut({ scope: 'local' });
+      await AsyncStorage.removeItem(ONBOARDING_KEY);
       await setUser(null);
       router.replace('/auth/login');
     } catch (err) {
