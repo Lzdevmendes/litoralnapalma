@@ -7,6 +7,7 @@ import { useBeaches } from '@/hooks/useBeaches';
 import { useUPA } from '@/hooks/useUPA';
 import { useReports } from '@/hooks/useReports';
 import { useCity } from '@/context/city-context';
+import { useLanguage } from '@/context/language-context';
 import { occupancyColor } from '@/lib/utils';
 import { WebViewMap } from '@/components/map/webview-map';
 // app.json deve ter react-native-maps no plugin e GOOGLE_MAPS_API_KEY para dev build
@@ -49,6 +50,7 @@ const reportEmoji: Record<string, string> = {
 
 export function AppMapView() {
   const { city } = useCity();
+  const { t } = useLanguage();
   const { data: beaches } = useBeaches(city);
   const { data: upas } = useUPA(city);
   const { data: reports } = useReports(city);
@@ -180,12 +182,12 @@ export function AppMapView() {
           gap: 4,
         }}
       >
-        {[
-          { color: '#22c55e', label: 'Vazia' },
-          { color: '#f59e0b', label: 'Moderada' },
-          { color: '#ef4444', label: 'Lotada' },
-        ].map(({ color, label }) => (
-          <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        {([
+          { color: '#22c55e', label: t.beach.occupancy.vazia },
+          { color: '#f59e0b', label: t.beach.occupancy.moderada },
+          { color: '#ef4444', label: t.beach.occupancy.lotada },
+        ] as const).map(({ color, label }) => (
+          <View key={color} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />
             <Text style={{ fontSize: 10, color: '#374151' }}>{label}</Text>
           </View>
