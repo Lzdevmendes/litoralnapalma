@@ -14,7 +14,7 @@ type OTPStatus = 'default' | 'error' | 'success';
 export default function VerifyScreen() {
   const router = useRouter();
   const { setUser } = useAuth();
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const { contact, type } = useLocalSearchParams<{ contact: string; type: 'email' | 'phone' }>();
 
   const [code, setCode]       = useState('');
@@ -70,7 +70,7 @@ export default function VerifyScreen() {
 
   async function handleVerify() {
     if (code.length < 6) {
-      setError(locale === 'en' ? 'Enter all 6 digits' : 'Digite os 6 dígitos do código');
+      setError(t.verify.enterDigits);
       setStatus('error');
       shake();
       return;
@@ -86,15 +86,15 @@ export default function VerifyScreen() {
     } catch (err) {
       const msg = err instanceof Error ? err.message.toLowerCase() : '';
       if (msg.includes('expired') || msg.includes('expirado')) {
-        setError(locale === 'en' ? 'Code expired. Tap below to resend.' : 'Código expirado. Use o botão abaixo para reenviar.');
+        setError(t.verify.codeExpired);
       } else if (msg.includes('invalid') || msg.includes('inválido') || msg.includes('token')) {
-        setError(locale === 'en' ? 'Wrong code. Check and try again.' : 'Código incorreto. Verifique e tente novamente.');
+        setError(t.verify.wrongCode);
       } else if (msg.includes('rate') || msg.includes('limit')) {
-        setError(locale === 'en' ? 'Too many attempts. Wait a few minutes.' : 'Muitas tentativas. Aguarde alguns minutos.');
+        setError(t.verify.tooMany);
       } else if (msg) {
         setError(msg.charAt(0).toUpperCase() + msg.slice(1));
       } else {
-        setError(locale === 'en' ? 'Could not verify. Please try again.' : 'Não foi possível verificar. Tente novamente.');
+        setError(t.verify.couldNotVerify);
       }
       setStatus('error');
       shake();
@@ -123,9 +123,9 @@ export default function VerifyScreen() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
       if (msg.toLowerCase().includes('rate') || msg.toLowerCase().includes('limit')) {
-        setError(locale === 'en' ? 'Too many attempts. Wait a few minutes.' : 'Muitas tentativas. Aguarde alguns minutos.');
+        setError(t.verify.tooMany);
       } else {
-        setError(locale === 'en' ? 'Could not resend. Try again shortly.' : 'Não foi possível reenviar. Tente novamente.');
+        setError(t.verify.couldNotResend);
       }
       setSeconds(30);
     } finally {
@@ -143,7 +143,7 @@ export default function VerifyScreen() {
           {/* Voltar */}
           <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 32 }}>
             <Text style={{ fontSize: 14, color: '#0077b6', fontWeight: '600' }}>
-              {locale === 'en' ? '← Back' : '← Voltar'}
+              {t.nav.back}
             </Text>
           </TouchableOpacity>
 
@@ -174,15 +174,13 @@ export default function VerifyScreen() {
 
           {/* Título */}
           <Text style={{ fontSize: 26, fontWeight: '800', color: '#1e293b', textAlign: 'center', marginBottom: 10 }}>
-            {isSuccess
-              ? (locale === 'en' ? 'Verified! 🎉' : 'Verificado! 🎉')
-              : (locale === 'en' ? 'Enter the code' : 'Confirme o código')}
+            {isSuccess ? t.verify.verified : t.verify.enterCode}
           </Text>
 
           {!isSuccess && (
             <View style={{ marginBottom: 32 }}>
               <Text style={{ fontSize: 14, color: '#64748b', textAlign: 'center', lineHeight: 22 }}>
-                {locale === 'en' ? 'We sent a 6-digit code to' : 'Enviamos um código de 6 dígitos para'}
+                {t.verify.sentTo}
               </Text>
               <Text style={{ fontSize: 15, fontWeight: '700', color: '#374151', textAlign: 'center', marginTop: 2 }}>
                 {maskedContact}
@@ -222,7 +220,7 @@ export default function VerifyScreen() {
               marginTop: 16, marginBottom: 4,
             }}>
               <Text style={{ fontSize: 12, color: '#0077b6', textAlign: 'center' }}>
-                {locale === 'en' ? 'Dev mode · use code ' : 'Modo dev · use o código '}
+                {t.verify.devMode}{' '}
                 <Text style={{ fontWeight: '800' }}>{DEV_OTP}</Text>
               </Text>
             </View>
@@ -232,7 +230,7 @@ export default function VerifyScreen() {
           {!isSuccess && (
             <View style={{ marginTop: 20, marginBottom: 20 }}>
               <PrimaryButton
-                label={locale === 'en' ? 'Confirm' : 'Confirmar'}
+                label={t.verify.confirm}
                 onPress={handleVerify}
                 disabled={code.length < 6}
                 loading={loading}
@@ -245,15 +243,13 @@ export default function VerifyScreen() {
             <View style={{ alignItems: 'center' }}>
               {seconds > 0 ? (
                 <Text style={{ fontSize: 14, color: '#94a3b8' }}>
-                  {locale === 'en' ? 'Resend in ' : 'Reenviar em '}
+                  {t.verify.resendIn}{' '}
                   <Text style={{ fontWeight: '700', color: '#64748b' }}>{seconds}s</Text>
                 </Text>
               ) : (
                 <TouchableOpacity onPress={handleResend} disabled={resending}>
                   <Text style={{ fontSize: 14, fontWeight: '700', color: resending ? '#94a3b8' : '#0077b6' }}>
-                    {resending
-                      ? (locale === 'en' ? 'Sending…' : 'Enviando…')
-                      : (locale === 'en' ? 'Resend code' : 'Reenviar código')}
+                    {resending ? t.verify.sending : t.verify.resend}
                   </Text>
                 </TouchableOpacity>
               )}

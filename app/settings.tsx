@@ -243,7 +243,7 @@ export default function SettingsScreen() {
               </Text>
             </View>
             <Text style={{ fontSize: 12, color: C.textMuted }}>
-              {locale === 'pt' ? 'Trocar' : 'Change'}
+              {t.settings.change}
             </Text>
           </Pressable>
         </Card>
