@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -130,18 +130,30 @@ export default function LoginScreen() {
       {/* ── Camada 4: modal de login com blur na borda superior ────────── */}
       <KeyboardAvoidingView behavior="padding">
 
-        {/* Faixa de blur delimitando vídeo → form */}
-        <BlurView
-          intensity={28}
-          tint="dark"
-          style={{
-            height: 40,
-            marginBottom: -1,
-            borderTopLeftRadius: 36,
-            borderTopRightRadius: 36,
-            overflow: 'hidden',
-          }}
-        />
+        {/* Faixa de transição vídeo → form — BlurView apenas no iOS (Android crasharia com hardware bitmaps em software renderer) */}
+        {Platform.OS === 'ios' ? (
+          <BlurView
+            intensity={28}
+            tint="dark"
+            style={{
+              height: 40,
+              marginBottom: -1,
+              borderTopLeftRadius: 36,
+              borderTopRightRadius: 36,
+              overflow: 'hidden',
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              height: 40,
+              marginBottom: -1,
+              borderTopLeftRadius: 36,
+              borderTopRightRadius: 36,
+              backgroundColor: 'rgba(0,20,40,0.55)',
+            }}
+          />
+        )}
 
         {/* Card do formulário */}
         <View
