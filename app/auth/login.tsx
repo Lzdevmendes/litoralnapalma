@@ -3,8 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingVi
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { sendEmailOTP, sendPhoneOTP, signInWithGoogle } from '@/lib/auth';
-import { SocialButton, PrimaryButton } from '@/components/auth/SocialButton';
+import { sendEmailOTP, sendPhoneOTP } from '@/lib/auth';
+import { PrimaryButton } from '@/components/auth/SocialButton';
 import { VideoBackground } from '@/components/ui/video-background';
 import { useLanguage } from '@/context/language-context';
 
@@ -33,7 +33,6 @@ export default function LoginScreen() {
   const [phone, setPhone] = useState('');
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
 
   const isEmailValid = emailRegex.test(email);
@@ -69,25 +68,6 @@ export default function LoginScreen() {
       }
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleGoogle() {
-    setError('');
-    setGoogleLoading(true);
-    try {
-      await signInWithGoogle();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : '';
-      if (msg === 'LOGIN_CANCELLED') return;
-      if (msg === 'EXPO_GO_NOT_SUPPORTED') { setError(t.auth.googleExpoGo); return; }
-      if (msg.includes('Supabase') || msg.includes('variáveis')) {
-        setError(t.auth.serviceUnavailable);
-      } else {
-        setError(t.auth.googleError);
-      }
-    } finally {
-      setGoogleLoading(false);
     }
   }
 
@@ -190,21 +170,6 @@ export default function LoginScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {/* Google */}
-            <SocialButton
-              emoji="🔵"
-              label={t.auth.continueWith}
-              onPress={handleGoogle}
-              loading={googleLoading}
-            />
-
-            {/* Divisor */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 20 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: '#e2e8f0' }} />
-              <Text style={{ fontSize: 13, color: '#94a3b8', fontWeight: '500' }}>{t.auth.or}</Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: '#e2e8f0' }} />
-            </View>
-
             {/* Toggle método */}
             <View
               style={{
