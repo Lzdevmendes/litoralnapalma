@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { LogoSymbol } from '@/components/ui/logo-symbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { sendEmailOTP, sendPhoneOTP } from '@/lib/auth';
@@ -96,11 +97,7 @@ export default function LoginScreen() {
         }}
         pointerEvents="none"
       >
-        <Image
-          source={require('../../assets/splash-icon.png')}
-          style={{ width: 80, height: 80, marginBottom: 14 }}
-          resizeMode="contain"
-        />
+        <LogoSymbol size={80} style={{ marginBottom: 14 }} />
         <Text
           style={{
             fontSize: 32,
