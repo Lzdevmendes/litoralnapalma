@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { View, Text, Pressable, Dimensions, Animated, ScrollView } from 'react-native';
+import { View, Text, Image, Pressable, Dimensions, Animated, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -156,7 +156,11 @@ export default function OnboardingScreen() {
           width, flex: 1, alignItems: 'center', justifyContent: 'center',
           paddingHorizontal: 28, paddingTop: insets.top + 48, paddingBottom: BOTTOM_HEIGHT,
         }}>
-          <Text style={{ fontSize: 80, marginBottom: 24 }}>🌊</Text>
+          <Image
+            source={require('../assets/splash-icon.png')}
+            style={{ width: 80, height: 80, marginBottom: 24 }}
+            resizeMode="contain"
+          />
 
           <Text style={{
             fontSize: 36, fontWeight: '800', color: '#fff',
